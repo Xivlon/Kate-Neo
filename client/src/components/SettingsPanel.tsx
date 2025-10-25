@@ -60,6 +60,13 @@ export function SettingsPanel() {
           setSettings((prev) => {
             const updated = { ...prev };
             const parts = key.split('.');
+            
+            // Prevent prototype pollution
+            if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) {
+              console.error('[SettingsPanel] Invalid key:', key);
+              return prev;
+            }
+            
             let current: any = updated;
             for (let i = 0; i < parts.length - 1; i++) {
               if (!current[parts[i]]) current[parts[i]] = {};

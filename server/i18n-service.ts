@@ -97,15 +97,32 @@ export class I18nService extends EventEmitter {
    * Load translation file for a specific locale
    */
   private async loadTranslation(locale: string): Promise<void> {
-    const translationPath = path.join(this.config.localesDir, `${locale}.json`);
+    // Sanitize locale to prevent path injection
+    // Only allow alphanumeric characters and hyphens
+    const sanitizedLocale = locale.replace(/[^a-zA-Z0-9-]/g, '');
+    if (sanitizedLocale !== locale || locale.includes('..')) {
+      console.error('[I18nService] Invalid locale format:', locale);
+      return;
+    }
+    
+    const translationPath = path.join(this.config.localesDir, `${sanitizedLocale}.json`);
+    
+    // Ensure the resolved path is within the locales directory
+    const resolvedPath = path.resolve(translationPath);
+    const resolvedLocalesDir = path.resolve(this.config.localesDir);
+    
+    if (!resolvedPath.startsWith(resolvedLocalesDir)) {
+      console.error('[I18nService] Path outside locales directory:', translationPath);
+      return;
+    }
     
     try {
-      const data = await fs.readFile(translationPath, 'utf-8');
+      const data = await fs.readFile(resolvedPath, 'utf-8');
       const translations = JSON.parse(data) as TranslationDictionary;
-      this.translations.set(locale, translations);
-      console.log(`[I18nService] Loaded translation for locale: ${locale}`);
+      this.translations.set(sanitizedLocale, translations);
+      console.log('[I18nService] Loaded translation for locale:', sanitizedLocale);
     } catch (error) {
-      console.error(`[I18nService] Failed to load translation for ${locale}:`, error);
+      console.error('[I18nService] Failed to load translation for locale', error);
     }
   }
 

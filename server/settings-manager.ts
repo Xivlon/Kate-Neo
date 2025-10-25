@@ -184,8 +184,18 @@ export class SettingsManager extends EventEmitter {
     const parts = key.split('.');
     const lastPart = parts.pop()!;
     
+    // Prevent prototype pollution
+    if (lastPart === '__proto__' || lastPart === 'constructor' || lastPart === 'prototype') {
+      throw new Error(`Invalid key: ${lastPart}`);
+    }
+    
     let current: Record<string, unknown> = obj;
     for (const part of parts) {
+      // Prevent prototype pollution
+      if (part === '__proto__' || part === 'constructor' || part === 'prototype') {
+        throw new Error(`Invalid key part: ${part}`);
+      }
+      
       if (!(part in current) || typeof current[part] !== 'object') {
         current[part] = {};
       }
