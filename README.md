@@ -250,7 +250,9 @@ git submodule update --remote --recursive
 
 ## License
 
-TODO: Specify license (must be compatible with Kate/KDE and Theia licensing)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+**Note:** This project integrates with Eclipse Theia (EPL-2.0) and KDE Kate (LGPL-2.0+). When distributing this software, you must comply with all applicable licenses.
 
 ## Acknowledgments
 
