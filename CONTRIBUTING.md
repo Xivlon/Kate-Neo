@@ -326,4 +326,4 @@ Contributors will be recognized in:
 - GitHub contributors page
 - Release notes
 
-Thank you for contributing to Kate Neo! 🎉
+Thank you for contributing to Kate Neo! <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/starred-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/starred-symbolic.svg"><img alt="starred-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture>

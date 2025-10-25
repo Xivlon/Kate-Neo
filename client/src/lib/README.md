@@ -70,7 +70,7 @@ const completions = await lspManager.provideCompletions(
 );
 ```
 
-**Status**: ✅ Foundation implemented, ⏳ Backend integration pending
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Foundation implemented, <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/user-status-pending-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/user-status-pending-symbolic.svg"><img alt="user-status-pending-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Backend integration pending
 
 ### 2. Workspace Manager (`workspace/WorkspaceManager.ts`)
 
@@ -106,7 +106,7 @@ const unsubscribe = workspaceManager.onDocumentChange((doc) => {
 });
 ```
 
-**Status**: ✅ Foundation implemented, ⏳ Backend integration pending
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Foundation implemented, <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/user-status-pending-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/user-status-pending-symbolic.svg"><img alt="user-status-pending-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Backend integration pending
 
 ### 3. Event Bus (`events/EventBus.ts`)
 
@@ -137,7 +137,7 @@ eventBus.emit(IDEEventType.FILE_CREATED, {
 subscription.unsubscribe();
 ```
 
-**Status**: ✅ Fully implemented
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Fully implemented
 
 ### 4. File System Watcher (`fs/FileSystemWatcher.ts`)
 
@@ -162,7 +162,7 @@ const unwatch = fileSystemWatcher.watch('/project/src', (event) => {
 unwatch();
 ```
 
-**Status**: ✅ Foundation implemented, ⏳ Backend integration pending
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Foundation implemented, <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/user-status-pending-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/user-status-pending-symbolic.svg"><img alt="user-status-pending-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Backend integration pending
 
 ### 5. Settings Manager (`settings/SettingsManager.ts`)
 
@@ -192,7 +192,7 @@ const allSettings = settingsManager.getAll();
 settingsManager.reset('user');
 ```
 
-**Status**: ✅ Fully implemented
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Fully implemented
 
 ### 6. Terminal Manager (`terminal/TerminalManager.ts`)
 
@@ -224,7 +224,7 @@ await terminalManager.sendInput(session.id, 'ls -la\n');
 await terminalManager.closeSession(session.id);
 ```
 
-**Status**: ✅ Foundation implemented, ⏳ Backend PTY integration pending
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Foundation implemented, <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/user-status-pending-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/user-status-pending-symbolic.svg"><img alt="user-status-pending-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Backend PTY integration pending
 
 ### 7. Git Service (`git/GitService.ts`)
 
@@ -259,7 +259,7 @@ const commitHash = await gitService.commit('Add new feature');
 await gitService.checkoutBranch('develop');
 ```
 
-**Status**: ✅ Foundation implemented, ⏳ Backend integration pending
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Foundation implemented, <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/user-status-pending-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/user-status-pending-symbolic.svg"><img alt="user-status-pending-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Backend integration pending
 
 ### 8. Panel Manager (`ui/PanelManager.ts`)
 
@@ -297,7 +297,7 @@ const unsubscribe = panelManager.onChange((panels) => {
 });
 ```
 
-**Status**: ✅ Fully implemented
+**Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Fully implemented
 
 ## React Hooks
 
