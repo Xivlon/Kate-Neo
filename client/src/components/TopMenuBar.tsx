@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import logoUrl from "@assets/Fennec-removebg-light_1761405012436.png";
+import logoUrl from "@assets/Fennec-removebg-light.png";
 import { MenuBar } from "./MenuBar";
 
 interface TopMenuBarProps {
@@ -26,7 +26,8 @@ export function TopMenuBar({
   onGithubConnect,
 }: TopMenuBarProps) {
   return (
- <div className="h-13 flex items-center justify-between px-3 border-b border-card-border">
+    <div className="flex flex-col">
+      <div className="h-13 flex items-center justify-between px-3 border-b border-card-border">
         <div className="flex items-center gap-2">
           <img src={logoUrl} alt="IDE Logo" className="h-12 w-auto" />
           <MenuBar />
