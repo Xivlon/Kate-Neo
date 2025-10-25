@@ -133,16 +133,32 @@ npm run build
 
 ## Features
 
-Kate Neo now includes essential IDE features implemented in Phase 2:
+Kate Neo includes comprehensive IDE features across multiple development phases:
 
-### Debugging (DAP Integration)
+### Extension System (Phase 3)
+- **Extension API**: Complete API for extending IDE functionality
+- **Extension Host**: Manages extension lifecycle (load, activate, deactivate)
+- **Extension Panel**: UI for viewing and managing installed extensions
+- **Command Registry**: Register and execute custom commands
+- **Contribution Points**: Extend menus, commands, languages, and more
+- **Example Extensions**: Hello World extension demonstrates the API
+
+### Performance Optimization (Phase 3)
+- **Large File Handling**: Efficient handling of files over 5MB
+- **Chunked Loading**: Load only visible portions of large files
+- **Line Indexing**: Fast random access to any line in large files
+- **Virtualized Components**: Efficient rendering for large datasets
+- **Viewport Rendering**: Only render visible items in trees and lists
+- **Memory Efficient**: Minimal memory footprint for large files
+
+### Debugging (DAP Integration - Phase 2)
 - **Debug Sessions**: Start, stop, pause, and continue debug sessions
 - **Breakpoints**: Set and manage breakpoints in source files
 - **Call Stack**: View the current call stack when paused
 - **Variables**: Inspect variables in the current scope
 - **Debug Panel**: Dedicated UI panel for all debugging features
 
-### Version Control (Git)
+### Version Control (Git - Phase 2)
 - **File Status**: Track modified, added, deleted, and untracked files
 - **Staging**: Stage and unstage files for commit
 - **Commits**: Create commits with messages
@@ -150,13 +166,13 @@ Kate Neo now includes essential IDE features implemented in Phase 2:
 - **History**: View recent commit history
 - **Source Control Panel**: Integrated Git UI in the sidebar
 
-### Integrated Terminal
+### Integrated Terminal (Phase 2)
 - **Multiple Sessions**: Create and manage multiple terminal sessions
 - **Real-time I/O**: WebSocket-based communication for instant response
 - **Shell Support**: Automatic shell detection (bash, cmd, etc.)
 - **Resizable Panel**: Collapsible terminal panel at the bottom
 
-### Code Editor
+### Code Editor (Phase 1)
 - **Monaco Editor**: Full-featured code editor with syntax highlighting
 - **File Explorer**: Browse and open files in your workspace
 - **Tabbed Interface**: Multiple files open in tabs
@@ -259,7 +275,30 @@ Kate Neo now includes essential IDE features implemented in Phase 2:
   - [x] Input/output handling
   - [x] Session management
 
-### Phase 3: Kate Engine Research & Planning (Next)
+### Phase 3: Advanced Features & Polish ✅ (Completed)
+- [x] **Extension System**
+  - [x] Extension API types and interfaces
+  - [x] Extension manifest schema
+  - [x] Extension host service implementation
+  - [x] Extension loader and lifecycle management
+  - [x] Extension API surface (workspace, languages, window, commands)
+  - [x] Contribution points system
+  - [x] Command registry and execution
+  - [x] Example extension (Hello World)
+  - [x] Extensions panel UI
+  - [x] Extension enable/disable controls
+  - [x] API endpoints for extension management
+- [x] **Performance Optimization**
+  - [x] Large file manager service
+  - [x] Chunked file loading
+  - [x] Line offset indexing for fast navigation
+  - [x] Streaming file reading
+  - [x] Virtualized tree component
+  - [x] Virtualized list component
+  - [x] Viewport-based rendering
+  - [x] Tree expansion state management
+
+### Phase 4: Kate Engine Research & Planning (Next)
 - [ ] **TODO**: Research KTextEditor framework architecture
 - [ ] **TODO**: Investigate Node.js native binding options (N-API, node-addon-api)
 - [ ] **TODO**: Explore Qt/KDE environment requirements
@@ -267,14 +306,14 @@ Kate Neo now includes essential IDE features implemented in Phase 2:
 - [ ] **TODO**: Create proof-of-concept for Kate embedding
 - [ ] **TODO**: Document technical decisions and trade-offs
 
-### Phase 4: Kate Engine Integration (Future)
+### Phase 5: Kate Engine Integration (Future)
 - [ ] **TODO**: Create native Node.js bindings for KTextEditor
 - [ ] **TODO**: Implement basic buffer management with Kate
 - [ ] **TODO**: Set up Qt/KDE runtime environment
 - [ ] **TODO**: Test Kate engine initialization and basic operations
 - [ ] **TODO**: Implement WebSocket communication for buffer sync
 
-### Phase 5: Core Features (Future)
+### Phase 6: Core Features (Future)
 - [ ] **TODO**: Implement bidirectional buffer synchronization
 - [ ] **TODO**: Bridge Kate syntax highlighting to Monaco tokenizer
 - [ ] **TODO**: Add code folding integration

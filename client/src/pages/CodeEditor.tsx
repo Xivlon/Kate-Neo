@@ -9,13 +9,14 @@ import { FindReplaceDialog } from "@/components/FindReplaceDialog";
 import { DebugPanel } from "@/components/DebugPanel";
 import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { TerminalPanel } from "@/components/TerminalPanel";
+import { ExtensionsPanel } from "@/components/ExtensionsPanel";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Files, GitBranch, Bug, Terminal as TerminalIcon } from "lucide-react";
+import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -238,6 +239,13 @@ export default function CodeEditor() {
                         <Bug className="h-4 w-4 mr-2" />
                         Debug
                       </TabsTrigger>
+                      <TabsTrigger 
+                        value="extensions" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        Extensions
+                      </TabsTrigger>
                     </TabsList>
                   </div>
                   
@@ -255,6 +263,10 @@ export default function CodeEditor() {
                   
                   <TabsContent value="debug" className="flex-1 m-0 overflow-hidden">
                     <DebugPanel />
+                  </TabsContent>
+                  
+                  <TabsContent value="extensions" className="flex-1 m-0 overflow-hidden">
+                    <ExtensionsPanel />
                   </TabsContent>
                 </Tabs>
               </Panel>

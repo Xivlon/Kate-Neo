@@ -5,7 +5,10 @@ import { storage } from "./storage";
 import { debugAdapterManager, type DebugConfiguration } from "./debug-service";
 import { GitService } from "./git-service";
 import { terminalService } from "./terminal-service";
+import { ExtensionHost } from "./extension-host";
+import { LargeFileManager } from "./large-file-manager";
 import * as path from "path";
+import * as fs from "fs/promises";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -20,6 +23,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const workspacePath = process.cwd();
   const gitService = new GitService(workspacePath);
   await gitService.initialize();
+
+  // Initialize Extension Host
+  const extensionHost = new ExtensionHost(path.join(workspacePath, 'extensions'));
+  await extensionHost.initialize();
+
+  // Initialize Large File Manager
+  const largeFileManager = new LargeFileManager({
+    chunkSize: 1000,
+    maxFullLoadSize: 5 * 1024 * 1024, // 5MB
+    enableIndexing: true,
+  });
 
   // Debug API endpoints
   app.post("/api/debug/sessions", async (req, res) => {
@@ -256,6 +270,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
         terminalService.killSession(sessionId);
       }
     });
+  });
+
+  // Extension API endpoints
+  app.get("/api/extensions", (req, res) => {
+    try {
+      const extensions = extensionHost.getExtensions();
+      res.json({ 
+        extensions: extensions.map(ext => ({
+          id: ext.manifest.id,
+          name: ext.manifest.name,
+          version: ext.manifest.version,
+          description: ext.manifest.description,
+          publisher: ext.manifest.publisher,
+          state: ext.state,
+          error: ext.error,
+          activatedAt: ext.activatedAt,
+        }))
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/extensions/:id/activate", async (req, res) => {
+    try {
+      await extensionHost.activateExtension(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/extensions/:id/deactivate", async (req, res) => {
+    try {
+      await extensionHost.deactivateExtension(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/extensions/commands", async (req, res) => {
+    try {
+      const commands = extensionHost.getCommands();
+      res.json({ commands });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/extensions/commands/:command", async (req, res) => {
+    try {
+      const result = await extensionHost.executeCommand(
+        req.params.command,
+        ...(req.body.args || [])
+      );
+      res.json({ result });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Large File API endpoints
+  app.get("/api/files/metadata/:filePath(*)", async (req, res) => {
+    try {
+      const filePath = path.join(workspacePath, req.params.filePath);
+      const metadata = await largeFileManager.getFileMetadata(filePath);
+      const shouldUseLargeFile = await largeFileManager.shouldUseLargeFileHandling(filePath);
+      
+      res.json({ 
+        ...metadata, 
+        useLargeFileHandling: shouldUseLargeFile 
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/files/index/:filePath(*)", async (req, res) => {
+    try {
+      const filePath = path.join(workspacePath, req.params.filePath);
+      await largeFileManager.buildLineIndex(filePath);
+      const stats = await largeFileManager.getFileStats(filePath);
+      res.json({ indexed: true, stats });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/files/chunk/:filePath(*)", async (req, res) => {
+    try {
+      const filePath = path.join(workspacePath, req.params.filePath);
+      const startLine = parseInt(req.query.startLine as string) || 0;
+      const lineCount = parseInt(req.query.lineCount as string) || 100;
+      
+      const chunk = await largeFileManager.getChunk(filePath, startLine, lineCount);
+      res.json(chunk);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/files/stats/:filePath(*)", async (req, res) => {
+    try {
+      const filePath = path.join(workspacePath, req.params.filePath);
+      const stats = await largeFileManager.getFileStats(filePath);
+      res.json(stats);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
   });
 
   return httpServer;
