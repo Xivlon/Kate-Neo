@@ -1,0 +1,29 @@
+{
+  "name": "kate-neo-backend",
+  "version": "0.1.0",
+  "description": "Kate Neo Backend Bridge - Connects Theia frontend to Kate engine",
+  "main": "bridge.js",
+  "scripts": {
+    "start": "node bridge.js",
+    "dev": "nodemon bridge.js",
+    "test": "echo \"TODO: Add tests\" && exit 0"
+  },
+  "keywords": [
+    "kate",
+    "theia",
+    "editor",
+    "bridge",
+    "text-editor"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,95 @@
+name: Frontend Build
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-build.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-build.yml'
+
+jobs:
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+        cache-dependency-path: frontend/yarn.lock
+    
+    - name: Install Yarn
+      run: npm install -g yarn
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: |
+        echo "TODO: Install frontend dependencies"
+        echo "Skipping yarn install in placeholder mode"
+        # yarn install --frozen-lockfile
+    
+    - name: Type check
+      working-directory: ./frontend
+      run: |
+        echo "TODO: Run TypeScript type checking"
+        echo "Skipping tsc in placeholder mode"
+        # yarn compile
+    
+    - name: Build
+      working-directory: ./frontend
+      run: |
+        echo "TODO: Build frontend application"
+        echo "Skipping yarn build in placeholder mode"
+        # yarn build
+    
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build-${{ matrix.node-version }}
+        path: |
+          frontend/lib
+          frontend/src-gen
+        retention-days: 7
+        if-no-files-found: warn
+    
+    # TODO: Add step to run frontend tests
+    # - name: Run tests
+    #   working-directory: ./frontend
+    #   run: yarn test
+    
+    # TODO: Add step to lint code
+    # - name: Lint
+    #   working-directory: ./frontend
+    #   run: yarn lint
+    
+    # TODO: Add step to check for security vulnerabilities
+    # - name: Security audit
+    #   working-directory: ./frontend
+    #   run: yarn audit
+
+  # TODO: Add deployment job for successful builds on main branch
+  # deploy:
+  #   name: Deploy Frontend
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy to production
+  #       run: echo "TODO: Implement deployment"
