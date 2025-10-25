@@ -19,6 +19,12 @@ export * from './fs/FileSystemWatcher';
 // Settings
 export * from './settings/SettingsManager';
 
+// Terminal
+export * from './terminal/TerminalManager';
+
+// Git
+export * from './git/GitService';
+
 // Re-export existing utilities
 export * from './utils';
 export * from './queryClient';
