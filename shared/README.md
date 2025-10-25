@@ -35,6 +35,7 @@ These types are used by both the client and server to ensure type safety across 
 
 ### Frontend Example
 ```typescript
+// Client-side usage (using path alias)
 import { createMessage, BufferUpdate } from '@/shared/kate-types';
 
 // Create a buffer update message
@@ -53,7 +54,8 @@ ws.send(JSON.stringify(message));
 
 ### Backend Example
 ```typescript
-import { Message, isMessage, BufferUpdate } from './shared/kate-types';
+// Server-side usage (using relative path)
+import { Message, isMessage, BufferUpdate } from '../shared/kate-types';
 
 // Validate and parse incoming message
 const data = JSON.parse(messageData);

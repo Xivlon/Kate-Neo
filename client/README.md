@@ -50,7 +50,8 @@ client/
 │   │   ├── CodeEditor.tsx       ← Main editor page
 │   │   └── ...                  ← Other UI components
 │   ├── hooks/
-│   │   └── use-toast.ts
+│   │   ├── use-toast.ts         ← Toast notifications
+│   │   └── use-mobile.ts        ← Mobile detection
 │   ├── lib/
 │   ├── pages/
 │   └── App.tsx

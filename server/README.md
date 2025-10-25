@@ -67,9 +67,11 @@ server/
 ├── kate-bridge.ts   ← Kate engine bridge placeholder
 ├── index.ts         ← Server entry point
 ├── routes.ts        ← API routes
-├── vite.ts          ← Vite dev server setup
-└── storage.ts       ← Storage utilities
+├── storage.ts       ← Storage utilities
+└── vite.ts          ← Vite dev server setup
 ```
+
+**Note**: `vite.ts` and `storage.ts` are part of the existing server infrastructure and are not directly related to Kate integration.
 
 ## Next Steps for Kate Integration
 
