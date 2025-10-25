@@ -1,0 +1,55 @@
+{
+  "name": "kate-neo-frontend",
+  "version": "0.1.0",
+  "description": "Kate Neo Frontend - Theia-based IDE interface",
+  "private": true,
+  "scripts": {
+    "prepare": "yarn build",
+    "build": "yarn compile && yarn bundle",
+    "compile": "tsc -b",
+    "bundle": "webpack --mode production",
+    "watch": "concurrently -n compile,bundle \"tsc -b -w\" \"webpack --watch\"",
+    "start": "yarn rebuild && yarn start:browser",
+    "start:browser": "theia start --hostname=0.0.0.0 --port=3000",
+    "rebuild": "theia rebuild:browser",
+    "clean": "theia clean && rimraf lib"
+  },
+  "dependencies": {
+    "@theia/core": "latest",
+    "@theia/editor": "latest",
+    "@theia/filesystem": "latest",
+    "@theia/keymaps": "latest",
+    "@theia/markers": "latest",
+    "@theia/messages": "latest",
+    "@theia/monaco": "latest",
+    "@theia/navigator": "latest",
+    "@theia/outline-view": "latest",
+    "@theia/plugin-ext": "latest",
+    "@theia/plugin-ext-vscode": "latest",
+    "@theia/preferences": "latest",
+    "@theia/preview": "latest",
+    "@theia/search-in-workspace": "latest",
+    "@theia/terminal": "latest",
+    "@theia/workspace": "latest"
+  },
+  "devDependencies": {
+    "@theia/cli": "latest",
+    "@types/node": "^18.0.0",
+    "concurrently": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  },
+  "theia": {
+    "frontend": {
+      "config": {
+        "applicationName": "Kate Neo"
+      }
+    }
+  }
+}
