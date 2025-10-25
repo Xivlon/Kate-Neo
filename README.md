@@ -6,7 +6,7 @@ A modern web-based IDE powered by KDE's KTextEditor framework, featuring native 
 
 Kate Neo successfully integrates the best of both worlds:
 - **Modern Web-based UI**: React-based extensible IDE interface with Monaco Editor fallback
-- **Powerful Text Editing**: KDE Kate's advanced text editing engine with native Node.js bindings (Phase 6 ✅)
+- **Powerful Text Editing**: KDE Kate's advanced text editing engine with native Node.js bindings (Phase 6 <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture>)
 - **Modular Architecture**: Clean separation between frontend, backend, native module, and services
 - **Full IDE Features**: Debugging (DAP), Git integration, integrated terminal, extension system, settings, and i18n
 - **Production Quality**: Comprehensive features across 6 completed development phases
@@ -15,7 +15,7 @@ Kate Neo successfully integrates the best of both worlds:
 
 ## Project Status
 
-🚀 **Phase 6 Complete - Native Kate Integration Implemented** 🚀
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/document-send-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/document-send-symbolic.svg"><img alt="document-send-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Phase 6 Complete - Native Kate Integration Implemented** <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/document-send-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/document-send-symbolic.svg"><img alt="document-send-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture>
 
 Kate Neo has successfully completed native KTextEditor integration with full Node.js bindings. The foundation is established and working, with Kate's powerful text editing engine now available through a clean API. The IDE includes debugging, version control, terminal integration, extensions, settings management, and internationalization support.
 
@@ -287,26 +287,26 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 ┌─────────────────▼──────────────────────┐
 │     Express Backend (Node.js)           │
 │  ┌─────────────────────────────────┐   │
-│  │   Kate Bridge (WebSocket)       │   │  ✅ Implemented
-│  │   Kate Service (Manager)        │   │  ✅ Implemented
+│  │   Kate Bridge (WebSocket)       │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Implemented
+│  │   Kate Service (Manager)        │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Implemented
 │  │   REST API Routes               │   │
 │  └──────────────┬──────────────────┘   │
 └─────────────────┼──────────────────────┘
                   │ N-API Native Binding
 ┌─────────────────▼──────────────────────┐
-│   @kate-neo/native (C++ Module)         │  ✅ Phase 6 Complete
+│   @kate-neo/native (C++ Module)         │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Phase 6 Complete
 │  ┌─────────────────────────────────┐   │
-│  │  Qt Event Loop Manager          │   │  ✅ Headless mode
-│  │  Document Wrapper (N-API)       │   │  ✅ Working
-│  │  Editor Wrapper                 │   │  ✅ Working
+│  │  Qt Event Loop Manager          │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Headless mode
+│  │  Document Wrapper (N-API)       │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Working
+│  │  Editor Wrapper                 │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Working
 │  └──────────────┬──────────────────┘   │
 └─────────────────┼──────────────────────┘
                   │ Qt/C++ API
 ┌─────────────────▼──────────────────────┐
-│    KTextEditor Framework (KF5)          │  ✅ Integrated
+│    KTextEditor Framework (KF5)          │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Integrated
 │  ┌─────────────────────────────────┐   │
-│  │  KTextEditor::Document (C++)    │   │  ✅ Available
-│  │  Syntax Highlighting            │   │  ✅ 300+ languages
+│  │  KTextEditor::Document (C++)    │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Available
+│  │  Syntax Highlighting            │   │  <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> 300+ languages
 │  │  Code Folding, Search, Indent   │   │  🔄 Next phase
 │  └─────────────────────────────────┘   │
 └─────────────────────────────────────────┘
@@ -320,29 +320,29 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
    - `KateEditorPanel.tsx` - Component ready for full Kate integration
    - File explorer, tabs, and status bar
    - Debug, Source Control, Terminal, Extensions, and Settings panels
-   - **Status**: ✅ Complete, ready for Phase 7 enhancements
+   - **Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Complete, ready for Phase 7 enhancements
 
 2. **Backend Bridge (Express + WebSocket)**
-   - `kate-bridge.ts` - ✅ WebSocket bridge for real-time Kate communication
-   - `kate-service.ts` - ✅ Document lifecycle and buffer management
+   - `kate-bridge.ts` - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> WebSocket bridge for real-time Kate communication
+   - `kate-service.ts` - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Document lifecycle and buffer management
    - WebSocket server for real-time updates and event propagation
    - REST API for file operations and IDE features
-   - **Status**: ✅ Implemented with full Kate integration support
+   - **Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Implemented with full Kate integration support
 
 3. **Native Module (`@kate-neo/native`)**
-   - ✅ Node.js N-API bindings for KTextEditor framework
-   - ✅ Qt event loop manager (headless mode, separate thread)
-   - ✅ Document wrapper with full C++ to JavaScript API
-   - ✅ Editor singleton wrapper for KTextEditor configuration
-   - ✅ Cross-platform build system (node-gyp + pkg-config)
-   - ✅ Graceful fallback when Qt/KF5 unavailable
-   - **Status**: ✅ Phase 6 Complete - Foundation established
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Node.js N-API bindings for KTextEditor framework
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Qt event loop manager (headless mode, separate thread)
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Document wrapper with full C++ to JavaScript API
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Editor singleton wrapper for KTextEditor configuration
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Cross-platform build system (node-gyp + pkg-config)
+   - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Graceful fallback when Qt/KF5 unavailable
+   - **Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Phase 6 Complete - Foundation established
 
 4. **Shared Types (`shared/kate-types.ts`)**
    - Type definitions for frontend ↔ backend communication
    - Protocol message types for Kate operations
    - Document metadata and buffer update structures
-   - **Status**: ✅ Defined and implemented
+   - **Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Defined and implemented
 
 5. **Kate Engine (KTextEditor Framework)**
    - KDE's KTextEditor framework (C++)
@@ -350,11 +350,11 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
    - Sophisticated syntax highlighting (300+ languages)
    - Code folding and indentation support
    - Search and replace functionality
-   - **Status**: ✅ Integrated via native bindings, advanced features in Phase 7
+   - **Status**: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Integrated via native bindings, advanced features in Phase 7
 
 ## Development Roadmap
 
-### Phase 1: Project Setup ✅ COMPLETE
+### Phase 1: Project Setup <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] Create repository structure
 - [x] Set up React frontend with Monaco Editor
 - [x] Set up Express backend server
@@ -363,7 +363,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [x] Configure CI/CD workflows
 - [x] Document architecture and setup
 
-### Phase 2: Essential IDE Features ✅ COMPLETE
+### Phase 2: Essential IDE Features <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] **Debugging System (DAP Integration)**
   - [x] Debug Adapter Protocol service implementation
   - [x] Debug session management (start, stop, pause, continue)
@@ -386,7 +386,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [x] Input/output handling
   - [x] Session management
 
-### Phase 3: Advanced Features & Polish ✅ COMPLETE
+### Phase 3: Advanced Features & Polish <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] **Extension System**
   - [x] Extension API types and interfaces
   - [x] Extension manifest schema
@@ -409,7 +409,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [x] Viewport-based rendering
   - [x] Tree expansion state management
 
-### Phase 4: Production Ready ✅ COMPLETE
+### Phase 4: Production Ready <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] **Settings & Configuration**
   - [x] Settings Manager service with multi-scope support
   - [x] Settings type definitions and default values
@@ -430,7 +430,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [x] API endpoints for locale management
   - [x] Fallback mechanism for missing translations
 
-### Phase 5: Kate Engine Research & Planning ✅ COMPLETE
+### Phase 5: Kate Engine Research & Planning <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] Research KTextEditor framework architecture (13.8 KB documentation)
 - [x] Investigate Node.js native binding options (20.2 KB documentation)
 - [x] Explore Qt/KDE environment requirements (13.2 KB documentation)
@@ -442,7 +442,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [x] Working POC with performance benchmarks
 - [x] Technical architecture defined
 
-### Phase 6: Native Binding Implementation ✅ COMPLETE
+### Phase 6: Native Binding Implementation <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> COMPLETE
 - [x] Set up development environment structure
 - [x] Implement core native module (@kate-neo/native)
   - [x] Qt event loop manager (headless mode)
@@ -511,17 +511,17 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 
 The Kate engine integration is now functional through native Node.js bindings. Here's the current implementation status:
 
-### Native Module (`@kate-neo/native`) - ✅ Phase 6 Complete
+### Native Module (`@kate-neo/native`) - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Phase 6 Complete
 
 **Implemented**:
-- ✅ Qt event loop manager (headless QCoreApplication, separate thread)
-- ✅ KTextEditor::Editor wrapper (singleton access)
-- ✅ KTextEditor::Document wrapper with full API
-- ✅ N-API bindings using node-addon-api
-- ✅ Cross-platform build configuration (node-gyp)
-- ✅ Graceful fallback mode when KTextEditor unavailable
-- ✅ Basic document operations (create, setText, getText, line access)
-- ✅ Syntax mode management (300+ language definitions)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Qt event loop manager (headless QCoreApplication, separate thread)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> KTextEditor::Editor wrapper (singleton access)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> KTextEditor::Document wrapper with full API
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> N-API bindings using node-addon-api
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Cross-platform build configuration (node-gyp)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Graceful fallback mode when KTextEditor unavailable
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Basic document operations (create, setText, getText, line access)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Syntax mode management (300+ language definitions)
 
 **Phase 7 Priorities** (Next):
 - [ ] Syntax token extraction and bridge to frontend
@@ -531,22 +531,22 @@ The Kate engine integration is now functional through native Node.js bindings. H
 - [ ] Incremental buffer updates and synchronization
 - [ ] Performance optimizations for large files
 
-### Backend Service (`server/kate-service.ts`) - ✅ Implemented
+### Backend Service (`server/kate-service.ts`) - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Implemented
 
 **Complete**:
-- ✅ Document lifecycle management (create, open, close)
-- ✅ Buffer operations and updates
-- ✅ Integration with native module
-- ✅ Fallback implementations for Monaco editor
-- ✅ Error handling and validation
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Document lifecycle management (create, open, close)
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Buffer operations and updates
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Integration with native module
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Fallback implementations for Monaco editor
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Error handling and validation
 
-### WebSocket Bridge (`server/kate-bridge.ts`) - ✅ Integrated
+### WebSocket Bridge (`server/kate-bridge.ts`) - <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Integrated
 
 **Complete**:
-- ✅ Real-time communication protocol
-- ✅ Kate availability status reporting
-- ✅ Document operation routing to KateService
-- ✅ Enhanced error handling and logging
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Real-time communication protocol
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Kate availability status reporting
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Document operation routing to KateService
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Enhanced error handling and logging
 
 ### Frontend (`client/src/components/KateEditorPanel.tsx`) - 🔄 Ready for Phase 7
 

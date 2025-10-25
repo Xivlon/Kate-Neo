@@ -6,12 +6,12 @@ This document presents a working proof-of-concept that demonstrates the feasibil
 
 ## POC Goals
 
-1. ✅ Demonstrate native binding creation with node-addon-api
-2. ✅ Initialize Qt/KTextEditor in a Node.js process
-3. ✅ Create and manipulate KTextEditor documents
-4. ✅ Handle text operations from JavaScript
-5. ✅ Verify syntax highlighting works
-6. ✅ Test event propagation from Kate to JavaScript
+1. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Demonstrate native binding creation with node-addon-api
+2. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Initialize Qt/KTextEditor in a Node.js process
+3. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Create and manipulate KTextEditor documents
+4. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Handle text operations from JavaScript
+5. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Verify syntax highlighting works
+6. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Test event propagation from Kate to JavaScript
 
 ## Implementation
 
@@ -678,7 +678,7 @@ console.log(`Average: ${elapsed / iterations}ms per document`);
 **Results**:
 - 1000 documents in ~150ms
 - Average: 0.15ms per document
-- ✅ Performance acceptable
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Performance acceptable
 
 ### Large Document Handling
 
@@ -698,35 +698,35 @@ console.log(`Line 5000: ${doc.line(5000)}`);
 **Results**:
 - 10,000 lines loaded in ~50ms
 - Line access: <1ms
-- ✅ Large file handling works
+- <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Large file handling works
 
 ## Lessons Learned
 
 ### What Worked Well
 
-1. ✅ **node-addon-api**: Excellent C++ abstraction
-2. ✅ **Headless Qt**: QCoreApplication works without display
-3. ✅ **KTextEditor**: Rich API, well-documented
-4. ✅ **Memory Management**: RAII and smart pointers prevent leaks
-5. ✅ **Event Loop**: Separate thread for Qt works well
+1. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **node-addon-api**: Excellent C++ abstraction
+2. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Headless Qt**: QCoreApplication works without display
+3. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **KTextEditor**: Rich API, well-documented
+4. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Memory Management**: RAII and smart pointers prevent leaks
+5. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Event Loop**: Separate thread for Qt works well
 
 ### Challenges Encountered
 
-1. ❌ **Qt Keywords**: Conflicts with Node.js (fixed with `QT_NO_KEYWORDS`)
-2. ❌ **Threading**: Qt objects must stay in Qt thread
-3. ❌ **Platform Plugin**: Needed `QT_QPA_PLATFORM=offscreen`
-4. ❌ **Build Complexity**: Many include paths and libraries
+1. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/window-close-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/window-close-symbolic.svg"><img alt="window-close-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Qt Keywords**: Conflicts with Node.js (fixed with `QT_NO_KEYWORDS`)
+2. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/window-close-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/window-close-symbolic.svg"><img alt="window-close-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Threading**: Qt objects must stay in Qt thread
+3. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/window-close-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/window-close-symbolic.svg"><img alt="window-close-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Platform Plugin**: Needed `QT_QPA_PLATFORM=offscreen`
+4. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/window-close-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/window-close-symbolic.svg"><img alt="window-close-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Build Complexity**: Many include paths and libraries
 
 ### Solutions Applied
 
-1. ✅ Used `QT_NO_KEYWORDS` define
-2. ✅ Created separate Qt thread with event loop
-3. ✅ Set environment variable in code
-4. ✅ Used pkg-config for library detection
+1. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Used `QT_NO_KEYWORDS` define
+2. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Created separate Qt thread with event loop
+3. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Set environment variable in code
+4. <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> Used pkg-config for library detection
 
 ## Conclusions
 
-### Feasibility: ✅ CONFIRMED
+### Feasibility: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> CONFIRMED
 
 The proof-of-concept successfully demonstrates that:
 - KTextEditor can be embedded in Node.js
@@ -735,14 +735,14 @@ The proof-of-concept successfully demonstrates that:
 - Syntax highlighting is functional
 - Memory management is stable
 
-### Performance: ✅ EXCELLENT
+### Performance: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> EXCELLENT
 
 - Document operations: <1ms
 - Large file handling: Efficient
 - Memory usage: Reasonable
 - No memory leaks detected
 
-### Integration: ✅ VIABLE
+### Integration: <picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> VIABLE
 
 - Clean JavaScript API possible
 - Event system can be implemented
@@ -762,7 +762,7 @@ The proof-of-concept successfully demonstrates that:
 
 ## Recommendations
 
-✅ **Proceed with full implementation**
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/light/checkbox-checked-symbolic.svg"><source media="(prefers-color-scheme: light)" srcset="https://github.com/StorageB/icons/blob/main/GNOME46Adwaita/dark/checkbox-checked-symbolic.svg"><img alt="checkbox-checked-symbolic" src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png"></picture> **Proceed with full implementation**
 
 The POC validates the technical approach. Recommended path forward:
 1. Complete native binding API surface
