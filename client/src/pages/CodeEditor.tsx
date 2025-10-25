@@ -6,11 +6,16 @@ import { EditorPane } from "@/components/EditorPane";
 import { TopMenuBar } from "@/components/TopMenuBar";
 import { StatusBar } from "@/components/StatusBar";
 import { FindReplaceDialog } from "@/components/FindReplaceDialog";
+import { DebugPanel } from "@/components/DebugPanel";
+import { SourceControlPanel } from "@/components/SourceControlPanel";
+import { TerminalPanel } from "@/components/TerminalPanel";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Files, GitBranch, Bug, Terminal as TerminalIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +32,8 @@ export default function CodeEditor() {
   const [fileContents, setFileContents] = useState<Map<string, string>>(new Map());
   const [isFindDialogOpen, setIsFindDialogOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState("files");
+  const [terminalVisible, setTerminalVisible] = useState(false);
   const [newFileDialogOpen, setNewFileDialogOpen] = useState(false);
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
@@ -207,58 +214,113 @@ export default function CodeEditor() {
           {!sidebarCollapsed && (
             <>
               <Panel defaultSize={20} minSize={15} maxSize={30}>
-                <div className="h-full flex flex-col bg-sidebar border-r border-sidebar-border">
-                  <div className="h-12 flex items-center px-4 border-b border-sidebar-border">
-                    <span className="text-sm font-medium uppercase text-muted-foreground">
-                      Explorer
-                    </span>
+                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full flex flex-col">
+                  <div className="border-b border-sidebar-border bg-sidebar">
+                    <TabsList className="w-full justify-start rounded-none h-12 bg-transparent p-0">
+                      <TabsTrigger 
+                        value="files" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <Files className="h-4 w-4 mr-2" />
+                        Files
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="git" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <GitBranch className="h-4 w-4 mr-2" />
+                        Git
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="debug" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <Bug className="h-4 w-4 mr-2" />
+                        Debug
+                      </TabsTrigger>
+                    </TabsList>
                   </div>
-                  <FileTree
-                    files={files}
-                    selectedFileId={activeTabId}
-                    onFileSelect={handleFileSelect}
-                  />
-                </div>
+                  
+                  <TabsContent value="files" className="flex-1 m-0 overflow-hidden">
+                    <FileTree
+                      files={files}
+                      selectedFileId={activeTabId}
+                      onFileSelect={handleFileSelect}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="git" className="flex-1 m-0 overflow-hidden">
+                    <SourceControlPanel />
+                  </TabsContent>
+                  
+                  <TabsContent value="debug" className="flex-1 m-0 overflow-hidden">
+                    <DebugPanel />
+                  </TabsContent>
+                </Tabs>
               </Panel>
               <PanelResizeHandle className="w-1 bg-border hover:bg-primary transition-colors cursor-col-resize" />
             </>
           )}
 
           <Panel defaultSize={80}>
-            <div className="h-full flex flex-col">
-              {openTabs.length > 0 && (
-                <TabBar
-                  tabs={openTabs}
-                  activeTabId={activeTabId}
-                  onTabSelect={setActiveTabId}
-                  onTabClose={handleTabClose}
-                />
-              )}
-              
-              <div className="flex-1 relative">
-                {activeFile && activeFile.type === "file" ? (
-                  <EditorPane
-                    value={activeContent}
-                    language={activeFile.language || "plaintext"}
-                    onChange={handleEditorChange}
-                  />
-                ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground">
-                    <div className="text-center">
-                      <p className="text-lg mb-2">No file open</p>
-                      <p className="text-sm">Select a file from the explorer to start editing</p>
-                    </div>
+            <PanelGroup direction="vertical">
+              <Panel defaultSize={terminalVisible ? 70 : 100}>
+                <div className="h-full flex flex-col">
+                  {openTabs.length > 0 && (
+                    <TabBar
+                      tabs={openTabs}
+                      activeTabId={activeTabId}
+                      onTabSelect={setActiveTabId}
+                      onTabClose={handleTabClose}
+                    />
+                  )}
+                  
+                  <div className="flex-1 relative">
+                    {activeFile && activeFile.type === "file" ? (
+                      <EditorPane
+                        value={activeContent}
+                        language={activeFile.language || "plaintext"}
+                        onChange={handleEditorChange}
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <p className="text-lg mb-2">No file open</p>
+                          <p className="text-sm">Select a file from the explorer to start editing</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <StatusBar
-                line={1}
-                column={1}
-                language={activeFile?.language || "plaintext"}
-                encoding="UTF-8"
-              />
-            </div>
+                  <div className="flex items-center justify-between px-4 h-6 bg-sidebar border-t border-sidebar-border">
+                    <StatusBar
+                      line={1}
+                      column={1}
+                      language={activeFile?.language || "plaintext"}
+                      encoding="UTF-8"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-5 text-xs"
+                      onClick={() => setTerminalVisible(!terminalVisible)}
+                    >
+                      <TerminalIcon className="h-3 w-3 mr-1" />
+                      Terminal
+                    </Button>
+                  </div>
+                </div>
+              </Panel>
+              
+              {terminalVisible && (
+                <>
+                  <PanelResizeHandle className="h-1 bg-border hover:bg-primary transition-colors cursor-row-resize" />
+                  <Panel defaultSize={30} minSize={20}>
+                    <TerminalPanel />
+                  </Panel>
+                </>
+              )}
+            </PanelGroup>
           </Panel>
         </PanelGroup>
       </div>
