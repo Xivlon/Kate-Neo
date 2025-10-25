@@ -25,6 +25,9 @@ export * from './terminal/TerminalManager';
 // Git
 export * from './git/GitService';
 
+// UI
+export * from './ui/PanelManager';
+
 // Re-export existing utilities
 export * from './utils';
 export * from './queryClient';

@@ -11,7 +11,7 @@ The IDE is built on a modular service-oriented architecture with clear separatio
 │                   React Components                       │
 │  (UI layer - FileTree, Editor, Terminal, etc.)          │
 └────────────────┬────────────────────────────────────────┘
-                 │
+                 │ React Hooks (useIDE.ts)
 ┌────────────────▼────────────────────────────────────────┐
 │                  Core Services Layer                     │
 │                                                          │
@@ -25,9 +25,10 @@ The IDE is built on a modular service-oriented architecture with clear separatio
 │  │ Manager      │  │              │  │ Watcher      │ │
 │  └──────────────┘  └──────────────┘  └──────────────┘ │
 │                                                          │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │            Event Bus (Communication)              │  │
-│  └──────────────────────────────────────────────────┘  │
+│  ┌──────────────┐  ┌──────────────────────────────┐   │
+│  │ Panel        │  │  Event Bus (Communication)   │   │
+│  │ Manager      │  │                              │   │
+│  └──────────────┘  └──────────────────────────────┘   │
 └────────────────┬────────────────────────────────────────┘
                  │
 ┌────────────────▼────────────────────────────────────────┐
@@ -260,6 +261,92 @@ await gitService.checkoutBranch('develop');
 
 **Status**: ✅ Foundation implemented, ⏳ Backend integration pending
 
+### 8. Panel Manager (`ui/PanelManager.ts`)
+
+**Purpose**: UI panel and layout management.
+
+**Features**:
+- Register and manage UI panels
+- Show/hide panels
+- Resize and reposition panels
+- Save and restore layouts
+- Default panel configuration
+
+**Usage**:
+```typescript
+import { panelManager } from '@/lib';
+
+// Register a panel
+panelManager.registerPanel({
+  id: 'my-panel',
+  title: 'My Panel',
+  position: 'left',
+  visible: true,
+  size: 250,
+});
+
+// Toggle panel visibility
+panelManager.togglePanel('terminal');
+
+// Get panels by position
+const leftPanels = panelManager.getPanelsByPosition('left');
+
+// Listen to changes
+const unsubscribe = panelManager.onChange((panels) => {
+  console.log('Panels changed:', panels);
+});
+```
+
+**Status**: ✅ Fully implemented
+
+## React Hooks
+
+The `hooks/useIDE.ts` file provides React hooks for easy integration with components:
+
+### useWorkspace()
+Access workspace and document management
+```typescript
+const { documents, activeDocument, openDocument, saveDocument } = useWorkspace();
+```
+
+### useLSP(documentUri)
+Access LSP features for a document
+```typescript
+const { diagnostics, getCompletions, getHover } = useLSP(document.uri);
+```
+
+### useSettings()
+Access and modify settings
+```typescript
+const { settings, getSetting, setSetting } = useSettings();
+```
+
+### useTerminal()
+Manage terminal sessions
+```typescript
+const { sessions, createSession, sendInput } = useTerminal();
+```
+
+### useGit()
+Access Git operations
+```typescript
+const { status, stageFile, commit, initialize } = useGit();
+```
+
+### useFileWatcher(path)
+Watch file system changes
+```typescript
+const { changes, onFileChange } = useFileWatcher('/project/src');
+```
+
+### useIDEEvent(eventType, handler)
+Subscribe to IDE events
+```typescript
+useIDEEvent(IDEEventType.DOCUMENT_SAVED, (data) => {
+  console.log('Document saved:', data);
+});
+```
+
 ## Event Types
 
 The Event Bus uses typed events defined in `IDEEventType`:
@@ -307,9 +394,19 @@ The Event Bus uses typed events defined in `IDEEventType`:
 
 ## Integration with Components
 
-Components can use these services through imports:
+Components can use these services through hooks or direct imports:
 
 ```typescript
+// Using hooks (recommended for React components)
+import { useWorkspace, useSettings } from '@/hooks/useIDE';
+
+function MyComponent() {
+  const { documents, openDocument } = useWorkspace();
+  const { settings } = useSettings();
+  // ...
+}
+
+// Direct import (for non-React code)
 import {
   workspaceManager,
   lspManager,
@@ -343,6 +440,7 @@ All services are currently in **foundation mode** with placeholder implementatio
    - Service unit tests
    - Event flow tests
    - Integration tests
+   - Hook tests
 
 ## Development Guidelines
 
@@ -354,6 +452,7 @@ When extending these services:
 4. **Document Changes**: Update this README when adding features
 5. **Type Safety**: Use TypeScript types throughout
 6. **Error Handling**: Gracefully handle errors and edge cases
+7. **Use Hooks**: Create React hooks for new services
 
 ## Reference
 
