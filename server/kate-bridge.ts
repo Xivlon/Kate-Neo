@@ -18,6 +18,7 @@
 
 import { WebSocket, WebSocketServer } from 'ws';
 import type { Server } from 'http';
+import { kateService } from './kate-service';
 
 /**
  * Kate Engine Bridge Configuration
@@ -92,24 +93,27 @@ export class KateBridge {
 
   /**
    * Initialize the Kate bridge
-   * TODO: Initialize Kate engine and establish bindings
    */
   async initialize(server: Server): Promise<void> {
     console.log('[KateBridge] Initializing Kate engine bridge...');
     
-    // TODO: Load and initialize Kate engine libraries
-    // This will require:
-    // 1. Native Node.js bindings to KTextEditor framework
-    // 2. Qt/KDE environment setup
-    // 3. Kate engine configuration
+    // Check Kate service status
+    const status = kateService.getStatus();
+    console.log('[KateBridge] Kate service status:', status);
     
-    console.log('[KateBridge] TODO: Load Kate engine libraries from:', this.config.kateLibPath);
-    console.log('[KateBridge] TODO: Initialize KTextEditor framework');
+    if (status.available) {
+      console.log('[KateBridge] ✓ Kate native module available');
+      console.log('[KateBridge] ✓ Qt event loop running:', status.qtRunning);
+      console.log('[KateBridge] ✓ Kate version:', status.version);
+    } else {
+      console.log('[KateBridge] ⚠ Kate native module not available - using fallback mode');
+      console.log('[KateBridge] Install Qt5 and KF5 libraries for full Kate support');
+    }
     
     // Setup WebSocket server for frontend communication
     await this.setupWebSocketServer(server);
     
-    console.log('[KateBridge] Kate bridge initialization complete (placeholder mode)');
+    console.log('[KateBridge] Kate bridge initialization complete');
   }
 
   /**
@@ -143,9 +147,14 @@ export class KateBridge {
       });
 
       // Send connection acknowledgment
+      const status = kateService.getStatus();
       this.send(ws, {
         type: 'connected',
-        message: 'Connected to Kate engine bridge (placeholder mode)',
+        message: 'Connected to Kate engine bridge',
+        payload: {
+          kateAvailable: status.available,
+          version: status.version,
+        },
       });
     });
 
@@ -197,129 +206,142 @@ export class KateBridge {
 
   /**
    * Handle buffer open request
-   * TODO: Create document buffer in Kate engine
    */
   private async handleBufferOpen(ws: WebSocket, payload: any): Promise<void> {
     const { documentId, filePath, content, language } = payload;
     
-    console.log(`[KateBridge] TODO: Open document in Kate engine: ${filePath}`);
-    console.log(`[KateBridge] TODO: Set syntax highlighting mode: ${language}`);
+    console.log(`[KateBridge] Opening document: ${filePath}`);
     
-    // TODO: Create Kate document instance
-    // TODO: Load content into Kate buffer
-    // TODO: Set up syntax highlighting
-    
-    this.documents.set(documentId, {
-      filePath,
-      content,
-      language,
-      version: 0,
-    });
+    try {
+      // Create document using Kate service
+      const docId = documentId || kateService.createDocument(filePath, language, content);
+      
+      // Store in local map
+      const metadata = kateService.getDocumentMetadata(docId);
+      if (metadata) {
+        this.documents.set(docId, metadata);
+      }
 
-    this.send(ws, {
-      type: 'buffer.opened',
-      payload: {
-        documentId,
-        success: true,
-        message: 'Document opened (placeholder)',
-      },
-    });
+      this.send(ws, {
+        type: 'buffer.opened',
+        payload: {
+          documentId: docId,
+          success: true,
+          kateAvailable: kateService.isKateAvailable(),
+          metadata,
+        },
+      });
+    } catch (error) {
+      console.error('[KateBridge] Error opening document:', error);
+      this.sendError(ws, `Failed to open document: ${(error as Error).message}`);
+    }
   }
 
   /**
    * Handle buffer update request
-   * TODO: Apply changes to Kate engine buffer
    */
   private async handleBufferUpdate(ws: WebSocket, payload: BufferUpdate): Promise<void> {
     const { documentId, changes, version } = payload;
     
-    console.log(`[KateBridge] TODO: Apply ${changes.length} changes to Kate buffer`);
-    console.log(`[KateBridge] TODO: Update buffer version to ${version}`);
+    console.log(`[KateBridge] Applying ${changes.length} changes to document ${documentId}`);
     
-    // TODO: Apply changes to Kate engine buffer
-    // TODO: Validate change sequence
-    // TODO: Handle conflicts
-    // TODO: Trigger syntax re-highlighting
-    
-    // Broadcast changes to other clients
-    this.broadcast({
-      type: 'buffer.updated',
-      payload: {
-        documentId,
-        changes,
-        version,
-      },
-    }, ws);
+    try {
+      // Apply changes using Kate service
+      kateService.applyBufferUpdate(payload);
+      
+      // Broadcast changes to other clients
+      this.broadcast({
+        type: 'buffer.updated',
+        payload: {
+          documentId,
+          changes,
+          version,
+        },
+      }, ws);
+    } catch (error) {
+      console.error('[KateBridge] Error applying buffer update:', error);
+      this.sendError(ws, `Failed to update buffer: ${(error as Error).message}`);
+    }
   }
 
   /**
    * Handle buffer close request
-   * TODO: Close document in Kate engine
    */
   private async handleBufferClose(ws: WebSocket, payload: any): Promise<void> {
     const { documentId } = payload;
     
-    console.log(`[KateBridge] TODO: Close document in Kate engine: ${documentId}`);
+    console.log(`[KateBridge] Closing document: ${documentId}`);
     
-    // TODO: Save document if needed
-    // TODO: Clean up Kate engine resources
-    // TODO: Remove from active documents
-    
-    this.documents.delete(documentId);
+    try {
+      // Close document using Kate service
+      kateService.closeDocument(documentId);
+      
+      // Remove from local map
+      this.documents.delete(documentId);
 
-    this.send(ws, {
-      type: 'buffer.closed',
-      payload: {
-        documentId,
-        success: true,
-      },
-    });
+      this.send(ws, {
+        type: 'buffer.closed',
+        payload: {
+          documentId,
+          success: true,
+        },
+      });
+    } catch (error) {
+      console.error('[KateBridge] Error closing document:', error);
+      this.sendError(ws, `Failed to close document: ${(error as Error).message}`);
+    }
   }
 
   /**
    * Handle syntax highlighting request
-   * TODO: Get syntax tokens from Kate engine
    */
   private async handleSyntaxRequest(ws: WebSocket, payload: any): Promise<void> {
     const { documentId, lineStart, lineEnd } = payload;
     
-    console.log(`[KateBridge] TODO: Get syntax highlighting from Kate for lines ${lineStart}-${lineEnd}`);
+    console.log(`[KateBridge] Getting syntax highlighting for lines ${lineStart}-${lineEnd}`);
     
-    // TODO: Query Kate engine for syntax highlighting data
-    // TODO: Convert Kate tokens to Monaco/Theia format
-    
-    const tokens: SyntaxToken[] = []; // Placeholder
-    
-    this.send(ws, {
-      type: 'syntax.response',
-      payload: {
-        documentId,
-        tokens,
-      },
-    });
+    try {
+      // Get syntax tokens from Kate service
+      const tokens = kateService.getSyntaxTokens(documentId, lineStart, lineEnd);
+      
+      this.send(ws, {
+        type: 'syntax.response',
+        payload: {
+          documentId,
+          tokens,
+          kateAvailable: kateService.isKateAvailable(),
+        },
+      });
+    } catch (error) {
+      console.error('[KateBridge] Error getting syntax tokens:', error);
+      this.sendError(ws, `Failed to get syntax highlighting: ${(error as Error).message}`);
+    }
   }
 
   /**
    * Handle code folding request
-   * TODO: Get folding markers from Kate engine
    */
   private async handleFoldRequest(ws: WebSocket, payload: any): Promise<void> {
     const { documentId } = payload;
     
-    console.log(`[KateBridge] TODO: Get code folding regions from Kate engine`);
+    console.log(`[KateBridge] Getting code folding regions for ${documentId}`);
     
-    // TODO: Query Kate engine for folding markers
-    // TODO: Convert to Monaco/Theia folding format
-    
-    const foldingRegions: any[] = []; // Placeholder
-    
-    this.send(ws, {
-      type: 'fold.response',
-      payload: {
-        documentId,
-        regions: foldingRegions,
-      },
-    });
+    try {
+      // TODO: Implement actual folding region extraction from Kate
+      const foldingRegions: any[] = [];
+      
+      this.send(ws, {
+        type: 'fold.response',
+        payload: {
+          documentId,
+          regions: foldingRegions,
+          kateAvailable: kateService.isKateAvailable(),
+        },
+      });
+    } catch (error) {
+      console.error('[KateBridge] Error getting folding regions:', error);
+      this.sendError(ws, `Failed to get code folding: ${(error as Error).message}`);
+    }
   }
 
   /**
@@ -355,7 +377,6 @@ export class KateBridge {
 
   /**
    * Shutdown the bridge
-   * TODO: Clean up Kate engine resources
    */
   async shutdown(): Promise<void> {
     console.log('[KateBridge] Shutting down Kate engine bridge...');
@@ -370,9 +391,11 @@ export class KateBridge {
       this.wss.close();
     }
     
-    // TODO: Shutdown Kate engine
-    // TODO: Save all open documents
-    // TODO: Clean up resources
+    // Close all documents
+    const allDocs = kateService.getAllDocuments();
+    for (const doc of allDocs) {
+      kateService.closeDocument(doc.documentId);
+    }
     
     console.log('[KateBridge] Kate bridge shutdown complete');
   }
