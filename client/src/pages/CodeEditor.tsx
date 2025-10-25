@@ -10,13 +10,14 @@ import { DebugPanel } from "@/components/DebugPanel";
 import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { TerminalPanel } from "@/components/TerminalPanel";
 import { ExtensionsPanel } from "@/components/ExtensionsPanel";
+import { SettingsPanel } from "@/components/SettingsPanel";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package } from "lucide-react";
+import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package, Settings } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -246,6 +247,13 @@ export default function CodeEditor() {
                         <Package className="h-4 w-4 mr-2" />
                         Extensions
                       </TabsTrigger>
+                      <TabsTrigger 
+                        value="settings" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        Settings
+                      </TabsTrigger>
                     </TabsList>
                   </div>
                   
@@ -267,6 +275,10 @@ export default function CodeEditor() {
                   
                   <TabsContent value="extensions" className="flex-1 m-0 overflow-hidden">
                     <ExtensionsPanel />
+                  </TabsContent>
+                  
+                  <TabsContent value="settings" className="flex-1 m-0 overflow-hidden">
+                    <SettingsPanel />
                   </TabsContent>
                 </Tabs>
               </Panel>

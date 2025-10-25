@@ -135,6 +135,24 @@ npm run build
 
 Kate Neo includes comprehensive IDE features across multiple development phases:
 
+### Settings & Configuration (Phase 4)
+- **Settings Manager**: Hierarchical settings with multi-scope support (Global, Workspace, Folder)
+- **Settings Persistence**: Auto-save to JSON files with deep merging
+- **Settings Panel**: Tabbed UI for Editor, Terminal, Git, Appearance, and Extensions settings
+- **Scope Selector**: Switch between Global and Workspace settings
+- **Reset Functionality**: Reset settings to defaults
+- **Type-Safe Settings**: Full TypeScript support with comprehensive type definitions
+- **Dot Notation Access**: Easy setting access via 'editor.fontSize' style keys
+
+### Internationalization (Phase 4)
+- **Multi-Language Support**: Currently supports English and Spanish
+- **Translation Management**: Easy-to-update JSON translation files
+- **Parameter Interpolation**: Dynamic values in translations (e.g., "File saved: {{name}}")
+- **Locale Switching**: Change language on the fly from Settings panel
+- **Fallback Mechanism**: Graceful fallback to default language for missing translations
+- **React Hook**: useI18n hook for easy integration in components
+- **API Endpoints**: Full REST API for locale and translation management
+
 ### Extension System (Phase 3)
 - **Extension API**: Complete API for extending IDE functionality
 - **Extension Host**: Manages extension lifecycle (load, activate, deactivate)
@@ -298,7 +316,28 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [x] Viewport-based rendering
   - [x] Tree expansion state management
 
-### Phase 4: Kate Engine Research & Planning (Next)
+### Phase 4: Production Ready ✅ (Completed)
+- [x] **Settings & Configuration**
+  - [x] Settings Manager service with multi-scope support
+  - [x] Settings type definitions and default values
+  - [x] Settings persistence (global and workspace)
+  - [x] Settings Panel UI component
+  - [x] API endpoints for settings CRUD operations
+  - [x] Scope selector (Global/Workspace)
+  - [x] Reset to defaults functionality
+  - [x] 5 setting categories (Editor, Terminal, Git, Appearance, Extensions)
+- [x] **Internationalization (i18n)**
+  - [x] I18n Service with multi-locale support
+  - [x] Translation file management
+  - [x] Parameter interpolation in translations
+  - [x] Locale switching with events
+  - [x] useI18n React hook
+  - [x] Language selector UI component
+  - [x] English and Spanish translations
+  - [x] API endpoints for locale management
+  - [x] Fallback mechanism for missing translations
+
+### Phase 5: Kate Engine Research & Planning (Next)
 - [ ] **TODO**: Research KTextEditor framework architecture
 - [ ] **TODO**: Investigate Node.js native binding options (N-API, node-addon-api)
 - [ ] **TODO**: Explore Qt/KDE environment requirements
@@ -306,14 +345,14 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [ ] **TODO**: Create proof-of-concept for Kate embedding
 - [ ] **TODO**: Document technical decisions and trade-offs
 
-### Phase 5: Kate Engine Integration (Future)
+### Phase 6: Kate Engine Integration (Future)
 - [ ] **TODO**: Create native Node.js bindings for KTextEditor
 - [ ] **TODO**: Implement basic buffer management with Kate
 - [ ] **TODO**: Set up Qt/KDE runtime environment
 - [ ] **TODO**: Test Kate engine initialization and basic operations
 - [ ] **TODO**: Implement WebSocket communication for buffer sync
 
-### Phase 6: Core Features (Future)
+### Phase 7: Core Features (Future)
 - [ ] **TODO**: Implement bidirectional buffer synchronization
 - [ ] **TODO**: Bridge Kate syntax highlighting to Monaco tokenizer
 - [ ] **TODO**: Add code folding integration
@@ -321,7 +360,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [ ] **TODO**: Implement search and replace functionality
 - [ ] **TODO**: Add Kate session management
 
-### Phase 6: Advanced Features (Future)
+### Phase 8: Advanced Features (Future)
 - [ ] **TODO**: Multi-cursor support
 - [ ] **TODO**: Language-specific features (LSP integration)
 - [ ] **TODO**: Custom UI components for Kate features
@@ -329,7 +368,7 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [ ] **TODO**: Comprehensive testing (unit, integration, e2e)
 - [ ] **TODO**: Error handling and recovery mechanisms
 
-### Phase 7: Polish & Release (Future)
+### Phase 9: Polish & Release (Future)
 - [ ] **TODO**: Complete user documentation
 - [ ] **TODO**: API documentation
 - [ ] **TODO**: Example configurations and templates

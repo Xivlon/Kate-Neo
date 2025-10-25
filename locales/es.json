@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "Kate Neo",
+    "tagline": "IDE Moderno con Edición Potente"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "reset": "Restablecer",
+    "close": "Cerrar",
+    "open": "Abrir",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "refresh": "Actualizar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
+  },
+  "menu": {
+    "file": "Archivo",
+    "edit": "Editar",
+    "view": "Ver",
+    "terminal": "Terminal",
+    "help": "Ayuda"
+  },
+  "sidebar": {
+    "files": "Archivos",
+    "git": "Git",
+    "debug": "Depurar",
+    "extensions": "Extensiones",
+    "settings": "Configuración"
+  },
+  "editor": {
+    "untitled": "Sin título",
+    "saveFile": "Guardar Archivo",
+    "openFile": "Abrir Archivo",
+    "closeFile": "Cerrar Archivo",
+    "newFile": "Nuevo Archivo",
+    "findInFile": "Buscar en Archivo",
+    "replaceInFile": "Reemplazar en Archivo"
+  },
+  "git": {
+    "changes": "Cambios",
+    "staged": "Preparado",
+    "unstaged": "Sin preparar",
+    "commit": "Confirmar",
+    "push": "Enviar",
+    "pull": "Obtener",
+    "branch": "Rama",
+    "checkout": "Cambiar",
+    "merge": "Fusionar",
+    "status": "Estado",
+    "history": "Historial",
+    "stash": "Guardar"
+  },
+  "debug": {
+    "start": "Iniciar Depuración",
+    "stop": "Detener Depuración",
+    "pause": "Pausar",
+    "continue": "Continuar",
+    "stepOver": "Paso Sobre",
+    "stepInto": "Paso Dentro",
+    "stepOut": "Paso Fuera",
+    "breakpoints": "Puntos de Interrupción",
+    "callStack": "Pila de Llamadas",
+    "variables": "Variables",
+    "watch": "Observar"
+  },
+  "terminal": {
+    "new": "Nueva Terminal",
+    "kill": "Cerrar Terminal",
+    "clear": "Limpiar Terminal",
+    "split": "Dividir Terminal"
+  },
+  "extensions": {
+    "title": "Extensiones",
+    "installed": "Extensiones Instaladas",
+    "available": "Extensiones Disponibles",
+    "enable": "Activar",
+    "disable": "Desactivar",
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "update": "Actualizar",
+    "search": "Buscar Extensiones",
+    "noExtensions": "No se encontraron extensiones"
+  },
+  "settings": {
+    "title": "Configuración",
+    "editor": "Editor",
+    "terminal": "Terminal",
+    "git": "Git",
+    "debug": "Depurar",
+    "extensions": "Extensiones",
+    "appearance": "Apariencia",
+    "language": "Idioma",
+    "fontSize": "Tamaño de Fuente",
+    "fontFamily": "Familia de Fuente",
+    "tabSize": "Tamaño de Tabulación",
+    "lineNumbers": "Números de Línea",
+    "wordWrap": "Ajuste de Línea",
+    "minimap": "Minimapa",
+    "autoSave": "Guardado Automático",
+    "formatOnSave": "Formatear al Guardar",
+    "global": "Configuración Global",
+    "workspace": "Configuración del Espacio de Trabajo",
+    "reset": "Restablecer Valores Predeterminados",
+    "resetConfirm": "¿Está seguro de que desea restablecer toda la configuración a los valores predeterminados?"
+  },
+  "messages": {
+    "fileNotFound": "Archivo no encontrado: {{path}}",
+    "fileSaved": "Archivo guardado: {{name}}",
+    "fileDeleted": "Archivo eliminado: {{name}}",
+    "extensionActivated": "Extensión activada: {{name}}",
+    "extensionDeactivated": "Extensión desactivada: {{name}}",
+    "settingsSaved": "Configuración guardada exitosamente",
+    "settingsReset": "Configuración restablecida a valores predeterminados",
+    "localeChanged": "Idioma cambiado a {{locale}}",
+    "errorOccurred": "Ocurrió un error: {{message}}"
+  }
+}
