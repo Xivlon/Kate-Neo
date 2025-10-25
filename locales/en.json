@@ -1,0 +1,126 @@
+{
+  "app": {
+    "name": "Kate Neo",
+    "tagline": "Modern IDE with Powerful Editing"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "reset": "Reset",
+    "close": "Close",
+    "open": "Open",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "terminal": "Terminal",
+    "help": "Help"
+  },
+  "sidebar": {
+    "files": "Files",
+    "git": "Git",
+    "debug": "Debug",
+    "extensions": "Extensions",
+    "settings": "Settings"
+  },
+  "editor": {
+    "untitled": "Untitled",
+    "saveFile": "Save File",
+    "openFile": "Open File",
+    "closeFile": "Close File",
+    "newFile": "New File",
+    "findInFile": "Find in File",
+    "replaceInFile": "Replace in File"
+  },
+  "git": {
+    "changes": "Changes",
+    "staged": "Staged",
+    "unstaged": "Unstaged",
+    "commit": "Commit",
+    "push": "Push",
+    "pull": "Pull",
+    "branch": "Branch",
+    "checkout": "Checkout",
+    "merge": "Merge",
+    "status": "Status",
+    "history": "History",
+    "stash": "Stash"
+  },
+  "debug": {
+    "start": "Start Debugging",
+    "stop": "Stop Debugging",
+    "pause": "Pause",
+    "continue": "Continue",
+    "stepOver": "Step Over",
+    "stepInto": "Step Into",
+    "stepOut": "Step Out",
+    "breakpoints": "Breakpoints",
+    "callStack": "Call Stack",
+    "variables": "Variables",
+    "watch": "Watch"
+  },
+  "terminal": {
+    "new": "New Terminal",
+    "kill": "Kill Terminal",
+    "clear": "Clear Terminal",
+    "split": "Split Terminal"
+  },
+  "extensions": {
+    "title": "Extensions",
+    "installed": "Installed Extensions",
+    "available": "Available Extensions",
+    "enable": "Enable",
+    "disable": "Disable",
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "update": "Update",
+    "search": "Search Extensions",
+    "noExtensions": "No extensions found"
+  },
+  "settings": {
+    "title": "Settings",
+    "editor": "Editor",
+    "terminal": "Terminal",
+    "git": "Git",
+    "debug": "Debug",
+    "extensions": "Extensions",
+    "appearance": "Appearance",
+    "language": "Language",
+    "fontSize": "Font Size",
+    "fontFamily": "Font Family",
+    "tabSize": "Tab Size",
+    "lineNumbers": "Line Numbers",
+    "wordWrap": "Word Wrap",
+    "minimap": "Minimap",
+    "autoSave": "Auto Save",
+    "formatOnSave": "Format on Save",
+    "global": "Global Settings",
+    "workspace": "Workspace Settings",
+    "reset": "Reset to Defaults",
+    "resetConfirm": "Are you sure you want to reset all settings to defaults?"
+  },
+  "messages": {
+    "fileNotFound": "File not found: {{path}}",
+    "fileSaved": "File saved: {{name}}",
+    "fileDeleted": "File deleted: {{name}}",
+    "extensionActivated": "Extension activated: {{name}}",
+    "extensionDeactivated": "Extension deactivated: {{name}}",
+    "settingsSaved": "Settings saved successfully",
+    "settingsReset": "Settings reset to defaults",
+    "localeChanged": "Language changed to {{locale}}",
+    "errorOccurred": "An error occurred: {{message}}"
+  }
+}

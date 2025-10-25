@@ -7,6 +7,10 @@ import { GitService } from "./git-service";
 import { terminalService } from "./terminal-service";
 import { ExtensionHost } from "./extension-host";
 import { LargeFileManager } from "./large-file-manager";
+import { getSettingsManager } from "./settings-manager";
+import { getI18nService } from "./i18n-service";
+import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
+import type { TranslationRequest } from "../shared/i18n-types";
 import * as path from "path";
 import * as fs from "fs/promises";
 
@@ -34,6 +38,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     maxFullLoadSize: 5 * 1024 * 1024, // 5MB
     enableIndexing: true,
   });
+
+  // Initialize Settings Manager
+  const settingsManager = getSettingsManager({
+    workspaceDir: workspacePath,
+  });
+  await settingsManager.initialize();
+
+  // Initialize I18n Service
+  const i18nService = getI18nService({
+    localesDir: path.join(workspacePath, 'locales'),
+  });
+  await i18nService.initialize();
 
   // Debug API endpoints
   app.post("/api/debug/sessions", async (req, res) => {
@@ -418,6 +434,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const stats = await largeFileManager.getFileStats(resolvedPath);
       res.json(stats);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Settings API endpoints
+  app.get("/api/settings", async (req, res) => {
+    try {
+      const request: SettingsGetRequest = {
+        scope: req.query.scope as SettingsScope | undefined,
+        key: req.query.key as string | undefined,
+      };
+      const response = await settingsManager.getSettings(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.put("/api/settings", async (req, res) => {
+    try {
+      const request: SettingsUpdateRequest = req.body;
+      const response = await settingsManager.updateSetting(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.delete("/api/settings", async (req, res) => {
+    try {
+      const { scope, key } = req.body;
+      const response = await settingsManager.deleteSetting(scope as SettingsScope, key);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/settings/reset", async (req, res) => {
+    try {
+      const { scope } = req.body;
+      const response = await settingsManager.resetSettings(scope as SettingsScope);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // I18n API endpoints
+  app.get("/api/i18n/locales", (req, res) => {
+    try {
+      const locales = i18nService.getAvailableLocales();
+      res.json(locales);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/i18n/locale", (req, res) => {
+    try {
+      const locale = i18nService.getCurrentLocale();
+      res.json({ locale });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/i18n/locale", async (req, res) => {
+    try {
+      const { locale } = req.body;
+      const success = await i18nService.setLocale(locale);
+      res.json({ success, locale: i18nService.getCurrentLocale() });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/i18n/translate", (req, res) => {
+    try {
+      const request: TranslationRequest = req.body;
+      const response = i18nService.translate(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.get("/api/i18n/translations", (req, res) => {
+    try {
+      const locale = req.query.locale as string | undefined;
+      const translations = locale 
+        ? i18nService.getTranslationsForLocale(locale)
+        : i18nService.getAllTranslations();
+      res.json({ translations });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
