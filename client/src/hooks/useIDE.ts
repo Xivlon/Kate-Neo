@@ -23,6 +23,7 @@ import type {
   GitStatus,
   FileChangeEvent,
   EventSubscription,
+  IDESettings,
 } from '@/lib';
 
 /**
@@ -149,13 +150,13 @@ export function useSettings() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const getSetting = useCallback(<K extends keyof typeof settings>(key: K) => {
-    return settingsManager.get(key);
-  }, []);
+  const getSetting = useCallback(<K extends keyof IDESettings>(key: K) => {
+    return settings[key];
+  }, [settings]);
 
-  const setSetting = useCallback(<K extends keyof typeof settings>(
+  const setSetting = useCallback(<K extends keyof IDESettings>(
     key: K,
-    value: typeof settings[K],
+    value: IDESettings[K],
     scope: 'user' | 'workspace' = 'user'
   ) => {
     settingsManager.set(key, value, scope);

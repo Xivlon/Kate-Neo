@@ -22,7 +22,6 @@ export interface Panel {
 
 export interface PanelLayout {
   panels: Panel[];
-  activePanel?: string;
 }
 
 export type PanelChangeListener = (panels: Panel[]) => void;
