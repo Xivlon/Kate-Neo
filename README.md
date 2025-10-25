@@ -131,6 +131,38 @@ npm run build
 
 **Note**: Kate engine integration is currently in placeholder mode. The editor uses Monaco Editor until the Kate engine bridge is fully implemented.
 
+## Features
+
+Kate Neo now includes essential IDE features implemented in Phase 2:
+
+### Debugging (DAP Integration)
+- **Debug Sessions**: Start, stop, pause, and continue debug sessions
+- **Breakpoints**: Set and manage breakpoints in source files
+- **Call Stack**: View the current call stack when paused
+- **Variables**: Inspect variables in the current scope
+- **Debug Panel**: Dedicated UI panel for all debugging features
+
+### Version Control (Git)
+- **File Status**: Track modified, added, deleted, and untracked files
+- **Staging**: Stage and unstage files for commit
+- **Commits**: Create commits with messages
+- **Branches**: View, switch, and create branches
+- **History**: View recent commit history
+- **Source Control Panel**: Integrated Git UI in the sidebar
+
+### Integrated Terminal
+- **Multiple Sessions**: Create and manage multiple terminal sessions
+- **Real-time I/O**: WebSocket-based communication for instant response
+- **Shell Support**: Automatic shell detection (bash, cmd, etc.)
+- **Resizable Panel**: Collapsible terminal panel at the bottom
+
+### Code Editor
+- **Monaco Editor**: Full-featured code editor with syntax highlighting
+- **File Explorer**: Browse and open files in your workspace
+- **Tabbed Interface**: Multiple files open in tabs
+- **Auto-save**: Save files with Ctrl+S
+- **Find/Replace**: Search and replace across files
+
 ## Architecture
 
 ### High-Level Architecture
@@ -195,7 +227,7 @@ npm run build
 
 ## Development Roadmap
 
-### Phase 1: Project Setup ✅ (Current Phase - In Progress)
+### Phase 1: Project Setup ✅ (Completed)
 - [x] Create repository structure
 - [x] Set up React frontend with Monaco Editor
 - [x] Set up Express backend server
@@ -203,9 +235,31 @@ npm run build
 - [x] Create shared type definitions
 - [x] Configure CI/CD workflows
 - [x] Document architecture and setup
-- [ ] **TODO**: Complete placeholder implementation testing
 
-### Phase 2: Kate Engine Research & Planning (Next)
+### Phase 2: Essential IDE Features ✅ (Completed)
+- [x] **Debugging System (DAP Integration)**
+  - [x] Debug Adapter Protocol service implementation
+  - [x] Debug session management (start, stop, pause, continue)
+  - [x] Breakpoint management
+  - [x] Debug panel UI with breakpoints, call stack, and variables view
+  - [x] API endpoints for debug operations
+- [x] **Version Control Integration (Git)**
+  - [x] Git service with repository operations
+  - [x] File status tracking (modified, added, deleted, untracked)
+  - [x] Stage/unstage files
+  - [x] Commit changes with message
+  - [x] Branch management (list, switch, create)
+  - [x] Commit history viewing
+  - [x] Source control panel UI
+- [x] **Terminal Integration**
+  - [x] Terminal service with PTY support
+  - [x] WebSocket-based terminal communication
+  - [x] Multiple terminal sessions
+  - [x] Terminal panel UI
+  - [x] Input/output handling
+  - [x] Session management
+
+### Phase 3: Kate Engine Research & Planning (Next)
 - [ ] **TODO**: Research KTextEditor framework architecture
 - [ ] **TODO**: Investigate Node.js native binding options (N-API, node-addon-api)
 - [ ] **TODO**: Explore Qt/KDE environment requirements
@@ -213,14 +267,14 @@ npm run build
 - [ ] **TODO**: Create proof-of-concept for Kate embedding
 - [ ] **TODO**: Document technical decisions and trade-offs
 
-### Phase 3: Kate Engine Integration (Future)
+### Phase 4: Kate Engine Integration (Future)
 - [ ] **TODO**: Create native Node.js bindings for KTextEditor
 - [ ] **TODO**: Implement basic buffer management with Kate
 - [ ] **TODO**: Set up Qt/KDE runtime environment
 - [ ] **TODO**: Test Kate engine initialization and basic operations
 - [ ] **TODO**: Implement WebSocket communication for buffer sync
 
-### Phase 4: Core Features (Future)
+### Phase 5: Core Features (Future)
 - [ ] **TODO**: Implement bidirectional buffer synchronization
 - [ ] **TODO**: Bridge Kate syntax highlighting to Monaco tokenizer
 - [ ] **TODO**: Add code folding integration
@@ -228,7 +282,7 @@ npm run build
 - [ ] **TODO**: Implement search and replace functionality
 - [ ] **TODO**: Add Kate session management
 
-### Phase 5: Advanced Features (Future)
+### Phase 6: Advanced Features (Future)
 - [ ] **TODO**: Multi-cursor support
 - [ ] **TODO**: Language-specific features (LSP integration)
 - [ ] **TODO**: Custom UI components for Kate features
@@ -236,7 +290,7 @@ npm run build
 - [ ] **TODO**: Comprehensive testing (unit, integration, e2e)
 - [ ] **TODO**: Error handling and recovery mechanisms
 
-### Phase 6: Polish & Release (Future)
+### Phase 7: Polish & Release (Future)
 - [ ] **TODO**: Complete user documentation
 - [ ] **TODO**: API documentation
 - [ ] **TODO**: Example configurations and templates
