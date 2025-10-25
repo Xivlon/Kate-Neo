@@ -1,0 +1,22 @@
+{
+  "id": "kate-neo.hello-world",
+  "name": "Hello World Extension",
+  "version": "1.0.0",
+  "publisher": "Kate Neo Team",
+  "description": "A simple example extension that demonstrates the Kate Neo extension API",
+  "main": "index.js",
+  "activationEvents": ["*"],
+  "contributes": {
+    "commands": [
+      {
+        "command": "helloWorld.sayHello",
+        "title": "Hello World: Say Hello",
+        "category": "Hello World"
+      }
+    ]
+  },
+  "engines": {
+    "kateNeo": "^1.0.0"
+  },
+  "license": "MIT"
+}
