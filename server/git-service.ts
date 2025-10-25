@@ -6,11 +6,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import * as path from 'path';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * File status in git
@@ -71,7 +71,7 @@ export class GitService extends EventEmitter {
    */
   async initialize(): Promise<boolean> {
     try {
-      await this.execGit('rev-parse --git-dir');
+      await this.execGit(['rev-parse', '--git-dir']);
       this.isInitialized = true;
       console.log(`[GitService] Initialized for repository: ${this.repoPath}`);
       return true;
@@ -90,7 +90,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const { stdout } = await this.execGit('status --porcelain -u');
+      const { stdout } = await this.execGit(['status', '--porcelain', '-u']);
       
       const changes: GitFileChange[] = [];
       const lines = stdout.trim().split('\n').filter(line => line.length > 0);
@@ -163,8 +163,8 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const stagedFlag = staged ? '--cached' : '';
-      const { stdout } = await this.execGit(`diff ${stagedFlag} -- "${filePath}"`);
+      const args = staged ? ['diff', '--cached', '--', filePath] : ['diff', '--', filePath];
+      const { stdout } = await this.execGit(args);
       return stdout;
     } catch (error) {
       console.error('[GitService] Error getting diff:', error);
@@ -181,7 +181,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      await this.execGit(`add "${filePath}"`);
+      await this.execGit(['add', '--', filePath]);
       this.emit('statusChanged');
       return true;
     } catch (error) {
@@ -199,7 +199,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      await this.execGit(`reset HEAD "${filePath}"`);
+      await this.execGit(['reset', 'HEAD', '--', filePath]);
       this.emit('statusChanged');
       return true;
     } catch (error) {
@@ -217,7 +217,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      await this.execGit(`commit -m "${message.replace(/"/g, '\\"')}"`);
+      await this.execGit(['commit', '-m', message]);
       this.emit('statusChanged');
       this.emit('committed', message);
       return true;
@@ -236,7 +236,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const { stdout } = await this.execGit('branch -a');
+      const { stdout } = await this.execGit(['branch', '-a']);
       
       const branches: GitBranch[] = [];
       const lines = stdout.trim().split('\n');
@@ -270,7 +270,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const { stdout } = await this.execGit('rev-parse --abbrev-ref HEAD');
+      const { stdout } = await this.execGit(['rev-parse', '--abbrev-ref', 'HEAD']);
       return stdout.trim();
     } catch (error) {
       console.error('[GitService] Error getting current branch:', error);
@@ -287,7 +287,7 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      await this.execGit(`checkout "${branchName}"`);
+      await this.execGit(['checkout', branchName]);
       this.emit('branchChanged', branchName);
       return true;
     } catch (error) {
@@ -305,8 +305,11 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const checkoutFlag = checkout ? '-b' : '';
-      await this.execGit(`${checkout ? 'checkout' : 'branch'} ${checkoutFlag} "${branchName}"`);
+      if (checkout) {
+        await this.execGit(['checkout', '-b', branchName]);
+      } else {
+        await this.execGit(['branch', branchName]);
+      }
       this.emit('branchCreated', branchName);
       return true;
     } catch (error) {
@@ -324,9 +327,12 @@ export class GitService extends EventEmitter {
     }
 
     try {
-      const { stdout } = await this.execGit(
-        `log --pretty=format:"%H|%an|%ad|%s" --date=iso -n ${limit}`
-      );
+      const { stdout } = await this.execGit([
+        'log',
+        '--pretty=format:%H|%an|%ad|%s',
+        '--date=iso',
+        `-n${limit}`
+      ]);
       
       const commits: GitCommit[] = [];
       const lines = stdout.trim().split('\n');
@@ -351,9 +357,9 @@ export class GitService extends EventEmitter {
   }
 
   /**
-   * Execute git command
+   * Execute git command with arguments array (safe from command injection)
    */
-  private async execGit(command: string): Promise<{ stdout: string; stderr: string }> {
-    return execAsync(`git -C "${this.repoPath}" ${command}`);
+  private async execGit(args: string[]): Promise<{ stdout: string; stderr: string }> {
+    return execFileAsync('git', ['-C', this.repoPath, ...args]);
   }
 }
