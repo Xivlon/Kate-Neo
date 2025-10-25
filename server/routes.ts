@@ -335,9 +335,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Large File API endpoints
   app.get("/api/files/metadata/:filePath(*)", async (req, res) => {
     try {
-      const filePath = path.join(workspacePath, req.params.filePath);
-      const metadata = await largeFileManager.getFileMetadata(filePath);
-      const shouldUseLargeFile = await largeFileManager.shouldUseLargeFileHandling(filePath);
+      // Sanitize file path to prevent directory traversal
+      const requestedPath = req.params.filePath;
+      const filePath = path.join(workspacePath, requestedPath);
+      
+      // Ensure the resolved path is within the workspace
+      const resolvedPath = path.resolve(filePath);
+      const resolvedWorkspace = path.resolve(workspacePath);
+      
+      if (!resolvedPath.startsWith(resolvedWorkspace)) {
+        return res.status(403).json({ error: 'Access denied: Path outside workspace' });
+      }
+      
+      const metadata = await largeFileManager.getFileMetadata(resolvedPath);
+      const shouldUseLargeFile = await largeFileManager.shouldUseLargeFileHandling(resolvedPath);
       
       res.json({ 
         ...metadata, 
@@ -350,9 +361,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/files/index/:filePath(*)", async (req, res) => {
     try {
-      const filePath = path.join(workspacePath, req.params.filePath);
-      await largeFileManager.buildLineIndex(filePath);
-      const stats = await largeFileManager.getFileStats(filePath);
+      const requestedPath = req.params.filePath;
+      const filePath = path.join(workspacePath, requestedPath);
+      
+      // Ensure the resolved path is within the workspace
+      const resolvedPath = path.resolve(filePath);
+      const resolvedWorkspace = path.resolve(workspacePath);
+      
+      if (!resolvedPath.startsWith(resolvedWorkspace)) {
+        return res.status(403).json({ error: 'Access denied: Path outside workspace' });
+      }
+      
+      await largeFileManager.buildLineIndex(resolvedPath);
+      const stats = await largeFileManager.getFileStats(resolvedPath);
       res.json({ indexed: true, stats });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -361,11 +382,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/files/chunk/:filePath(*)", async (req, res) => {
     try {
-      const filePath = path.join(workspacePath, req.params.filePath);
+      const requestedPath = req.params.filePath;
+      const filePath = path.join(workspacePath, requestedPath);
+      
+      // Ensure the resolved path is within the workspace
+      const resolvedPath = path.resolve(filePath);
+      const resolvedWorkspace = path.resolve(workspacePath);
+      
+      if (!resolvedPath.startsWith(resolvedWorkspace)) {
+        return res.status(403).json({ error: 'Access denied: Path outside workspace' });
+      }
+      
       const startLine = parseInt(req.query.startLine as string) || 0;
       const lineCount = parseInt(req.query.lineCount as string) || 100;
       
-      const chunk = await largeFileManager.getChunk(filePath, startLine, lineCount);
+      const chunk = await largeFileManager.getChunk(resolvedPath, startLine, lineCount);
       res.json(chunk);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -374,8 +405,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/files/stats/:filePath(*)", async (req, res) => {
     try {
-      const filePath = path.join(workspacePath, req.params.filePath);
-      const stats = await largeFileManager.getFileStats(filePath);
+      const requestedPath = req.params.filePath;
+      const filePath = path.join(workspacePath, requestedPath);
+      
+      // Ensure the resolved path is within the workspace
+      const resolvedPath = path.resolve(filePath);
+      const resolvedWorkspace = path.resolve(workspacePath);
+      
+      if (!resolvedPath.startsWith(resolvedWorkspace)) {
+        return res.status(403).json({ error: 'Access denied: Path outside workspace' });
+      }
+      
+      const stats = await largeFileManager.getFileStats(resolvedPath);
       res.json(stats);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

@@ -163,7 +163,7 @@ export class ExtensionHost extends EventEmitter {
     } catch (error) {
       extension.state = ExtensionState.Failed;
       extension.error = error instanceof Error ? error.message : String(error);
-      console.error(`[ExtensionHost] Failed to activate extension ${extensionId}:`, error);
+      console.error('[ExtensionHost] Failed to activate extension:', extensionId, error);
       this.emit('event', { 
         type: 'extension.failed', 
         extensionId, 
@@ -199,7 +199,7 @@ export class ExtensionHost extends EventEmitter {
       extension.state = ExtensionState.Unloaded;
       this.emit('event', { type: 'extension.deactivated', extensionId } as ExtensionHostEvent);
     } catch (error) {
-      console.error(`[ExtensionHost] Failed to deactivate extension ${extensionId}:`, error);
+      console.error('[ExtensionHost] Failed to deactivate extension:', extensionId, error);
       throw error;
     }
   }
@@ -381,7 +381,7 @@ export class ExtensionHost extends EventEmitter {
       try {
         await this.deactivateExtension(extensionId);
       } catch (error) {
-        console.error(`[ExtensionHost] Error deactivating ${extensionId}:`, error);
+        console.error('[ExtensionHost] Error deactivating extension:', extensionId, error);
       }
     }
     
