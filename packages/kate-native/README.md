@@ -19,16 +19,22 @@ This package provides Node.js bindings to the KTextEditor framework, enabling Ka
 ### Linux (Primary Platform)
 
 ```bash
-# Ubuntu/Debian
+# Ubuntu/Debian 20.04+
 sudo apt-get install \
-  qt5-default \
   qtbase5-dev \
+  qtchooser \
+  qt5-qmake \
+  qtbase5-dev-tools \
   extra-cmake-modules \
   libkf5texteditor-dev \
   libkf5syntaxhighlighting-dev \
   build-essential \
   cmake \
   pkg-config
+
+# For Ubuntu 18.04 and earlier:
+# Replace qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+# with qt5-default qtbase5-dev
 
 # Fedora/RHEL
 sudo dnf install \

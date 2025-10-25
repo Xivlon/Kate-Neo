@@ -305,7 +305,7 @@ describe('KateService', () => {
   it('should get document text', () => {
     const docId = kateService.createDocument('/tmp/test.txt', 'text', 'hello');
     const text = kateService.getDocumentText(docId);
-    // In fallback mode, might be empty
+    // Returns empty string in fallback mode, actual content in native mode
     expect(text !== null).toBe(true);
   });
 });

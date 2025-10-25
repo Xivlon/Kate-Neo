@@ -165,13 +165,16 @@ Simple example runs successfully:
 ### For Development (with KTextEditor)
 
 ```bash
-# Install Qt5/KF5 (Ubuntu/Debian)
+# Install Qt5/KF5 (Ubuntu/Debian 20.04+)
 sudo apt-get install \
-  qt5-default qtbase5-dev \
+  qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools \
   extra-cmake-modules \
   libkf5texteditor-dev \
   libkf5syntaxhighlighting-dev \
   build-essential cmake pkg-config
+
+# For older Ubuntu versions (18.04 and earlier), use:
+# sudo apt-get install qt5-default qtbase5-dev ...
 
 # Build native module
 cd packages/kate-native
