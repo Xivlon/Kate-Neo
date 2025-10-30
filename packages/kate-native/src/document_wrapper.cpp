@@ -8,6 +8,7 @@
 #include <KTextEditor/Cursor>
 #include <QString>
 #include <QUrl>
+#include <QRegularExpression>
 #endif
 
 namespace KateNative {
@@ -47,6 +48,15 @@ Napi::Object DocumentWrapper::Init(Napi::Env env, Napi::Object exports) {
         // Phase 7: Advanced features
         InstanceMethod("getSyntaxTokens", &DocumentWrapper::GetSyntaxTokens),
         InstanceMethod("getFoldingRegions", &DocumentWrapper::GetFoldingRegions),
+        
+        // Phase 8: Advanced editing features
+        InstanceMethod("search", &DocumentWrapper::Search),
+        InstanceMethod("replace", &DocumentWrapper::Replace),
+        InstanceMethod("replaceAll", &DocumentWrapper::ReplaceAll),
+        InstanceMethod("getIndentation", &DocumentWrapper::GetIndentation),
+        InstanceMethod("setIndentation", &DocumentWrapper::SetIndentation),
+        InstanceMethod("indentLine", &DocumentWrapper::IndentLine),
+        InstanceMethod("indentLines", &DocumentWrapper::IndentLines),
     });
     
     Napi::FunctionReference* constructor = new Napi::FunctionReference();
@@ -471,6 +481,328 @@ Napi::Value DocumentWrapper::GetFoldingRegions(const Napi::CallbackInfo& info) {
 #else
     // Fallback: return empty array
     return Napi::Array::New(env);
+#endif
+}
+
+// Phase 8: Search and Replace Methods
+
+Napi::Value DocumentWrapper::Search(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    if (info.Length() < 1 || !info[0].IsString()) {
+        Napi::TypeError::New(env, "First argument must be a search string").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    std::string searchText = info[0].As<Napi::String>().Utf8Value();
+    
+    // Parse options
+    bool caseSensitive = false;
+    bool wholeWords = false;
+    bool useRegex = false;
+    
+    if (info.Length() >= 2 && info[1].IsObject()) {
+        Napi::Object options = info[1].As<Napi::Object>();
+        
+        if (options.Has("caseSensitive") && options.Get("caseSensitive").IsBoolean()) {
+            caseSensitive = options.Get("caseSensitive").As<Napi::Boolean>().Value();
+        }
+        
+        if (options.Has("wholeWords") && options.Get("wholeWords").IsBoolean()) {
+            wholeWords = options.Get("wholeWords").As<Napi::Boolean>().Value();
+        }
+        
+        if (options.Has("regex") && options.Get("regex").IsBoolean()) {
+            useRegex = options.Get("regex").As<Napi::Boolean>().Value();
+        }
+    }
+    
+    // Search through document
+    Napi::Array results = Napi::Array::New(env);
+    uint32_t resultIndex = 0;
+    
+    QString qSearchText = QString::fromStdString(searchText);
+    int lineCount = m_document->lines();
+    
+    for (int line = 0; line < lineCount; line++) {
+        QString lineText = m_document->line(line);
+        
+        if (useRegex) {
+            QRegularExpression regex(qSearchText, caseSensitive ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
+            QRegularExpressionMatchIterator matches = regex.globalMatch(lineText);
+            
+            while (matches.hasNext()) {
+                QRegularExpressionMatch match = matches.next();
+                Napi::Object result = Napi::Object::New(env);
+                result.Set("line", Napi::Number::New(env, line));
+                result.Set("column", Napi::Number::New(env, match.capturedStart()));
+                result.Set("length", Napi::Number::New(env, match.capturedLength()));
+                result.Set("text", Napi::String::New(env, match.captured().toStdString()));
+                results[resultIndex++] = result;
+            }
+        } else {
+            Qt::CaseSensitivity cs = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive();
+            int startPos = 0;
+            
+            while (true) {
+                int pos = lineText.indexOf(qSearchText, startPos, cs);
+                if (pos < 0) break;
+                
+                // Check whole word match if requested
+                if (wholeWords) {
+                    bool isWordStart = (pos == 0 || !lineText[pos - 1].isLetterOrNumber());
+                    bool isWordEnd = (pos + qSearchText.length() >= lineText.length() || 
+                                     !lineText[pos + qSearchText.length()].isLetterOrNumber());
+                    if (!isWordStart || !isWordEnd) {
+                        startPos = pos + 1;
+                        continue;
+                    }
+                }
+                
+                Napi::Object result = Napi::Object::New(env);
+                result.Set("line", Napi::Number::New(env, line));
+                result.Set("column", Napi::Number::New(env, pos));
+                result.Set("length", Napi::Number::New(env, qSearchText.length()));
+                result.Set("text", Napi::String::New(env, qSearchText.toStdString()));
+                results[resultIndex++] = result;
+                
+                startPos = pos + 1;
+            }
+        }
+    }
+    
+    return results;
+#else
+    return Napi::Array::New(env);
+#endif
+}
+
+Napi::Value DocumentWrapper::Replace(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return Napi::Boolean::New(env, false);
+    }
+    
+    if (info.Length() < 4 || !info[0].IsNumber() || !info[1].IsNumber() || 
+        !info[2].IsNumber() || !info[3].IsString()) {
+        Napi::TypeError::New(env, "Arguments: line, column, length, replacement").ThrowAsJavaScriptException();
+        return Napi::Boolean::New(env, false);
+    }
+    
+    int line = info[0].As<Napi::Number>().Int32Value();
+    int column = info[1].As<Napi::Number>().Int32Value();
+    int length = info[2].As<Napi::Number>().Int32Value();
+    std::string replacement = info[3].As<Napi::String>().Utf8Value();
+    
+    KTextEditor::Range range(line, column, line, column + length);
+    bool success = m_document->replaceText(range, QString::fromStdString(replacement));
+    
+    return Napi::Boolean::New(env, success);
+#else
+    return Napi::Boolean::New(env, false);
+#endif
+}
+
+Napi::Value DocumentWrapper::ReplaceAll(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return Napi::Number::New(env, 0);
+    }
+    
+    if (info.Length() < 2 || !info[0].IsString() || !info[1].IsString()) {
+        Napi::TypeError::New(env, "Arguments: searchText, replacementText").ThrowAsJavaScriptException();
+        return Napi::Number::New(env, 0);
+    }
+    
+    std::string searchText = info[0].As<Napi::String>().Utf8Value();
+    std::string replacementText = info[1].As<Napi::String>().Utf8Value();
+    
+    // Parse options
+    bool caseSensitive = false;
+    bool wholeWords = false;
+    
+    if (info.Length() >= 3 && info[2].IsObject()) {
+        Napi::Object options = info[2].As<Napi::Object>();
+        
+        if (options.Has("caseSensitive") && options.Get("caseSensitive").IsBoolean()) {
+            caseSensitive = options.Get("caseSensitive").As<Napi::Boolean>().Value();
+        }
+        
+        if (options.Has("wholeWords") && options.Get("wholeWords").IsBoolean()) {
+            wholeWords = options.Get("wholeWords").As<Napi::Boolean>().Value();
+        }
+    }
+    
+    // First, find all occurrences (in reverse order to maintain positions)
+    Napi::Value searchResults = Search(info);
+    Napi::Array results = searchResults.As<Napi::Array>();
+    
+    int replacedCount = 0;
+    
+    // Replace from end to start to maintain positions
+    for (int i = results.Length() - 1; i >= 0; i--) {
+        Napi::Object result = results.Get(i).As<Napi::Object>();
+        int line = result.Get("line").As<Napi::Number>().Int32Value();
+        int column = result.Get("column").As<Napi::Number>().Int32Value();
+        int length = result.Get("length").As<Napi::Number>().Int32Value();
+        
+        KTextEditor::Range range(line, column, line, column + length);
+        if (m_document->replaceText(range, QString::fromStdString(replacementText))) {
+            replacedCount++;
+        }
+    }
+    
+    return Napi::Number::New(env, replacedCount);
+#else
+    return Napi::Number::New(env, 0);
+#endif
+}
+
+// Phase 8: Indentation Methods
+
+Napi::Value DocumentWrapper::GetIndentation(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return Napi::Number::New(env, 0);
+    }
+    
+    if (info.Length() < 1 || !info[0].IsNumber()) {
+        Napi::TypeError::New(env, "Line number required").ThrowAsJavaScriptException();
+        return Napi::Number::New(env, 0);
+    }
+    
+    int line = info[0].As<Napi::Number>().Int32Value();
+    
+    if (line < 0 || line >= m_document->lines()) {
+        return Napi::Number::New(env, 0);
+    }
+    
+    QString lineText = m_document->line(line);
+    int indentation = 0;
+    
+    for (int i = 0; i < lineText.length(); i++) {
+        if (lineText[i] == ' ') {
+            indentation++;
+        } else if (lineText[i] == '\t') {
+            indentation += 4; // Tab = 4 spaces
+        } else {
+            break;
+        }
+    }
+    
+    return Napi::Number::New(env, indentation);
+#else
+    return Napi::Number::New(env, 0);
+#endif
+}
+
+void DocumentWrapper::SetIndentation(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsNumber()) {
+        Napi::TypeError::New(env, "Arguments: line, spaces").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    int line = info[0].As<Napi::Number>().Int32Value();
+    int spaces = info[1].As<Napi::Number>().Int32Value();
+    
+    if (line < 0 || line >= m_document->lines()) {
+        return;
+    }
+    
+    QString lineText = m_document->line(line);
+    
+    // Find where text starts (after indentation)
+    int textStart = 0;
+    for (int i = 0; i < lineText.length(); i++) {
+        if (!lineText[i].isSpace()) {
+            textStart = i;
+            break;
+        }
+    }
+    
+    // Create new indentation
+    QString newIndent = QString(spaces, ' ');
+    QString newText = newIndent + lineText.mid(textStart);
+    
+    // Replace the line
+    KTextEditor::Range range(line, 0, line, lineText.length());
+    m_document->replaceText(range, newText);
+#endif
+}
+
+void DocumentWrapper::IndentLine(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    if (info.Length() < 1 || !info[0].IsNumber()) {
+        Napi::TypeError::New(env, "Line number required").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    int line = info[0].As<Napi::Number>().Int32Value();
+    
+    if (line < 0 || line >= m_document->lines()) {
+        return;
+    }
+    
+    // Use Kate's smart indentation
+    KTextEditor::Range range(line, 0, line, 0);
+    m_document->indent(range, 1);
+#endif
+}
+
+void DocumentWrapper::IndentLines(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::TypeError::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsNumber()) {
+        Napi::TypeError::New(env, "Arguments: startLine, endLine").ThrowAsJavaScriptException();
+        return;
+    }
+    
+    int startLine = info[0].As<Napi::Number>().Int32Value();
+    int endLine = info[1].As<Napi::Number>().Int32Value();
+    
+    if (startLine < 0 || endLine >= m_document->lines() || startLine > endLine) {
+        return;
+    }
+    
+    // Use Kate's smart indentation for range
+    KTextEditor::Range range(startLine, 0, endLine, m_document->lineLength(endLine));
+    m_document->indent(range, 1);
 #endif
 }
 

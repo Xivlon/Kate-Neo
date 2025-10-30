@@ -43,6 +43,14 @@ try {
             redo() {}
             getSyntaxTokens(lineStart, lineEnd) { return []; }
             getFoldingRegions() { return []; }
+            // Phase 8: Advanced editing features
+            search(query, options) { return []; }
+            replace(line, column, length, replacement) { return false; }
+            replaceAll(searchText, replacementText, options) { return 0; }
+            getIndentation(line) { return 0; }
+            setIndentation(line, spaces) {}
+            indentLine(line) {}
+            indentLines(startLine, endLine) {}
         },
         KateEditor: class MockEditor {
             constructor() {

@@ -271,7 +271,160 @@ class KateDocument {
         // Fallback: return empty array
         return [];
     }
+
+    /**
+     * Search for text in document (Phase 8)
+     */
+    search(query: string, options: { caseSensitive?: boolean; wholeWords?: boolean; regex?: boolean } = {}): any[] {
+        if (this.nativeDoc && this.nativeDoc.search) {
+            return this.nativeDoc.search(query, options);
+        }
+        // Fallback: simple text search
+        const results: any[] = [];
+        const lines = this.content.split('\n');
+        const caseSensitive = options.caseSensitive !== false;
+        
+        for (let line = 0; line < lines.length; line++) {
+            let lineText = lines[line];
+            let searchQuery = query;
+            
+            if (!caseSensitive) {
+                lineText = lineText.toLowerCase();
+                searchQuery = searchQuery.toLowerCase();
+            }
+            
+            let pos = lineText.indexOf(searchQuery);
+            while (pos >= 0) {
+                results.push({
+                    line,
+                    column: pos,
+                    length: query.length,
+                    text: lines[line].substring(pos, pos + query.length)
+                });
+                pos = lineText.indexOf(searchQuery, pos + 1);
+            }
+        }
+        
+        return results;
+    }
+
+    /**
+     * Replace text at specific location (Phase 8)
+     */
+    replace(line: number, column: number, length: number, replacement: string): boolean {
+        if (this.nativeDoc && this.nativeDoc.replace) {
+            return this.nativeDoc.replace(line, column, length, replacement);
+        }
+        // Fallback: replace in content string
+        const lines = this.content.split('\n');
+        if (line < 0 || line >= lines.length) return false;
+        
+        const lineText = lines[line];
+        const before = lineText.substring(0, column);
+        const after = lineText.substring(column + length);
+        lines[line] = before + replacement + after;
+        
+        this.content = lines.join('\n');
+        this.metadata.isDirty = true;
+        this.metadata.version++;
+        return true;
+    }
+
+    /**
+     * Replace all occurrences (Phase 8)
+     */
+    replaceAll(searchText: string, replacementText: string, options: any = {}): number {
+        if (this.nativeDoc && this.nativeDoc.replaceAll) {
+            return this.nativeDoc.replaceAll(searchText, replacementText, options);
+        }
+        // Fallback: use search and replace
+        const matches = this.search(searchText, options);
+        let count = 0;
+        
+        // Replace from end to start to maintain positions
+        for (let i = matches.length - 1; i >= 0; i--) {
+            const match = matches[i];
+            if (this.replace(match.line, match.column, match.length, replacementText)) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+
+    /**
+     * Get indentation of a line (Phase 8)
+     */
+    getIndentation(line: number): number {
+        if (this.nativeDoc && this.nativeDoc.getIndentation) {
+            return this.nativeDoc.getIndentation(line);
+        }
+        // Fallback: count leading spaces
+        const lines = this.content.split('\n');
+        if (line < 0 || line >= lines.length) return 0;
+        
+        const lineText = lines[line];
+        let spaces = 0;
+        for (let i = 0; i < lineText.length; i++) {
+            if (lineText[i] === ' ') spaces++;
+            else if (lineText[i] === '\t') spaces += 4;
+            else break;
+        }
+        return spaces;
+    }
+
+    /**
+     * Set indentation of a line (Phase 8)
+     */
+    setIndentation(line: number, spaces: number): void {
+        if (this.nativeDoc && this.nativeDoc.setIndentation) {
+            this.nativeDoc.setIndentation(line, spaces);
+            return;
+        }
+        // Fallback: manual indentation
+        const lines = this.content.split('\n');
+        if (line < 0 || line >= lines.length) return;
+        
+        const lineText = lines[line];
+        const trimmed = lineText.trimStart();
+        lines[line] = ' '.repeat(spaces) + trimmed;
+        
+        this.content = lines.join('\n');
+        this.metadata.isDirty = true;
+        this.metadata.version++;
+    }
+
+    /**
+     * Auto-indent a line using Kate's smart indentation (Phase 8)
+     */
+    indentLine(line: number): void {
+        if (this.nativeDoc && this.nativeDoc.indentLine) {
+            this.nativeDoc.indentLine(line);
+            return;
+        }
+        // Fallback: simple indentation based on previous line
+        const lines = this.content.split('\n');
+        if (line < 1 || line >= lines.length) return;
+        
+        const prevIndent = this.getIndentation(line - 1);
+        this.setIndentation(line, prevIndent);
+    }
+
+    /**
+     * Auto-indent multiple lines (Phase 8)
+     */
+    indentLines(startLine: number, endLine: number): void {
+        if (this.nativeDoc && this.nativeDoc.indentLines) {
+            this.nativeDoc.indentLines(startLine, endLine);
+            return;
+        }
+        // Fallback: indent each line
+        for (let line = startLine; line <= endLine; line++) {
+            this.indentLine(line);
+        }
+    }
 }
+
 
 /**
  * Kate Service - Manages Kate documents and native integration
@@ -440,6 +593,97 @@ export class KateService {
         }
         
         return doc.getFoldingRegions();
+    }
+
+    /**
+     * Search in document (Phase 8)
+     */
+    search(documentId: string, query: string, options: any = {}): any[] {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return [];
+        }
+        
+        return doc.search(query, options);
+    }
+
+    /**
+     * Replace text in document (Phase 8)
+     */
+    replace(documentId: string, line: number, column: number, length: number, replacement: string): boolean {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return false;
+        }
+        
+        return doc.replace(line, column, length, replacement);
+    }
+
+    /**
+     * Replace all occurrences (Phase 8)
+     */
+    replaceAll(documentId: string, searchText: string, replacementText: string, options: any = {}): number {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return 0;
+        }
+        
+        return doc.replaceAll(searchText, replacementText, options);
+    }
+
+    /**
+     * Get line indentation (Phase 8)
+     */
+    getIndentation(documentId: string, line: number): number {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return 0;
+        }
+        
+        return doc.getIndentation(line);
+    }
+
+    /**
+     * Set line indentation (Phase 8)
+     */
+    setIndentation(documentId: string, line: number, spaces: number): void {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return;
+        }
+        
+        doc.setIndentation(line, spaces);
+    }
+
+    /**
+     * Auto-indent line (Phase 8)
+     */
+    indentLine(documentId: string, line: number): void {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return;
+        }
+        
+        doc.indentLine(line);
+    }
+
+    /**
+     * Auto-indent lines (Phase 8)
+     */
+    indentLines(documentId: string, startLine: number, endLine: number): void {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return;
+        }
+        
+        doc.indentLines(startLine, endLine);
     }
 }
 
