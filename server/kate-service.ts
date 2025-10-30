@@ -249,6 +249,28 @@ class KateDocument {
         }
         return this.metadata.isDirty;
     }
+
+    /**
+     * Get syntax tokens for a line range (Phase 7)
+     */
+    getSyntaxTokens(lineStart: number, lineEnd: number): SyntaxToken[] {
+        if (this.nativeDoc && this.nativeDoc.getSyntaxTokens) {
+            return this.nativeDoc.getSyntaxTokens(lineStart, lineEnd);
+        }
+        // Fallback: return empty array
+        return [];
+    }
+
+    /**
+     * Get folding regions (Phase 7)
+     */
+    getFoldingRegions(): any[] {
+        if (this.nativeDoc && this.nativeDoc.getFoldingRegions) {
+            return this.nativeDoc.getFoldingRegions();
+        }
+        // Fallback: return empty array
+        return [];
+    }
 }
 
 /**
@@ -398,9 +420,26 @@ export class KateService {
      * Get syntax tokens (placeholder for now)
      */
     getSyntaxTokens(documentId: string, lineStart: number, lineEnd: number): SyntaxToken[] {
-        // TODO: Implement actual syntax highlighting extraction from Kate
-        // For now, return empty array
-        return [];
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return [];
+        }
+        
+        return doc.getSyntaxTokens(lineStart, lineEnd);
+    }
+
+    /**
+     * Get folding regions (Phase 7)
+     */
+    getFoldingRegions(documentId: string): any[] {
+        const doc = this.documents.get(documentId);
+        if (!doc) {
+            console.warn(`[KateService] Document ${documentId} not found`);
+            return [];
+        }
+        
+        return doc.getFoldingRegions();
     }
 }
 

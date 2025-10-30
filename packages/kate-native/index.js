@@ -41,6 +41,8 @@ try {
             url() { return ''; }
             undo() {}
             redo() {}
+            getSyntaxTokens(lineStart, lineEnd) { return []; }
+            getFoldingRegions() { return []; }
         },
         KateEditor: class MockEditor {
             constructor() {
