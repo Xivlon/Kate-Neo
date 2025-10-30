@@ -53,6 +53,10 @@ private:
     void Undo(const Napi::CallbackInfo& info);
     void Redo(const Napi::CallbackInfo& info);
     
+    // Phase 7: Advanced features
+    Napi::Value GetSyntaxTokens(const Napi::CallbackInfo& info);
+    Napi::Value GetFoldingRegions(const Napi::CallbackInfo& info);
+    
     std::shared_ptr<KTextEditor::Document> m_document;
     static KTextEditor::Editor* s_editor;
 };

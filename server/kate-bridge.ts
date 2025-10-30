@@ -327,8 +327,8 @@ export class KateBridge {
     console.log(`[KateBridge] Getting code folding regions for ${documentId}`);
     
     try {
-      // TODO: Implement actual folding region extraction from Kate
-      const foldingRegions: any[] = [];
+      // Get folding regions from Kate service
+      const foldingRegions = kateService.getFoldingRegions(documentId);
       
       this.send(ws, {
         type: 'fold.response',

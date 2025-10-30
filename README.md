@@ -469,14 +469,18 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - [x] Basic testing and validation
 - [x] **Deliverables**: 18 new files, ~2,500 lines of code/docs
 
-### Phase 7: Advanced Features & Integration 🔄 IN PROGRESS (Next)
-- [ ] **Syntax & Highlighting Integration**
-  - [ ] Extract syntax tokens from Kate engine
+### Phase 7: Advanced Features & Integration 🔄 IN PROGRESS (~60% Complete)
+- [x] **Syntax & Highlighting Integration**
+  - [x] Extract syntax tokens from Kate engine (native C++)
+  - [x] Backend service integration (kate-service)
+  - [x] WebSocket protocol for real-time tokens
   - [ ] Bridge tokens to Monaco/frontend format
-  - [ ] Real-time highlighting updates
-  - [ ] Support for 300+ language definitions
-- [ ] **Code Folding Integration**
-  - [ ] Detect folding regions from Kate
+  - [ ] Real-time highlighting updates in Monaco
+  - [x] Support for 300+ language definitions (via Kate)
+- [x] **Code Folding Integration**
+  - [x] Detect folding regions from Kate (native C++)
+  - [x] Backend service integration
+  - [x] WebSocket protocol for folding data
   - [ ] UI integration for folding controls
   - [ ] Fold/unfold operations via Kate API
 - [ ] **Event System**
@@ -484,10 +488,13 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [ ] Document change events
   - [ ] Cursor position events
   - [ ] Selection change events
-- [ ] **Frontend Updates**
-  - [ ] WebSocket client for Kate communication
+- [x] **Frontend Updates**
+  - [x] WebSocket client for Kate communication (useKateBridge hook)
+  - [x] KateEditorPanel integration
+  - [x] Real-time syntax token requests
+  - [x] Real-time folding region requests
   - [ ] Real-time buffer synchronization
-  - [ ] Performance optimization for updates
+  - [x] Performance optimization for updates
 - [ ] **Testing & Validation**
   - [ ] Comprehensive integration tests
   - [ ] Performance benchmarks

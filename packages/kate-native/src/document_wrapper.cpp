@@ -43,6 +43,10 @@ Napi::Object DocumentWrapper::Init(Napi::Env env, Napi::Object exports) {
         // Undo/Redo
         InstanceMethod("undo", &DocumentWrapper::Undo),
         InstanceMethod("redo", &DocumentWrapper::Redo),
+        
+        // Phase 7: Advanced features
+        InstanceMethod("getSyntaxTokens", &DocumentWrapper::GetSyntaxTokens),
+        InstanceMethod("getFoldingRegions", &DocumentWrapper::GetFoldingRegions),
     });
     
     Napi::FunctionReference* constructor = new Napi::FunctionReference();
@@ -359,6 +363,114 @@ void DocumentWrapper::Redo(const Napi::CallbackInfo& info) {
     if (m_document) {
         m_document->redo();
     }
+#endif
+}
+
+Napi::Value DocumentWrapper::GetSyntaxTokens(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::Error::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    // Parameters: lineStart, lineEnd
+    if (info.Length() < 2 || !info[0].IsNumber() || !info[1].IsNumber()) {
+        Napi::TypeError::New(env, "Expected lineStart and lineEnd as numbers").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    int lineStart = info[0].As<Napi::Number>().Int32Value();
+    int lineEnd = info[1].As<Napi::Number>().Int32Value();
+    
+    Napi::Array tokens = Napi::Array::New(env);
+    uint32_t tokenIndex = 0;
+    
+    const int MAX_SCAN_LENGTH = 10000; // Prevent excessive scanning
+    
+    // Extract syntax tokens for each line
+    for (int line = lineStart; line <= lineEnd && line < m_document->lines(); line++) {
+        QString lineText = m_document->line(line);
+        int lineLength = qMin(lineText.length(), MAX_SCAN_LENGTH);
+        
+        // Iterate through each character to get highlighting
+        for (int col = 0; col < lineLength; ) {
+            auto attr = m_document->attributeAt(KTextEditor::Cursor(line, col));
+            
+            // Find the extent of this attribute
+            int startCol = col;
+            int endCol = col + 1;
+            
+            // Extend while attribute is the same (with limit)
+            while (endCol < lineLength && (endCol - startCol) < 1000) {
+                auto nextAttr = m_document->attributeAt(KTextEditor::Cursor(line, endCol));
+                if (nextAttr != attr) break;
+                endCol++;
+            }
+            
+            // Create token object
+            Napi::Object token = Napi::Object::New(env);
+            token.Set("line", Napi::Number::New(env, line));
+            token.Set("startColumn", Napi::Number::New(env, startCol));
+            token.Set("endColumn", Napi::Number::New(env, endCol));
+            
+            // Get token type from attribute name
+            QString tokenType = attr ? attr->name() : QString("text");
+            token.Set("tokenType", Napi::String::New(env, tokenType.toStdString()));
+            
+            tokens[tokenIndex++] = token;
+            col = endCol;
+        }
+    }
+    
+    return tokens;
+#else
+    // Fallback: return empty array
+    return Napi::Array::New(env);
+#endif
+}
+
+Napi::Value DocumentWrapper::GetFoldingRegions(const Napi::CallbackInfo& info) {
+    Napi::Env env = info.Env();
+    
+#ifdef HAVE_KTEXTEDITOR
+    if (!m_document) {
+        Napi::Error::New(env, "Document not initialized").ThrowAsJavaScriptException();
+        return env.Null();
+    }
+    
+    Napi::Array regions = Napi::Array::New(env);
+    uint32_t regionIndex = 0;
+    
+    const int MAX_LINES = 50000; // Limit for performance
+    int maxLine = qMin(m_document->lines(), MAX_LINES);
+    
+    // Iterate through lines to find folding regions
+    // Note: In a real implementation, we'd use Kate's folding API more efficiently
+    for (int line = 0; line < maxLine; line++) {
+        // Check if this line starts a foldable region
+        if (m_document->isLineVisible(line)) {
+            // Get folding range starting at this line
+            auto foldingRange = m_document->foldingRegionAt(KTextEditor::Cursor(line, 0));
+            
+            if (foldingRange.isValid() && foldingRange.start().line() == line) {
+                Napi::Object region = Napi::Object::New(env);
+                region.Set("startLine", Napi::Number::New(env, foldingRange.start().line()));
+                region.Set("endLine", Napi::Number::New(env, foldingRange.end().line()));
+                
+                // Use default kind - proper classification would require language-specific logic
+                region.Set("kind", Napi::String::New(env, "region"));
+                
+                regions[regionIndex++] = region;
+            }
+        }
+    }
+    
+    return regions;
+#else
+    // Fallback: return empty array
+    return Napi::Array::New(env);
 #endif
 }
 
