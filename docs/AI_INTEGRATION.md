@@ -21,7 +21,6 @@ Kate Neo IDE now includes comprehensive AI assistant capabilities with support f
   - Unit test generation
   - Custom instructions
 - **Multiple Models**: Switch between different AI models per provider
-- **Streaming Support**: Real-time response streaming (configurable)
 - **Context Management**: Maintains conversation history for better context
 - **Configurable Parameters**: Temperature, max tokens, system prompts
 
@@ -325,23 +324,37 @@ To extend AI capabilities:
 
 ```typescript
 // Select code and use code assistance
-const data = await fetch('/api/ai/code-assistance', {
-  type: 'improve',
-  code: 'function add(a,b){return a+b}',
-  language: 'javascript'
+const response = await fetch('/api/ai/code-assistance', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    type: 'improve',
+    code: 'function add(a,b){return a+b}',
+    language: 'javascript'
+  })
 });
+const data = await response.json();
 ```
 
 ### Custom Instructions
 
 ```typescript
 // Use custom type for specific requests
-{
-  type: 'custom',
-  code: 'class UserService { ... }',
-  language: 'typescript',
-  instruction: 'Add comprehensive error handling and logging'
-}
+const response = await fetch('/api/ai/code-assistance', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    type: 'custom',
+    code: 'class UserService { ... }',
+    language: 'typescript',
+    instruction: 'Add comprehensive error handling and logging'
+  })
+});
+const data = await response.json();
 ```
 
 ## License
