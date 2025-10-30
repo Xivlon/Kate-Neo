@@ -57,6 +57,15 @@ private:
     Napi::Value GetSyntaxTokens(const Napi::CallbackInfo& info);
     Napi::Value GetFoldingRegions(const Napi::CallbackInfo& info);
     
+    // Phase 8: Advanced editing features
+    Napi::Value Search(const Napi::CallbackInfo& info);
+    Napi::Value Replace(const Napi::CallbackInfo& info);
+    Napi::Value ReplaceAll(const Napi::CallbackInfo& info);
+    Napi::Value GetIndentation(const Napi::CallbackInfo& info);
+    void SetIndentation(const Napi::CallbackInfo& info);
+    void IndentLine(const Napi::CallbackInfo& info);
+    void IndentLines(const Napi::CallbackInfo& info);
+    
     std::shared_ptr<KTextEditor::Document> m_document;
     static KTextEditor::Editor* s_editor;
 };

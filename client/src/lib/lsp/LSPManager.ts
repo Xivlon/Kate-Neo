@@ -132,43 +132,85 @@ export class LSPManager {
   private servers: Map<string, LanguageServer> = new Map();
   private diagnostics: Map<string, Diagnostic[]> = new Map();
   private documents: Map<string, TextDocument> = new Map();
+  private diagnosticsCallbacks: Set<(uri: string, diagnostics: Diagnostic[]) => void> = new Set();
 
   constructor() {
     console.log('[LSPManager] Initialized');
+    this.setupDiagnosticsListener();
+  }
+
+  /**
+   * Setup diagnostics listener via API
+   */
+  private setupDiagnosticsListener(): void {
+    // Poll for diagnostics updates periodically
+    setInterval(() => {
+      this.fetchDiagnostics();
+    }, 1000);
+  }
+
+  /**
+   * Fetch diagnostics from backend
+   */
+  private async fetchDiagnostics(): Promise<void> {
+    for (const uri of this.documents.keys()) {
+      try {
+        const response = await fetch(`/api/lsp/diagnostics?uri=${encodeURIComponent(uri)}`);
+        if (response.ok) {
+          const diagnostics = await response.json();
+          this.setDiagnostics(uri, diagnostics);
+        }
+      } catch (error) {
+        // Silently fail - diagnostics are not critical
+      }
+    }
   }
 
   /**
    * Initialize a language server for a specific language
    */
   async initializeServer(languageId: string): Promise<void> {
-    console.log(`[LSPManager] TODO: Initialize language server for ${languageId}`);
+    console.log(`[LSPManager] Initializing language server for ${languageId}`);
     
-    // TODO: Implement actual language server initialization
-    // This will involve:
-    // 1. Spawning the language server process
-    // 2. Establishing JSON-RPC connection
-    // 3. Sending initialize request
-    // 4. Receiving and storing server capabilities
-    
-    // Placeholder server
-    const server: LanguageServer = {
-      languageId,
-      capabilities: {
-        completionProvider: true,
-        hoverProvider: true,
-        diagnosticProvider: true,
-        documentSymbolProvider: true,
-      },
-      initialize: async () => {
-        console.log(`[LSPManager] Server initialized for ${languageId}`);
-      },
-      shutdown: async () => {
-        console.log(`[LSPManager] Server shutdown for ${languageId}`);
-      },
-    };
+    try {
+      // Request backend to initialize the language server
+      const response = await fetch('/api/lsp/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ languageId })
+      });
 
-    await server.initialize();
-    this.servers.set(languageId, server);
+      if (!response.ok) {
+        console.error(`[LSPManager] Failed to initialize ${languageId} server`);
+        return;
+      }
+
+      const data = await response.json();
+      
+      // Create server wrapper
+      const server: LanguageServer = {
+        languageId,
+        capabilities: data.capabilities || {
+          completionProvider: true,
+          hoverProvider: true,
+          diagnosticProvider: true,
+          documentSymbolProvider: true,
+        },
+        initialize: async () => {
+          console.log(`[LSPManager] Server initialized for ${languageId}`);
+        },
+        shutdown: async () => {
+          await fetch(`/api/lsp/shutdown/${languageId}`, { method: 'POST' });
+          console.log(`[LSPManager] Server shutdown for ${languageId}`);
+        },
+      };
+
+      await server.initialize();
+      this.servers.set(languageId, server);
+      console.log(`[LSPManager] ${languageId} server ready`);
+    } catch (error) {
+      console.error(`[LSPManager] Error initializing ${languageId} server:`, error);
+    }
   }
 
   /**
@@ -183,7 +225,22 @@ export class LSPManager {
     }
     
     console.log(`[LSPManager] Document opened: ${document.uri}`);
-    // TODO: Send textDocument/didOpen notification to language server
+    
+    // Send didOpen to backend
+    try {
+      await fetch('/api/lsp/document/open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uri: document.uri,
+          languageId: document.languageId,
+          version: document.version,
+          text: document.text
+        })
+      });
+    } catch (error) {
+      console.error('[LSPManager] Error opening document:', error);
+    }
   }
 
   /**
@@ -197,7 +254,21 @@ export class LSPManager {
     }
     
     console.log(`[LSPManager] Document changed: ${uri}`);
-    // TODO: Send textDocument/didChange notification to language server
+    
+    // Send didChange to backend
+    try {
+      await fetch('/api/lsp/document/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uri,
+          text,
+          version
+        })
+      });
+    } catch (error) {
+      console.error('[LSPManager] Error updating document:', error);
+    }
   }
 
   /**
@@ -208,7 +279,17 @@ export class LSPManager {
     this.diagnostics.delete(uri);
     
     console.log(`[LSPManager] Document closed: ${uri}`);
-    // TODO: Send textDocument/didClose notification to language server
+    
+    // Send didClose to backend
+    try {
+      await fetch('/api/lsp/document/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri })
+      });
+    } catch (error) {
+      console.error('[LSPManager] Error closing document:', error);
+    }
   }
 
   /**
@@ -228,12 +309,21 @@ export class LSPManager {
       return [];
     }
 
-    console.log(`[LSPManager] TODO: Request completions at ${position.line}:${position.character}`);
-    
-    // TODO: Send textDocument/completion request to language server
-    // TODO: Parse and return completion items
-    
-    return [];
+    try {
+      const response = await fetch('/api/lsp/completion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri, position })
+      });
+
+      if (!response.ok) return [];
+      
+      const completions = await response.json();
+      return completions || [];
+    } catch (error) {
+      console.error('[LSPManager] Completion error:', error);
+      return [];
+    }
   }
 
   /**
@@ -250,12 +340,70 @@ export class LSPManager {
       return null;
     }
 
-    console.log(`[LSPManager] TODO: Request hover at ${position.line}:${position.character}`);
-    
-    // TODO: Send textDocument/hover request to language server
-    // TODO: Parse and return hover information
-    
-    return null;
+    try {
+      const response = await fetch('/api/lsp/hover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri, position })
+      });
+
+      if (!response.ok) return null;
+      
+      return await response.json();
+    } catch (error) {
+      console.error('[LSPService] Hover error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Go to definition
+   */
+  async gotoDefinition(uri: string, position: Position): Promise<any> {
+    const document = this.documents.get(uri);
+    if (!document) {
+      return null;
+    }
+
+    try {
+      const response = await fetch('/api/lsp/definition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri, position })
+      });
+
+      if (!response.ok) return null;
+      
+      return await response.json();
+    } catch (error) {
+      console.error('[LSPManager] Definition error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Find references
+   */
+  async findReferences(uri: string, position: Position): Promise<any[]> {
+    const document = this.documents.get(uri);
+    if (!document) {
+      return [];
+    }
+
+    try {
+      const response = await fetch('/api/lsp/references', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri, position })
+      });
+
+      if (!response.ok) return [];
+      
+      return await response.json();
+    } catch (error) {
+      console.error('[LSPManager] References error:', error);
+      return [];
+    }
   }
 
   /**
@@ -271,6 +419,23 @@ export class LSPManager {
   setDiagnostics(uri: string, diagnostics: Diagnostic[]): void {
     this.diagnostics.set(uri, diagnostics);
     console.log(`[LSPManager] Diagnostics updated for ${uri}: ${diagnostics.length} issues`);
+    
+    // Notify all callbacks
+    for (const callback of this.diagnosticsCallbacks) {
+      callback(uri, diagnostics);
+    }
+  }
+
+  /**
+   * Subscribe to diagnostics updates
+   */
+  onDiagnostics(callback: (uri: string, diagnostics: Diagnostic[]) => void): () => void {
+    this.diagnosticsCallbacks.add(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      this.diagnosticsCallbacks.delete(callback);
+    };
   }
 
   /**
@@ -287,12 +452,15 @@ export class LSPManager {
       return [];
     }
 
-    console.log(`[LSPManager] TODO: Request document symbols`);
-    
-    // TODO: Send textDocument/documentSymbol request to language server
-    // TODO: Parse and return document symbols
-    
-    return [];
+    try {
+      const response = await fetch(`/api/lsp/symbols?uri=${encodeURIComponent(uri)}`);
+      if (!response.ok) return [];
+      
+      return await response.json();
+    } catch (error) {
+      console.error('[LSPManager] Document symbols error:', error);
+      return [];
+    }
   }
 
   /**
@@ -309,12 +477,20 @@ export class LSPManager {
       return [];
     }
 
-    console.log(`[LSPManager] TODO: Request document formatting`);
-    
-    // TODO: Send textDocument/formatting request to language server
-    // TODO: Parse and return text edits
-    
-    return [];
+    try {
+      const response = await fetch('/api/lsp/format', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uri })
+      });
+
+      if (!response.ok) return [];
+      
+      return await response.json();
+    } catch (error) {
+      console.error('[LSPManager] Formatting error:', error);
+      return [];
+    }
   }
 
   /**

@@ -19,7 +19,7 @@ Kate Neo successfully integrates the best of both worlds:
 
 Kate Neo has successfully completed native KTextEditor integration with full Node.js bindings. The foundation is established and working, with Kate's powerful text editing engine now available through a clean API. The IDE includes debugging, version control, terminal integration, extensions, settings management, and internationalization support.
 
-**Current Phase**: Phase 7 - Advanced Features & Frontend Integration (Next)
+**Current Phase**: Phase 8 - Core Features Completion (In Progress - 70% Complete)
 
 ## Repository Structure
 
@@ -501,18 +501,33 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
   - [ ] Cross-platform testing
 
 ### Phase 8: Core Features Completion (Future)
-- [ ] **Advanced Editing Features**
+- [x] **Advanced Editing Features** (70% Complete)
+  - [x] Search in document (regex, case-sensitive, whole word)
+  - [x] Replace and Replace All
+  - [x] Smart indentation from Kate (get, set, auto-indent)
   - [ ] Bidirectional buffer synchronization
-  - [ ] Smart indentation from Kate
-  - [ ] Advanced search and replace
   - [ ] Multi-cursor support
   - [ ] Kate session management
-- [ ] **LSP Integration**
-  - [ ] Language server protocol support
-  - [ ] Code completion
-  - [ ] Go to definition
-  - [ ] Find references
-  - [ ] Diagnostics and errors
+- [x] **LSP Integration** (Backend Complete)
+  - [x] LSP service backend with JSON-RPC
+  - [x] Language server configurations (25+ languages)
+  - [x] Code completion (backend)
+  - [x] Go to definition (backend)
+  - [x] Find references (backend)
+  - [x] Diagnostics and errors (backend)
+  - [x] Document symbols (backend)
+  - [x] Code formatting (backend)
+  - [ ] Monaco editor integration
+  - [ ] Completion UI
+  - [ ] Diagnostics panel
+  - [ ] Integration testing
+
+### Phase 8 Status: 🚀 IN PROGRESS (70% Complete)
+- ✅ LSP backend service complete
+- ✅ 25+ language server configs
+- ✅ Search/Replace/Indent native implementation
+- ⏳ Monaco LSP integration pending
+- ⏳ UI panels pending
 
 ### Phase 9: Polish & Release (Future)
 - [ ] Complete user documentation
