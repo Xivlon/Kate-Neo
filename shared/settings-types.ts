@@ -6,6 +6,8 @@
  * and extension settings.
  */
 
+import { AISettings, DEFAULT_AI_SETTINGS } from './ai-types.js';
+
 /**
  * Settings scope determines where settings are stored and applied
  */
@@ -174,6 +176,8 @@ export interface KateNeoSettings {
   debug: DebugSettings;
   /** Extension settings */
   extensions: ExtensionSettings;
+  /** AI assistant settings */
+  ai: AISettings;
   /** Language-specific settings */
   languages: LanguageSettings;
   /** Custom settings from extensions or plugins */
@@ -236,6 +240,7 @@ export const DEFAULT_SETTINGS: KateNeoSettings = {
     allowedIds: ['*'],
     showRecommendations: true,
   },
+  ai: DEFAULT_AI_SETTINGS,
   languages: {},
 };
 

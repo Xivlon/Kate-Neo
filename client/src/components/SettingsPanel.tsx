@@ -5,15 +5,17 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Settings, Save, RotateCcw, Globe } from 'lucide-react';
+import { Settings, Save, RotateCcw, Globe, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Textarea } from './ui/textarea';
 import { useI18n } from '../hooks/useI18n';
-import type { KateNeoSettings, SettingsScope } from '../../shared/settings-types';
+import type { KateNeoSettings, SettingsScope } from '../../../shared/settings-types';
+import type { AIProvider } from '../../../shared/ai-types';
 
 export function SettingsPanel() {
   const { t, locale, locales, setLocale } = useI18n();
@@ -152,10 +154,14 @@ export function SettingsPanel() {
       {/* Settings Content */}
       <div className="flex-1 overflow-y-auto p-4">
         <Tabs defaultValue="editor" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="editor">{t('settings.editor')}</TabsTrigger>
             <TabsTrigger value="terminal">{t('settings.terminal')}</TabsTrigger>
             <TabsTrigger value="git">{t('settings.git')}</TabsTrigger>
+            <TabsTrigger value="ai">
+              <Sparkles className="h-4 w-4 mr-1" />
+              AI
+            </TabsTrigger>
             <TabsTrigger value="appearance">{t('settings.appearance')}</TabsTrigger>
             <TabsTrigger value="extensions">{t('settings.extensions')}</TabsTrigger>
           </TabsList>
@@ -327,6 +333,279 @@ export function SettingsPanel() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Extensions Settings */}
+          <TabsContent value="extensions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('settings.extensions')}</CardTitle>
+                <CardDescription>Configure extension behavior</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="autoUpdate">Auto Update Extensions</Label>
+                  <input
+                    id="autoUpdate"
+                    type="checkbox"
+                    checked={settings.extensions?.autoUpdate === true}
+                    onChange={(e) => saveSetting('extensions.autoUpdate', e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="showRecommendations">Show Recommendations</Label>
+                  <input
+                    id="showRecommendations"
+                    type="checkbox"
+                    checked={settings.extensions?.showRecommendations !== false}
+                    onChange={(e) => saveSetting('extensions.showRecommendations', e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* AI Settings */}
+          <TabsContent value="ai" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Assistant Configuration</CardTitle>
+                <CardDescription>Configure AI providers and models for code assistance</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="aiEnabled">Enable AI Assistant</Label>
+                  <input
+                    id="aiEnabled"
+                    type="checkbox"
+                    checked={settings.ai?.enabled === true}
+                    onChange={(e) => saveSetting('ai.enabled', e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="aiProvider">Active Provider</Label>
+                  <Select
+                    value={settings.ai?.activeProvider || 'openai'}
+                    onValueChange={(v) => saveSetting('ai.activeProvider', v as AIProvider)}
+                  >
+                    <SelectTrigger id="aiProvider">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="openai">OpenAI</SelectItem>
+                      <SelectItem value="anthropic">Anthropic</SelectItem>
+                      <SelectItem value="custom">Custom API</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* OpenAI Settings */}
+                {settings.ai?.activeProvider === 'openai' && (
+                  <Card className="border-2">
+                    <CardHeader>
+                      <CardTitle className="text-sm">OpenAI Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="openaiApiKey">API Key</Label>
+                        <Input
+                          id="openaiApiKey"
+                          type="password"
+                          placeholder="sk-..."
+                          value={settings.ai?.providers?.openai?.apiKey || ''}
+                          onChange={(e) => saveSetting('ai.providers.openai.apiKey', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="openaiModel">Default Model</Label>
+                        <Select
+                          value={settings.ai?.providers?.openai?.defaultModel || 'gpt-3.5-turbo'}
+                          onValueChange={(v) => saveSetting('ai.providers.openai.defaultModel', v)}
+                        >
+                          <SelectTrigger id="openaiModel">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="gpt-4">GPT-4</SelectItem>
+                            <SelectItem value="gpt-4-turbo-preview">GPT-4 Turbo</SelectItem>
+                            <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="openaiEnabled">Enable OpenAI</Label>
+                        <input
+                          id="openaiEnabled"
+                          type="checkbox"
+                          checked={settings.ai?.providers?.openai?.enabled !== false}
+                          onChange={(e) => saveSetting('ai.providers.openai.enabled', e.target.checked)}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Anthropic Settings */}
+                {settings.ai?.activeProvider === 'anthropic' && (
+                  <Card className="border-2">
+                    <CardHeader>
+                      <CardTitle className="text-sm">Anthropic Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="anthropicApiKey">API Key</Label>
+                        <Input
+                          id="anthropicApiKey"
+                          type="password"
+                          placeholder="sk-ant-..."
+                          value={settings.ai?.providers?.anthropic?.apiKey || ''}
+                          onChange={(e) => saveSetting('ai.providers.anthropic.apiKey', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="anthropicModel">Default Model</Label>
+                        <Select
+                          value={settings.ai?.providers?.anthropic?.defaultModel || 'claude-3-sonnet-20240229'}
+                          onValueChange={(v) => saveSetting('ai.providers.anthropic.defaultModel', v)}
+                        >
+                          <SelectTrigger id="anthropicModel">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="claude-3-opus-20240229">Claude 3 Opus</SelectItem>
+                            <SelectItem value="claude-3-sonnet-20240229">Claude 3 Sonnet</SelectItem>
+                            <SelectItem value="claude-3-haiku-20240307">Claude 3 Haiku</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="anthropicEnabled">Enable Anthropic</Label>
+                        <input
+                          id="anthropicEnabled"
+                          type="checkbox"
+                          checked={settings.ai?.providers?.anthropic?.enabled !== false}
+                          onChange={(e) => saveSetting('ai.providers.anthropic.enabled', e.target.checked)}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Custom API Settings */}
+                {settings.ai?.activeProvider === 'custom' && (
+                  <Card className="border-2">
+                    <CardHeader>
+                      <CardTitle className="text-sm">Custom API Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="customApiKey">API Key (Optional)</Label>
+                        <Input
+                          id="customApiKey"
+                          type="password"
+                          placeholder="Your API key..."
+                          value={settings.ai?.providers?.custom?.apiKey || ''}
+                          onChange={(e) => saveSetting('ai.providers.custom.apiKey', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="customBaseUrl">Base URL</Label>
+                        <Input
+                          id="customBaseUrl"
+                          placeholder="https://api.example.com"
+                          value={settings.ai?.providers?.custom?.customConfig?.baseUrl || ''}
+                          onChange={(e) => saveSetting('ai.providers.custom.customConfig.baseUrl', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="customEndpoint">Endpoint (Optional)</Label>
+                        <Input
+                          id="customEndpoint"
+                          placeholder="/v1/chat/completions"
+                          value={settings.ai?.providers?.custom?.customConfig?.endpoint || ''}
+                          onChange={(e) => saveSetting('ai.providers.custom.customConfig.endpoint', e.target.value)}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="customFormat">API Format</Label>
+                        <Select
+                          value={settings.ai?.providers?.custom?.customConfig?.format || 'openai'}
+                          onValueChange={(v) => saveSetting('ai.providers.custom.customConfig.format', v)}
+                        >
+                          <SelectTrigger id="customFormat">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="openai">OpenAI Compatible</SelectItem>
+                            <SelectItem value="custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="customEnabled">Enable Custom API</Label>
+                        <input
+                          id="customEnabled"
+                          type="checkbox"
+                          checked={settings.ai?.providers?.custom?.enabled !== false}
+                          onChange={(e) => saveSetting('ai.providers.custom.enabled', e.target.checked)}
+                          className="h-4 w-4"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* General AI Settings */}
+                <div className="grid gap-2">
+                  <Label htmlFor="temperature">Temperature (0-2)</Label>
+                  <Input
+                    id="temperature"
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.1"
+                    value={settings.ai?.temperature || 0.7}
+                    onChange={(e) => saveSetting('ai.temperature', parseFloat(e.target.value))}
+                    className="w-32"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Controls randomness: 0 is deterministic, 2 is very creative
+                  </p>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="maxResponseTokens">Max Response Tokens</Label>
+                  <Input
+                    id="maxResponseTokens"
+                    type="number"
+                    min="100"
+                    max="32000"
+                    step="100"
+                    value={settings.ai?.maxResponseTokens || 2000}
+                    onChange={(e) => saveSetting('ai.maxResponseTokens', parseInt(e.target.value))}
+                    className="w-32"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="systemPrompt">System Prompt</Label>
+                  <Textarea
+                    id="systemPrompt"
+                    placeholder="You are a helpful AI coding assistant..."
+                    value={settings.ai?.systemPrompt || ''}
+                    onChange={(e) => saveSetting('ai.systemPrompt', e.target.value)}
+                    rows={3}
+                  />
                 </div>
               </CardContent>
             </Card>

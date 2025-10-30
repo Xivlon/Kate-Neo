@@ -9,8 +9,10 @@ import { ExtensionHost } from "./extension-host";
 import { LargeFileManager } from "./large-file-manager";
 import { getSettingsManager } from "./settings-manager";
 import { getI18nService } from "./i18n-service";
+import { aiService } from "./ai-service";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
+import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
 import * as path from "path";
 import * as fs from "fs/promises";
 
@@ -50,6 +52,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     localesDir: path.join(workspacePath, 'locales'),
   });
   await i18nService.initialize();
+
+  // Initialize AI Service
+  const currentSettings = await settingsManager.getSettings({});
+  if (currentSettings.success && currentSettings.settings) {
+    const aiSettings = (currentSettings.settings as any).ai;
+    if (aiSettings) {
+      await aiService.initialize(aiSettings);
+    }
+  }
 
   // Debug API endpoints
   app.post("/api/debug/sessions", async (req, res) => {
@@ -531,6 +542,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ translations });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  // AI API endpoints
+  app.get("/api/ai/status", (req, res) => {
+    try {
+      const settings = aiService.getSettings();
+      res.json({
+        enabled: aiService.isEnabled(),
+        provider: settings?.activeProvider,
+        models: aiService.getAvailableModels(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const request: ChatCompletionRequest = req.body;
+      const response = await aiService.chatCompletion(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/ai/code-assistance", async (req, res) => {
+    try {
+      const request: CodeAssistanceRequest = req.body;
+      const response = await aiService.codeAssistance(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/ai/test-connection", async (req, res) => {
+    try {
+      const { provider } = req.body;
+      const response = await aiService.testConnection(provider as AIProvider | undefined);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Listen for settings changes to update AI service
+  settingsManager.on('settingsChanged', (event) => {
+    if (event.keys.some((key: string) => key.startsWith('ai'))) {
+      settingsManager.getSettings({}).then(result => {
+        if (result.success && result.settings) {
+          const aiSettings = (result.settings as any).ai;
+          if (aiSettings) {
+            aiService.updateSettings(aiSettings);
+          }
+        }
+      });
     }
   });
 
