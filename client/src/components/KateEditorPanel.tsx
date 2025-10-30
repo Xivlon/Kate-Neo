@@ -67,38 +67,51 @@ export function KateEditorPanel({
 
   // Open document when component mounts or file changes
   useEffect(() => {
-    if (kateBridge.status.connected && filePath) {
-      console.log(`[KateEditorPanel] Opening document: ${filePath}`);
-      kateBridge.openDocument(documentId, filePath, content, language);
-
-      // Request syntax highlighting
-      if (kateBridge.status.kateAvailable) {
-        kateBridge.requestSyntaxHighlighting(documentId, 0, 100)
-          .then(tokens => {
-            console.log(`[KateEditorPanel] Received ${tokens.length} syntax tokens`);
-            setSyntaxTokens(tokens);
-          })
-          .catch(error => {
-            console.error("[KateEditorPanel] Error getting syntax tokens:", error);
-          });
-
-        // Request folding regions
-        kateBridge.requestFoldingRegions(documentId)
-          .then(regions => {
-            console.log(`[KateEditorPanel] Received ${regions.length} folding regions`);
-            setFoldingRegions(regions);
-          })
-          .catch(error => {
-            console.error("[KateEditorPanel] Error getting folding regions:", error);
-          });
-      }
-
-      return () => {
-        console.log(`[KateEditorPanel] Closing document: ${filePath}`);
-        kateBridge.closeDocument(documentId);
-      };
+    if (!kateBridge.status.connected || !filePath) {
+      return;
     }
-  }, [kateBridge.status.connected, filePath, documentId, content, language, kateBridge, toast]);
+
+    console.log(`[KateEditorPanel] Opening document: ${filePath}`);
+    kateBridge.openDocument(documentId, filePath, content, language);
+
+    // Request syntax highlighting
+    if (kateBridge.status.kateAvailable) {
+      kateBridge.requestSyntaxHighlighting(documentId, 0, 100)
+        .then(tokens => {
+          console.log(`[KateEditorPanel] Received ${tokens.length} syntax tokens`);
+          setSyntaxTokens(tokens);
+        })
+        .catch(error => {
+          console.error("[KateEditorPanel] Error getting syntax tokens:", error);
+        });
+
+      // Request folding regions
+      kateBridge.requestFoldingRegions(documentId)
+        .then(regions => {
+          console.log(`[KateEditorPanel] Received ${regions.length} folding regions`);
+          setFoldingRegions(regions);
+        })
+        .catch(error => {
+          console.error("[KateEditorPanel] Error getting folding regions:", error);
+        });
+    }
+
+    return () => {
+      console.log(`[KateEditorPanel] Closing document: ${filePath}`);
+      kateBridge.closeDocument(documentId);
+    };
+  }, [
+    kateBridge.status.connected,
+    kateBridge.status.kateAvailable,
+    kateBridge.openDocument,
+    kateBridge.closeDocument,
+    kateBridge.requestSyntaxHighlighting,
+    kateBridge.requestFoldingRegions,
+    filePath,
+    documentId,
+    content,
+    language,
+  ]);
 
   return (
     <div className="h-full flex flex-col border border-border rounded">

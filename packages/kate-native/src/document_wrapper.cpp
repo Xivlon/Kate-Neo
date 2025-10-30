@@ -387,20 +387,23 @@ Napi::Value DocumentWrapper::GetSyntaxTokens(const Napi::CallbackInfo& info) {
     Napi::Array tokens = Napi::Array::New(env);
     uint32_t tokenIndex = 0;
     
+    const int MAX_SCAN_LENGTH = 10000; // Prevent excessive scanning
+    
     // Extract syntax tokens for each line
     for (int line = lineStart; line <= lineEnd && line < m_document->lines(); line++) {
         QString lineText = m_document->line(line);
+        int lineLength = qMin(lineText.length(), MAX_SCAN_LENGTH);
         
         // Iterate through each character to get highlighting
-        for (int col = 0; col < lineText.length(); ) {
+        for (int col = 0; col < lineLength; ) {
             auto attr = m_document->attributeAt(KTextEditor::Cursor(line, col));
             
             // Find the extent of this attribute
             int startCol = col;
             int endCol = col + 1;
             
-            // Extend while attribute is the same
-            while (endCol < lineText.length()) {
+            // Extend while attribute is the same (with limit)
+            while (endCol < lineLength && (endCol - startCol) < 1000) {
                 auto nextAttr = m_document->attributeAt(KTextEditor::Cursor(line, endCol));
                 if (nextAttr != attr) break;
                 endCol++;
@@ -440,27 +443,24 @@ Napi::Value DocumentWrapper::GetFoldingRegions(const Napi::CallbackInfo& info) {
     Napi::Array regions = Napi::Array::New(env);
     uint32_t regionIndex = 0;
     
+    const int MAX_LINES = 50000; // Limit for performance
+    int maxLine = qMin(m_document->lines(), MAX_LINES);
+    
     // Iterate through lines to find folding regions
-    for (int line = 0; line < m_document->lines(); line++) {
+    // Note: In a real implementation, we'd use Kate's folding API more efficiently
+    for (int line = 0; line < maxLine; line++) {
         // Check if this line starts a foldable region
         if (m_document->isLineVisible(line)) {
             // Get folding range starting at this line
             auto foldingRange = m_document->foldingRegionAt(KTextEditor::Cursor(line, 0));
             
-            if (foldingRange.isValid()) {
+            if (foldingRange.isValid() && foldingRange.start().line() == line) {
                 Napi::Object region = Napi::Object::New(env);
                 region.Set("startLine", Napi::Number::New(env, foldingRange.start().line()));
                 region.Set("endLine", Napi::Number::New(env, foldingRange.end().line()));
                 
-                // Determine folding kind based on content
-                QString lineText = m_document->line(line);
-                QString kind = "region";
-                if (lineText.trimmed().startsWith("/*") || lineText.trimmed().startsWith("//")) {
-                    kind = "comment";
-                } else if (lineText.contains("import") || lineText.contains("include")) {
-                    kind = "imports";
-                }
-                region.Set("kind", Napi::String::New(env, kind.toStdString()));
+                // Use default kind - proper classification would require language-specific logic
+                region.Set("kind", Napi::String::New(env, "region"));
                 
                 regions[regionIndex++] = region;
             }

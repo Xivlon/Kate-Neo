@@ -37,6 +37,9 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
   const reconnectAttempts = useRef(0);
   const MAX_RECONNECT_ATTEMPTS = 5;
   const RECONNECT_DELAY = 2000;
+  
+  // Memoize callbacks to prevent unnecessary reconnections
+  const { onConnected, onDisconnected, onError } = options;
 
   const connect = useCallback(() => {
     // Determine WebSocket URL (use same host as current page)
@@ -64,7 +67,7 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
             version: message.payload?.version,
           };
           setStatus(newStatus);
-          options.onConnected?.(newStatus);
+          onConnected?.(newStatus);
           console.log('[useKateBridge] Kate status:', newStatus);
         }
       } catch (error) {
@@ -74,13 +77,13 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
 
     ws.onerror = (error) => {
       console.error('[useKateBridge] WebSocket error:', error);
-      options.onError?.('WebSocket connection error');
+      onError?.('WebSocket connection error');
     };
 
     ws.onclose = () => {
       console.log('[useKateBridge] Disconnected from Kate bridge');
       setStatus({ connected: false, kateAvailable: false });
-      options.onDisconnected?.();
+      onDisconnected?.();
 
       // Attempt to reconnect
       if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
@@ -91,10 +94,10 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
         reconnectTimeoutRef.current = setTimeout(connect, RECONNECT_DELAY);
       } else {
         console.error('[useKateBridge] Max reconnection attempts reached');
-        options.onError?.('Unable to connect to Kate bridge');
+        onError?.('Unable to connect to Kate bridge');
       }
     };
-  }, [options]);
+  }, [onConnected, onDisconnected, onError]);
 
   useEffect(() => {
     connect();
@@ -148,11 +151,18 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
         const handler = (event: MessageEvent) => {
           try {
             const message: KateBridgeMessage = JSON.parse(event.data);
-            if (message.type === 'syntax.response' && message.payload?.documentId === documentId) {
+            if (message.type === 'syntax.response') {
+              // Remove handler regardless of which document it was for
               wsRef.current?.removeEventListener('message', handler);
-              resolve(message.payload.tokens || []);
+              
+              if (message.payload?.documentId === documentId) {
+                resolve(message.payload.tokens || []);
+              } else {
+                reject(new Error('Response for different document'));
+              }
             }
           } catch (error) {
+            wsRef.current?.removeEventListener('message', handler);
             reject(error);
           }
         };
@@ -185,11 +195,18 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
         const handler = (event: MessageEvent) => {
           try {
             const message: KateBridgeMessage = JSON.parse(event.data);
-            if (message.type === 'fold.response' && message.payload?.documentId === documentId) {
+            if (message.type === 'fold.response') {
+              // Remove handler regardless of which document it was for
               wsRef.current?.removeEventListener('message', handler);
-              resolve(message.payload.regions || []);
+              
+              if (message.payload?.documentId === documentId) {
+                resolve(message.payload.regions || []);
+              } else {
+                reject(new Error('Response for different document'));
+              }
             }
           } catch (error) {
+            wsRef.current?.removeEventListener('message', handler);
             reject(error);
           }
         };
