@@ -11,13 +11,14 @@ import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { TerminalPanel } from "@/components/TerminalPanel";
 import { ExtensionsPanel } from "@/components/ExtensionsPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { AIAssistantPanel } from "@/components/AIAssistantPanel";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package, Settings } from "lucide-react";
+import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package, Settings, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -241,6 +242,13 @@ export default function CodeEditor() {
                         Debug
                       </TabsTrigger>
                       <TabsTrigger 
+                        value="ai" 
+                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        AI
+                      </TabsTrigger>
+                      <TabsTrigger 
                         value="extensions" 
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
@@ -271,6 +279,10 @@ export default function CodeEditor() {
                   
                   <TabsContent value="debug" className="flex-1 m-0 overflow-hidden">
                     <DebugPanel />
+                  </TabsContent>
+                  
+                  <TabsContent value="ai" className="flex-1 m-0 overflow-hidden">
+                    <AIAssistantPanel />
                   </TabsContent>
                   
                   <TabsContent value="extensions" className="flex-1 m-0 overflow-hidden">

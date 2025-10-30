@@ -209,6 +209,15 @@ For detailed information, see [packages/kate-native/README.md](packages/kate-nat
 
 Kate Neo includes comprehensive IDE features across multiple development phases:
 
+### AI Assistant Integration (Phase 7)
+- **Multi-Provider Support**: OpenAI, Anthropic, and custom API endpoints
+- **Chat Interface**: Interactive AI conversation in dedicated panel
+- **Code Assistance**: Explain, improve, fix, comment, and test code
+- **Multiple Models**: GPT-4, GPT-3.5 Turbo, Claude 3 (Opus, Sonnet, Haiku)
+- **Custom API**: Integrate any OpenAI-compatible or custom endpoint
+- **Configurable**: Temperature, max tokens, system prompts
+- **Secure**: API keys stored in settings (workspace or global scope)
+
 ### Settings & Configuration (Phase 4)
 - **Settings Manager**: Hierarchical settings with multi-scope support (Global, Workspace, Folder)
 - **Settings Persistence**: Auto-save to JSON files with deep merging
@@ -650,6 +659,8 @@ git submodule update --remote --recursive
 - Main codebase documentation in source files
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Detailed contribution guidelines
 - [Scripts README](scripts/README.md) - Build and deployment scripts
+- **AI Integration** (Phase 7):
+  - [AI Integration Guide](docs/AI_INTEGRATION.md) - Complete AI API setup and usage
 - **Phase 5 Documentation** (Research & Planning):
   - [KTextEditor Architecture](docs/phase5/1-ktexteditor-architecture.md)
   - [Node.js Native Bindings](docs/phase5/2-nodejs-native-bindings.md)
