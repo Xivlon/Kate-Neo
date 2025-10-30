@@ -603,5 +603,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LSP API endpoints (Phase 8)
+  // Import LSP service
+  const { lspService } = await import('./lsp-service');
+
+  app.post("/api/lsp/initialize", async (req, res) => {
+    try {
+      const { languageId } = req.body;
+      const success = await lspService.initializeServer(languageId);
+      if (success) {
+        const capabilities = lspService.getServerCapabilities(languageId);
+        res.json({ success: true, capabilities });
+      } else {
+        res.status(400).json({ success: false, error: 'Failed to initialize server' });
+      }
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/shutdown/:languageId", async (req, res) => {
+    try {
+      await lspService.shutdownServer(req.params.languageId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/document/open", async (req, res) => {
+    try {
+      const { uri, languageId, version, text } = req.body;
+      await lspService.didOpenTextDocument(uri, languageId, version, text);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/document/change", async (req, res) => {
+    try {
+      const { uri, text, version } = req.body;
+      const changes = [{ text }];
+      await lspService.didChangeTextDocument(uri, changes, version);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/document/close", async (req, res) => {
+    try {
+      const { uri } = req.body;
+      await lspService.didCloseTextDocument(uri);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/completion", async (req, res) => {
+    try {
+      const { uri, position } = req.body;
+      const completions = await lspService.provideCompletions(uri, position);
+      res.json(completions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/hover", async (req, res) => {
+    try {
+      const { uri, position } = req.body;
+      const hover = await lspService.provideHover(uri, position);
+      res.json(hover);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/definition", async (req, res) => {
+    try {
+      const { uri, position } = req.body;
+      const definition = await lspService.gotoDefinition(uri, position);
+      res.json(definition);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/references", async (req, res) => {
+    try {
+      const { uri, position } = req.body;
+      const references = await lspService.findReferences(uri, position);
+      res.json(references);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/lsp/diagnostics", async (req, res) => {
+    try {
+      const { uri } = req.query;
+      // Diagnostics are pushed via notifications, so we return empty here
+      // Frontend should subscribe to diagnostic updates
+      res.json([]);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/lsp/symbols", async (req, res) => {
+    try {
+      const { uri } = req.query as { uri: string };
+      const symbols = await lspService.provideDocumentSymbols(uri);
+      res.json(symbols);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/lsp/format", async (req, res) => {
+    try {
+      const { uri } = req.body;
+      const edits = await lspService.formatDocument(uri, {
+        tabSize: 2,
+        insertSpaces: true
+      });
+      res.json(edits);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/lsp/servers", (req, res) => {
+    const servers = lspService.getRunningServers();
+    res.json(servers);
+  });
+
   return httpServer;
 }
