@@ -3,6 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FileTree, type FileNode } from "@/components/layout/FileTree";
 import { TabBar, type Tab } from "@/components/layout/TabBar";
 import { EditorPane } from "@/components/editor/EditorPane";
+import { EditorPaneLSP } from "@/components/editor/EditorPaneLSP";
 import { TopMenuBar } from "@/components/layout/TopMenuBar";
 import { StatusBar } from "@/components/layout/StatusBar";
 import { FindReplaceDialog } from "@/components/editor/FindReplaceDialog";
@@ -355,10 +356,12 @@ export default function CodeEditor() {
 
       default:
         return (
-          <EditorPane
+          <EditorPaneLSP
             value={activeContent}
             language={activeFile.language || "plaintext"}
+            filePath={activeFile.path || activeFile.id}
             onChange={handleEditorChange}
+            onSave={handleSave}
           />
         );
     }

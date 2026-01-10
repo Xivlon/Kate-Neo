@@ -10,6 +10,7 @@ import { LargeFileManager } from "./services/large-file-manager";
 import { getSettingsManager } from "./services/settings-manager";
 import { getI18nService } from "./services/i18n-service";
 import { aiService } from "./services/ai-service";
+import { KateBridge } from "./services/kate-bridge";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
@@ -61,6 +62,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await aiService.initialize(aiSettings);
     }
   }
+
+  // Initialize Kate Bridge for KTextEditor integration
+  const kateBridge = new KateBridge({ debug: process.env.NODE_ENV === 'development' });
+  await kateBridge.initialize(httpServer).catch((error) => {
+    console.warn('[KateBridge] Failed to initialize:', error.message);
+    console.warn('[KateBridge] Kate features will be unavailable');
+  });
 
   // Debug API endpoints
   app.post("/api/debug/sessions", async (req, res) => {
@@ -873,6 +881,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/openscad/cancel/:renderId", (req, res) => {
     const cancelled = openscadService.cancelRender(req.params.renderId);
     res.json({ cancelled });
+  });
+
+  // Kate Bridge Status API
+  app.get("/api/kate/status", (req, res) => {
+    const status = kateBridge.getStatus();
+    res.json(status);
+  });
+
+  // Health check endpoint for production monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || "1.0.0",
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+    });
   });
 
   return httpServer;

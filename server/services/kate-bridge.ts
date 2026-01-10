@@ -376,6 +376,26 @@ export class KateBridge {
   }
 
   /**
+   * Get Kate bridge status
+   */
+  getStatus(): {
+    connected: boolean;
+    clientCount: number;
+    kateAvailable: boolean;
+    kateVersion: string;
+    documentsOpen: number;
+  } {
+    const kateStatus = kateService.getStatus();
+    return {
+      connected: this.wss !== null,
+      clientCount: this.clients.size,
+      kateAvailable: kateStatus.available,
+      kateVersion: kateStatus.version || 'unknown',
+      documentsOpen: this.documents.size,
+    };
+  }
+
+  /**
    * Shutdown the bridge
    */
   async shutdown(): Promise<void> {

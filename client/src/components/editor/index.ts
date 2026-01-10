@@ -5,6 +5,7 @@
  */
 
 export { EditorPane } from './EditorPane';
+export { EditorPaneLSP } from './EditorPaneLSP';
 export { FindReplaceDialog } from './FindReplaceDialog';
 export { KateEditorPanel } from './KateEditorPanel';
 export { MermaidPreview, DIAGRAM_TEMPLATES } from './MermaidPreview';
