@@ -741,5 +741,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(servers);
   });
 
+  // Java/Tomcat API endpoints
+  const { javaService } = await import('./services/java-service');
+  await javaService.initialize().catch(() => {
+    console.log('[Java] Java runtime not available');
+  });
+
+  app.get("/api/java/status", (req, res) => {
+    const status = javaService.getStatus();
+    res.json(status);
+  });
+
+  app.post("/api/java/compile", async (req, res) => {
+    try {
+      const { sourceFiles, outputDir, classpath } = req.body;
+      const result = await javaService.compile(sourceFiles, outputDir, classpath);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/java/run", async (req, res) => {
+    try {
+      const { className, classpath, args, options } = req.body;
+      const result = await javaService.run(className, classpath, args, options);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/start", async (req, res) => {
+    try {
+      await javaService.startTomcat();
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/stop", async (req, res) => {
+    try {
+      await javaService.stopTomcat();
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.get("/api/tomcat/status", async (req, res) => {
+    try {
+      const status = await javaService.getTomcatStatus();
+      res.json(status);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/deploy", async (req, res) => {
+    try {
+      const { name, source, contextPath } = req.body;
+      const deployment = await javaService.deploy(name, source, contextPath);
+      res.json(deployment);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.delete("/api/tomcat/undeploy/:name", async (req, res) => {
+    try {
+      const success = await javaService.undeploy(req.params.name);
+      res.json({ success });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/java/create-servlet-project", async (req, res) => {
+    try {
+      const { projectPath, options } = req.body;
+      await javaService.createServletProject(projectPath, options);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // OpenSCAD API endpoints
+  const { openscadService } = await import('./services/openscad-service');
+  await openscadService.initialize().catch(() => {
+    console.log('[OpenSCAD] OpenSCAD not available');
+  });
+
+  app.get("/api/openscad/status", (req, res) => {
+    const status = openscadService.getStatus();
+    res.json(status);
+  });
+
+  app.post("/api/openscad/render", async (req, res) => {
+    try {
+      const { sourceCode, options } = req.body;
+      const result = await openscadService.render(sourceCode, options);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/openscad/validate", async (req, res) => {
+    try {
+      const { sourceCode } = req.body;
+      const errors = await openscadService.validateSyntax(sourceCode);
+      res.json({ errors });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/openscad/templates", (req, res) => {
+    const templates = openscadService.getTemplates();
+    res.json(templates);
+  });
+
+  app.get("/api/openscad/autocomplete", (req, res) => {
+    const { prefix } = req.query;
+    const suggestions = openscadService.getAutocompleteSuggestions(prefix as string || '');
+    res.json(suggestions);
+  });
+
+  app.post("/api/openscad/cancel/:renderId", (req, res) => {
+    const cancelled = openscadService.cancelRender(req.params.renderId);
+    res.json({ cancelled });
+  });
+
   return httpServer;
 }
