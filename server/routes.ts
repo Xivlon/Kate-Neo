@@ -1,15 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
-import { debugAdapterManager, type DebugConfiguration } from "./debug-service";
-import { GitService } from "./git-service";
-import { terminalService } from "./terminal-service";
-import { ExtensionHost } from "./extension-host";
-import { LargeFileManager } from "./large-file-manager";
-import { getSettingsManager } from "./settings-manager";
-import { getI18nService } from "./i18n-service";
-import { aiService } from "./ai-service";
+import { storage } from "./core/storage";
+import { debugAdapterManager, type DebugConfiguration } from "./services/debug-service";
+import { GitService } from "./services/git-service";
+import { terminalService } from "./services/terminal-service";
+import { ExtensionHost } from "./services/extension-host";
+import { LargeFileManager } from "./services/large-file-manager";
+import { getSettingsManager } from "./services/settings-manager";
+import { getI18nService } from "./services/i18n-service";
+import { aiService } from "./services/ai-service";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
@@ -605,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LSP API endpoints (Phase 8)
   // Import LSP service
-  const { lspService } = await import('./lsp-service');
+  const { lspService } = await import('./services/lsp-service');
 
   app.post("/api/lsp/initialize", async (req, res) => {
     try {

@@ -16,7 +16,7 @@ import {
   SettingsResponse,
   SettingsChangeEvent,
   DEFAULT_SETTINGS,
-} from '../shared/settings-types.js';
+} from '../../shared/settings-types.js';
 
 /**
  * Settings Manager Configuration

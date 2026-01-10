@@ -10,7 +10,7 @@ import type {
     BufferUpdate, 
     TextChange,
     SyntaxToken 
-} from '../shared/kate-types';
+} from '../../shared/kate-types';
 
 // Try to import native module - may not be available
 let kateNative: any = null;

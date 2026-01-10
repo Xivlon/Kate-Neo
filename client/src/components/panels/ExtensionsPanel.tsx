@@ -5,11 +5,11 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
-import { Input } from './ui/input';
+import { Button } from '../ui/button';
+import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import { Input } from '../ui/input';
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from './ui/card';
+} from '../ui/card';
 import { Package, Power, PowerOff, RefreshCw, Search, Settings } from 'lucide-react';
 
 interface Extension {

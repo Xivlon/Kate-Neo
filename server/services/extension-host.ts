@@ -23,7 +23,7 @@ import {
   WindowAPI,
   CommandAPI,
   Command,
-} from '../shared/extension-types.js';
+} from '../../shared/extension-types.js';
 
 /**
  * Extension Host - manages extension lifecycle

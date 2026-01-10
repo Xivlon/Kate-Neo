@@ -14,7 +14,7 @@ import {
   TranslationResponse,
   LocaleChangeEvent,
   AvailableLocalesResponse,
-} from '../shared/i18n-types.js';
+} from '../../shared/i18n-types.js';
 
 /**
  * I18n Service Configuration

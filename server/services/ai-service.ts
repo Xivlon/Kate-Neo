@@ -17,7 +17,7 @@ import {
   AIProviderConfig,
   AIModel,
   KNOWN_MODELS,
-} from '../shared/ai-types.js';
+} from '../../shared/ai-types.js';
 
 /**
  * AI Service for handling AI API requests

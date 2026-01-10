@@ -6,16 +6,16 @@
 
 import { useState, useEffect } from 'react';
 import { Settings, Save, RotateCcw, Globe, Sparkles } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Textarea } from './ui/textarea';
-import { useI18n } from '../hooks/useI18n';
-import type { KateNeoSettings, SettingsScope } from '../../../shared/settings-types';
-import type { AIProvider } from '../../../shared/ai-types';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Textarea } from '../ui/textarea';
+import { useI18n } from '../../hooks/useI18n';
+import type { KateNeoSettings, SettingsScope } from '../../../../shared/settings-types';
+import type { AIProvider } from '../../../../shared/ai-types';
 
 export function SettingsPanel() {
   const { t, locale, locales, setLocale } = useI18n();
