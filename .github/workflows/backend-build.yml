@@ -5,11 +5,19 @@ on:
     branches: [ main, develop ]
     paths:
       - 'server/**'
+      - 'shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - '.github/workflows/backend-build.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
       - 'server/**'
+      - 'shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - '.github/workflows/backend-build.yml'
 
 jobs:
@@ -42,6 +50,12 @@ jobs:
         echo "Running TypeScript type checking..."
         npm run check
         echo "✓ Type checking passed"
+    
+    - name: Build
+      run: |
+        echo "Building backend..."
+        npm run build
+        echo "✓ Build completed"
     
     # TODO: Add step to run backend tests
     # - name: Run tests
