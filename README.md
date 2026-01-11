@@ -25,58 +25,66 @@ Kate Neo has successfully completed native KTextEditor integration with full Nod
 
 ```
 Kate-Neo/
-├── client/                          # React-based IDE frontend
+├── client/                              # React-based IDE frontend
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── KateEditorPanel.tsx  # Kate integration component
-│   │   │   ├── CodeEditor.tsx       # Main editor component
-│   │   │   ├── DebugPanel.tsx       # Debug interface (DAP)
-│   │   │   ├── SourceControlPanel.tsx # Git integration
-│   │   │   ├── TerminalPanel.tsx    # Integrated terminal
-│   │   │   ├── ExtensionsPanel.tsx  # Extension management
-│   │   │   ├── SettingsPanel.tsx    # Settings UI
-│   │   │   └── ...                  # Other UI components
-│   │   ├── App.tsx                  # Main application component
-│   │   └── main.tsx                 # Application entry point
+│   │   │   ├── common/                  # Shared UI components
+│   │   │   ├── editor/                  # Editor components
+│   │   │   │   ├── MermaidPreview.tsx   # Mermaid diagram renderer
+│   │   │   │   ├── ExcalidrawEditor.tsx # Excalidraw canvas
+│   │   │   │   └── OpenSCADPreview.tsx  # OpenSCAD 3D preview
+│   │   │   ├── layout/                  # Layout components
+│   │   │   │   ├── FileTree.tsx         # File tree with drag-drop
+│   │   │   │   └── TabBar.tsx           # Tab bar with reordering
+│   │   │   └── panels/                  # IDE panels
+│   │   │       ├── DebugPanel.tsx       # Debug interface (DAP)
+│   │   │       ├── SourceControlPanel.tsx # Git integration
+│   │   │       ├── TerminalPanel.tsx    # Integrated terminal
+│   │   │       ├── ExtensionsPanel.tsx  # Extension management
+│   │   │       └── SettingsPanel.tsx    # Settings UI
+│   │   ├── hooks/
+│   │   │   └── useDragDropAI.ts         # AI-powered drag-drop suggestions
+│   │   ├── pages/
+│   │   │   └── CodeEditor.tsx           # Main editor page
+│   │   ├── App.tsx                      # Main application component
+│   │   └── main.tsx                     # Application entry point
 │   ├── index.html
-│   └── public/                      # Static assets
+│   └── public/                          # Static assets
 │
-├── server/                          # Express backend server
-│   ├── kate-bridge.ts               # Kate engine WebSocket bridge
-│   ├── kate-service.ts              # Kate document management service
-│   ├── index.ts                     # Server entry point
-│   ├── routes.ts                    # API routes
-│   └── vite.ts                      # Vite dev server setup
+├── server/                              # Express backend server
+│   ├── services/                        # Backend services
+│   │   ├── kate-bridge.ts               # Kate engine WebSocket bridge
+│   │   ├── kate-service.ts              # Kate document management
+│   │   ├── java-service.ts              # Java/Tomcat integration
+│   │   ├── openscad-service.ts          # OpenSCAD rendering
+│   │   ├── git-service.ts               # Git operations
+│   │   ├── terminal-service.ts          # Terminal sessions
+│   │   └── ...                          # Other services
+│   ├── core/                            # Core utilities
+│   ├── index.ts                         # Server entry point
+│   └── routes.ts                        # API routes
 │
 ├── packages/
-│   └── kate-native/                 # Native KTextEditor bindings (Phase 6)
-│       ├── src/                     # C++ native module source
-│       │   ├── addon.cpp            # N-API entry point
-│       │   ├── qt_runner.cpp/h      # Qt event loop manager
-│       │   ├── document_wrapper.cpp/h # KTextEditor::Document wrapper
-│       │   └── editor_wrapper.cpp/h   # KTextEditor::Editor wrapper
-│       ├── binding.gyp              # node-gyp build configuration
-│       ├── index.js                 # JavaScript API
-│       └── package.json
+│   └── kate-native/                     # Native KTextEditor bindings
+│       ├── src/                         # C++ native module source
+│       ├── binding.gyp                  # node-gyp build configuration
+│       └── index.js                     # JavaScript API
 │
-├── shared/                          # Shared types and interfaces
-│   ├── kate-types.ts                # Kate engine type definitions
-│   └── schema.ts                    # Database schema
+├── shared/                              # Shared types and interfaces
+│   ├── kate-types.ts                    # Kate engine type definitions
+│   └── schema.ts                        # Database schema
 │
-├── docs/                            # Documentation
-│   └── phase5/                      # Phase 5 research documents
+├── docs/                                # Documentation
+│   ├── FEATURES.md                      # Feature documentation (NEW)
+│   ├── AI_INTEGRATION.md                # AI API guide
+│   ├── phase5/                          # Phase 5 research
+│   └── phases/                          # Development phase docs
 │
-├── scripts/                         # Build and utility scripts
-│   ├── build.sh                     # Main build script
-│   └── README.md                    # Scripts documentation
-│
-├── .github/
-│   └── workflows/                   # CI/CD pipelines
-│
-├── package.json                     # Root package configuration
-├── vite.config.ts                   # Vite configuration
-├── tsconfig.json                    # TypeScript configuration
-└── README.md                        # This file
+├── scripts/                             # Build and utility scripts
+├── extensions/                          # IDE extensions
+├── package.json                         # Root package configuration
+├── vite.config.ts                       # Vite configuration
+└── README.md                            # This file
 ```
 
 ## Quick Start
@@ -279,6 +287,35 @@ Kate Neo includes comprehensive IDE features across multiple development phases:
 - **Tabbed Interface**: Multiple files open in tabs
 - **Auto-save**: Save files with Ctrl+S
 - **Find/Replace**: Search and replace across files
+
+### Drag-and-Drop & AI Suggestions (Latest)
+- **File Tree Drag-and-Drop**: Move files and folders by dragging within the file tree
+- **Tab Reordering**: Drag tabs to reorder them in the editor
+- **External File Drop**: Drop files from your desktop into the IDE
+- **AI-Powered Suggestions**: Intelligent file organization recommendations
+- **Structure Analysis**: Automatic detection of misplaced files
+- **Naming Convention Hints**: Suggestions for consistent file naming
+
+### Specialized Editors (Latest)
+- **Mermaid Diagrams**: Live preview for `.mmd` and `.mermaid` files
+  - Flowcharts, sequence diagrams, class diagrams, and more
+  - Theme selection (default, dark, forest, neutral)
+  - Zoom controls and SVG/PNG export
+- **Excalidraw Canvas**: Whiteboard editor for `.excalidraw` files
+  - Shapes, freehand drawing, text, arrows
+  - Collaborative-style editing interface
+  - Export to SVG and PNG
+- **OpenSCAD Preview**: 3D model preview for `.scad` files
+  - Real-time parameter editing
+  - Camera controls (zoom, pan, rotate)
+  - Export to STL, PNG, SVG
+
+### Java Runtime & Apache Tomcat (Latest)
+- **Java Compilation**: Compile Java source files with configurable classpath
+- **Java Execution**: Run Java applications with arguments and environment
+- **Tomcat Integration**: Deploy and manage Java servlets
+- **Servlet Projects**: Create servlet project scaffolding
+- **WAR Deployment**: Deploy WAR files to Tomcat server
 
 ## Architecture
 
@@ -681,8 +718,9 @@ git submodule update --remote --recursive
 - Main codebase documentation in source files
 - [CONTRIBUTING.md](CONTRIBUTING.md) - Detailed contribution guidelines
 - [Scripts README](scripts/README.md) - Build and deployment scripts
-- **AI Integration** (Phase 7):
-  - [AI Integration Guide](docs/AI_INTEGRATION.md) - Complete AI API setup and usage
+- **Feature Guides**:
+  - [Features Guide](docs/FEATURES.md) - Comprehensive feature documentation
+  - [AI Integration Guide](docs/AI_INTEGRATION.md) - AI API setup and usage
 - **Phase 5 Documentation** (Research & Planning):
   - [KTextEditor Architecture](docs/phase5/1-ktexteditor-architecture.md)
   - [Node.js Native Bindings](docs/phase5/2-nodejs-native-bindings.md)

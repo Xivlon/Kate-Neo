@@ -4,12 +4,20 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'backend/**'
+      - 'server/**'
+      - 'shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - '.github/workflows/backend-build.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'backend/**'
+      - 'server/**'
+      - 'shared/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
       - '.github/workflows/backend-build.yml'
 
 jobs:
@@ -32,41 +40,34 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        cache-dependency-path: backend/package-lock.json
+        cache-dependency-path: package-lock.json
     
     - name: Install dependencies
-      working-directory: ./backend
-      run: |
-        echo "TODO: Install backend dependencies"
-        echo "Skipping npm install in placeholder mode"
-        # npm ci
+      run: npm ci
     
-    - name: Validate bridge.js syntax
-      working-directory: ./backend
+    - name: Type check
       run: |
-        echo "Validating JavaScript syntax..."
-        node --check bridge.js
-        echo "✓ Syntax validation passed"
+        echo "Running TypeScript type checking..."
+        npm run check
+        echo "✓ Type checking passed"
+    
+    - name: Build
+      run: |
+        echo "Building backend..."
+        npm run build
+        echo "✓ Build completed"
     
     # TODO: Add step to run backend tests
     # - name: Run tests
-    #   working-directory: ./backend
     #   run: npm test
     
     # TODO: Add step to lint code
     # - name: Lint
-    #   working-directory: ./backend
     #   run: npm run lint
     
     # TODO: Add step to check for security vulnerabilities
     # - name: Security audit
-    #   working-directory: ./backend
     #   run: npm audit
-    
-    # TODO: Add step to build backend (when Kate integration is added)
-    # - name: Build
-    #   working-directory: ./backend
-    #   run: npm run build
     
     - name: Upload backend artifacts
       if: success()
@@ -74,9 +75,9 @@ jobs:
       with:
         name: backend-build-${{ matrix.node-version }}
         path: |
-          backend/bridge.js
-          backend/package.json
+          dist/index.js
         retention-days: 7
+        if-no-files-found: warn
 
   # TODO: Add Kate engine integration test job
   # kate-integration:

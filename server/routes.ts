@@ -1,15 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./storage";
-import { debugAdapterManager, type DebugConfiguration } from "./debug-service";
-import { GitService } from "./git-service";
-import { terminalService } from "./terminal-service";
-import { ExtensionHost } from "./extension-host";
-import { LargeFileManager } from "./large-file-manager";
-import { getSettingsManager } from "./settings-manager";
-import { getI18nService } from "./i18n-service";
-import { aiService } from "./ai-service";
+import { debugAdapterManager, type DebugConfiguration } from "./services/debug-service";
+import { GitService } from "./services/git-service";
+import { terminalService } from "./services/terminal-service";
+import { ExtensionHost } from "./services/extension-host";
+import { LargeFileManager } from "./services/large-file-manager";
+import { getSettingsManager } from "./services/settings-manager";
+import { getI18nService } from "./services/i18n-service";
+import { aiService } from "./services/ai-service";
+import { KateBridge } from "./services/kate-bridge";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
@@ -61,6 +61,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await aiService.initialize(aiSettings);
     }
   }
+
+  // Initialize Kate Bridge for KTextEditor integration
+  const kateBridge = new KateBridge({ debug: process.env.NODE_ENV === 'development' });
+  await kateBridge.initialize(httpServer).catch((error) => {
+    console.warn('[KateBridge] Failed to initialize:', error.message);
+    console.warn('[KateBridge] Kate features will be unavailable');
+  });
 
   // Debug API endpoints
   app.post("/api/debug/sessions", async (req, res) => {
@@ -605,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LSP API endpoints (Phase 8)
   // Import LSP service
-  const { lspService } = await import('./lsp-service');
+  const { lspService } = await import('./services/lsp-service');
 
   app.post("/api/lsp/initialize", async (req, res) => {
     try {
@@ -739,6 +746,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/lsp/servers", (req, res) => {
     const servers = lspService.getRunningServers();
     res.json(servers);
+  });
+
+  // Java/Tomcat API endpoints
+  const { javaService } = await import('./services/java-service');
+  await javaService.initialize().catch(() => {
+    console.log('[Java] Java runtime not available');
+  });
+
+  app.get("/api/java/status", (req, res) => {
+    const status = javaService.getStatus();
+    res.json(status);
+  });
+
+  app.post("/api/java/compile", async (req, res) => {
+    try {
+      const { sourceFiles, outputDir, classpath } = req.body;
+      const result = await javaService.compile(sourceFiles, outputDir, classpath);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/java/run", async (req, res) => {
+    try {
+      const { className, classpath, args, options } = req.body;
+      const result = await javaService.run(className, classpath, args, options);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/start", async (req, res) => {
+    try {
+      await javaService.startTomcat();
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/stop", async (req, res) => {
+    try {
+      await javaService.stopTomcat();
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.get("/api/tomcat/status", async (req, res) => {
+    try {
+      const status = await javaService.getTomcatStatus();
+      res.json(status);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/tomcat/deploy", async (req, res) => {
+    try {
+      const { name, source, contextPath } = req.body;
+      const deployment = await javaService.deploy(name, source, contextPath);
+      res.json(deployment);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.delete("/api/tomcat/undeploy/:name", async (req, res) => {
+    try {
+      const success = await javaService.undeploy(req.params.name);
+      res.json({ success });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/java/create-servlet-project", async (req, res) => {
+    try {
+      const { projectPath, options } = req.body;
+      await javaService.createServletProject(projectPath, options);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // OpenSCAD API endpoints
+  const { openscadService } = await import('./services/openscad-service');
+  await openscadService.initialize().catch(() => {
+    console.log('[OpenSCAD] OpenSCAD not available');
+  });
+
+  app.get("/api/openscad/status", (req, res) => {
+    const status = openscadService.getStatus();
+    res.json(status);
+  });
+
+  app.post("/api/openscad/render", async (req, res) => {
+    try {
+      const { sourceCode, options } = req.body;
+      const result = await openscadService.render(sourceCode, options);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/openscad/validate", async (req, res) => {
+    try {
+      const { sourceCode } = req.body;
+      const errors = await openscadService.validateSyntax(sourceCode);
+      res.json({ errors });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/openscad/templates", (req, res) => {
+    const templates = openscadService.getTemplates();
+    res.json(templates);
+  });
+
+  app.get("/api/openscad/autocomplete", (req, res) => {
+    const { prefix } = req.query;
+    const suggestions = openscadService.getAutocompleteSuggestions(prefix as string || '');
+    res.json(suggestions);
+  });
+
+  app.post("/api/openscad/cancel/:renderId", (req, res) => {
+    const cancelled = openscadService.cancelRender(req.params.renderId);
+    res.json({ cancelled });
+  });
+
+  // Kate Bridge Status API
+  app.get("/api/kate/status", (req, res) => {
+    const status = kateBridge.getStatus();
+    res.json(status);
+  });
+
+  // Health check endpoint for production monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || "1.0.0",
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+    });
   });
 
   return httpServer;

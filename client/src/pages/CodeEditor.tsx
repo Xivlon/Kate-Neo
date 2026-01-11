@@ -1,24 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { FileTree, type FileNode } from "@/components/FileTree";
-import { TabBar, type Tab } from "@/components/TabBar";
-import { EditorPane } from "@/components/EditorPane";
-import { TopMenuBar } from "@/components/TopMenuBar";
-import { StatusBar } from "@/components/StatusBar";
-import { FindReplaceDialog } from "@/components/FindReplaceDialog";
-import { DebugPanel } from "@/components/DebugPanel";
-import { SourceControlPanel } from "@/components/SourceControlPanel";
-import { TerminalPanel } from "@/components/TerminalPanel";
-import { ExtensionsPanel } from "@/components/ExtensionsPanel";
-import { SettingsPanel } from "@/components/SettingsPanel";
-import { AIAssistantPanel } from "@/components/AIAssistantPanel";
+import { FileTree, type FileNode } from "@/components/layout/FileTree";
+import { TabBar, type Tab } from "@/components/layout/TabBar";
+import { EditorPaneLSP } from "@/components/editor/EditorPaneLSP";
+import { TopMenuBar } from "@/components/layout/TopMenuBar";
+import { StatusBar } from "@/components/layout/StatusBar";
+import { FindReplaceDialog } from "@/components/editor/FindReplaceDialog";
+import { MermaidPreview } from "@/components/editor/MermaidPreview";
+import { ExcalidrawEditor } from "@/components/editor/ExcalidrawEditor";
+import { OpenSCADPreview } from "@/components/editor/OpenSCADPreview";
+import { DebugPanel } from "@/components/panels/DebugPanel";
+import { SourceControlPanel } from "@/components/panels/SourceControlPanel";
+import { TerminalPanel } from "@/components/panels/TerminalPanel";
+import { ExtensionsPanel } from "@/components/panels/ExtensionsPanel";
+import { SettingsPanel } from "@/components/panels/SettingsPanel";
+import { AIAssistantPanel } from "@/components/panels/AIAssistantPanel";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
+import { useDragDropAI } from "@/hooks/useDragDropAI";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Files, GitBranch, Bug, Terminal as TerminalIcon, Package, Settings, Sparkles } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Files,
+  GitBranch,
+  Bug,
+  Terminal as TerminalIcon,
+  Package,
+  Settings,
+  Sparkles,
+  Lightbulb,
+  X,
+  ChevronRight,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +43,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+// File type detection helper
+function getEditorType(fileName: string): 'code' | 'mermaid' | 'excalidraw' | 'openscad' {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'mmd':
+    case 'mermaid':
+      return 'mermaid';
+    case 'excalidraw':
+      return 'excalidraw';
+    case 'scad':
+      return 'openscad';
+    default:
+      return 'code';
+  }
+}
 
 export default function CodeEditor() {
   const [files, setFiles] = useState<FileNode[]>(fileSystem.getFiles());
@@ -41,7 +73,16 @@ export default function CodeEditor() {
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [newFolderName, setNewFolderName] = useState("");
+  const [showAISuggestions, setShowAISuggestions] = useState(true);
   const { toast } = useToast();
+
+  // AI-powered drag-drop suggestions
+  const {
+    suggestions,
+    analyzeDragDrop,
+    analyzeFileStructure,
+    dismissSuggestion,
+  } = useDragDropAI(files, { enabled: true });
 
   // Always use dark mode
   useEffect(() => {
@@ -53,6 +94,11 @@ export default function CodeEditor() {
     setFiles(fileSystem.getFiles());
   }, []);
 
+  // Analyze file structure on load
+  useEffect(() => {
+    analyzeFileStructure();
+  }, [analyzeFileStructure]);
+
   const refreshFiles = () => {
     setFiles([...fileSystem.getFiles()]);
   };
@@ -61,7 +107,11 @@ export default function CodeEditor() {
     if (file.type === "file") {
       // Add to tabs if not already open
       if (!openTabs.find((t) => t.id === file.id)) {
-        setOpenTabs([...openTabs, { id: file.id, name: file.name }]);
+        setOpenTabs([...openTabs, {
+          id: file.id,
+          name: file.name,
+          language: file.language,
+        }]);
         if (file.content) {
           setFileContents(prev => {
             const newMap = new Map(prev);
@@ -77,11 +127,76 @@ export default function CodeEditor() {
   const handleTabClose = (tabId: string) => {
     const newTabs = openTabs.filter((t) => t.id !== tabId);
     setOpenTabs(newTabs);
-    
+
     if (activeTabId === tabId) {
       setActiveTabId(newTabs.length > 0 ? newTabs[newTabs.length - 1].id : undefined);
     }
   };
+
+  // Tab reordering handler
+  const handleTabReorder = useCallback((sourceIndex: number, targetIndex: number) => {
+    setOpenTabs(prev => {
+      const newTabs = [...prev];
+      const [movedTab] = newTabs.splice(sourceIndex, 1);
+      newTabs.splice(targetIndex, 0, movedTab);
+      return newTabs;
+    });
+
+    toast({
+      title: "Tab reordered",
+      description: "Tab position has been updated.",
+    });
+  }, [toast]);
+
+  // File move handler (drag-drop in file tree)
+  const handleFileMove = useCallback(async (
+    sourceId: string,
+    targetId: string,
+    position: 'before' | 'after' | 'inside'
+  ) => {
+    // Get AI suggestions for this move
+    await analyzeDragDrop(sourceId, targetId, position);
+
+    // TODO: Implement actual file move in fileSystem service
+    // For now, just show a toast
+    toast({
+      title: "File move",
+      description: `Moving file to ${position} target. Full implementation coming soon.`,
+    });
+  }, [analyzeDragDrop, toast]);
+
+  // External file drop handler
+  const handleExternalFileDrop = useCallback(async (droppedFiles: FileList, targetFolderId?: string) => {
+    for (let i = 0; i < droppedFiles.length; i++) {
+      const file = droppedFiles[i];
+
+      // Read file content
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+
+        // Create the file in the file system
+        const newFile = fileSystem.createFile(targetFolderId || null, file.name);
+        if (newFile) {
+          fileSystem.updateFileContent(newFile.id, content);
+          refreshFiles();
+
+          toast({
+            title: "File imported",
+            description: `${file.name} has been added to the project.`,
+          });
+
+          // Open the file
+          handleFileSelect({
+            ...newFile,
+            content,
+          });
+        }
+      };
+
+      reader.readAsText(file);
+    }
+  }, [toast]);
 
   const handleEditorChange = (value: string | undefined) => {
     if (activeTabId && value !== undefined) {
@@ -90,9 +205,9 @@ export default function CodeEditor() {
         newMap.set(activeTabId, value);
         return newMap;
       });
-      
+
       // Mark tab as dirty
-      setOpenTabs(prev => prev.map(tab => 
+      setOpenTabs(prev => prev.map(tab =>
         tab.id === activeTabId ? { ...tab, isDirty: true } : tab
       ));
     }
@@ -104,7 +219,7 @@ export default function CodeEditor() {
         const content = prev.get(activeTabId);
         if (content !== undefined) {
           if (fileSystem.updateFileContent(activeTabId, content)) {
-            setOpenTabs(prevTabs => prevTabs.map(tab => 
+            setOpenTabs(prevTabs => prevTabs.map(tab =>
               tab.id === activeTabId ? { ...tab, isDirty: false } : tab
             ));
             refreshFiles();
@@ -195,6 +310,60 @@ export default function CodeEditor() {
 
   const activeFile = activeTabId ? fileSystem.findFileById(activeTabId) : null;
   const activeContent = activeTabId ? fileContents.get(activeTabId) || "" : "";
+  const editorType = activeFile ? getEditorType(activeFile.name) : 'code';
+
+  // Render appropriate editor based on file type
+  const renderEditor = () => {
+    if (!activeFile || activeFile.type !== "file") {
+      return (
+        <div className="h-full flex items-center justify-center text-muted-foreground">
+          <div className="text-center">
+            <p className="text-lg mb-2">No file open</p>
+            <p className="text-sm">Select a file from the explorer or drop files here</p>
+          </div>
+        </div>
+      );
+    }
+
+    switch (editorType) {
+      case 'mermaid':
+        return (
+          <MermaidPreview
+            content={activeContent}
+            onChange={handleEditorChange}
+            splitView={true}
+          />
+        );
+
+      case 'excalidraw':
+        return (
+          <ExcalidrawEditor
+            content={activeContent}
+            onChange={handleEditorChange}
+          />
+        );
+
+      case 'openscad':
+        return (
+          <OpenSCADPreview
+            content={activeContent}
+            onChange={handleEditorChange}
+            splitView={true}
+          />
+        );
+
+      default:
+        return (
+          <EditorPaneLSP
+            value={activeContent}
+            language={activeFile.language || "plaintext"}
+            filePath={activeFile.path || activeFile.id}
+            onChange={handleEditorChange}
+            onSave={handleSave}
+          />
+        );
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -220,43 +389,43 @@ export default function CodeEditor() {
                 <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full flex flex-col">
                   <div className="border-b border-sidebar-border bg-sidebar">
                     <TabsList className="w-full justify-start rounded-none h-12 bg-transparent p-0">
-                      <TabsTrigger 
-                        value="files" 
+                      <TabsTrigger
+                        value="files"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <Files className="h-4 w-4 mr-2" />
                         Files
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="git" 
+                      <TabsTrigger
+                        value="git"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <GitBranch className="h-4 w-4 mr-2" />
                         Git
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="debug" 
+                      <TabsTrigger
+                        value="debug"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <Bug className="h-4 w-4 mr-2" />
                         Debug
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="ai" 
+                      <TabsTrigger
+                        value="ai"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <Sparkles className="h-4 w-4 mr-2" />
                         AI
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="extensions" 
+                      <TabsTrigger
+                        value="extensions"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <Package className="h-4 w-4 mr-2" />
                         Extensions
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="settings" 
+                      <TabsTrigger
+                        value="settings"
                         className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
                       >
                         <Settings className="h-4 w-4 mr-2" />
@@ -264,31 +433,72 @@ export default function CodeEditor() {
                       </TabsTrigger>
                     </TabsList>
                   </div>
-                  
-                  <TabsContent value="files" className="flex-1 m-0 overflow-hidden">
+
+                  <TabsContent value="files" className="flex-1 m-0 overflow-hidden flex flex-col">
                     <FileTree
                       files={files}
                       selectedFileId={activeTabId}
                       onFileSelect={handleFileSelect}
+                      onFileMove={handleFileMove}
+                      onExternalFileDrop={handleExternalFileDrop}
                     />
+
+                    {/* AI Suggestions Panel */}
+                    {showAISuggestions && suggestions.length > 0 && (
+                      <div className="border-t border-border bg-card/50">
+                        <div className="flex items-center justify-between px-2 py-1 border-b border-border">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Lightbulb className="h-3 w-3" />
+                            <span>AI Suggestions ({suggestions.length})</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                            onClick={() => setShowAISuggestions(false)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <ScrollArea className="max-h-32">
+                          {suggestions.slice(0, 3).map((suggestion) => (
+                            <div
+                              key={suggestion.id}
+                              className="px-2 py-1.5 text-xs hover:bg-accent/50 cursor-pointer border-b border-border/50 last:border-0"
+                              onClick={() => dismissSuggestion(suggestion.id)}
+                            >
+                              <div className="flex items-start gap-1">
+                                <ChevronRight className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="font-medium">{suggestion.title}</p>
+                                  <p className="text-muted-foreground line-clamp-2">
+                                    {suggestion.description}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </ScrollArea>
+                      </div>
+                    )}
                   </TabsContent>
-                  
+
                   <TabsContent value="git" className="flex-1 m-0 overflow-hidden">
                     <SourceControlPanel />
                   </TabsContent>
-                  
+
                   <TabsContent value="debug" className="flex-1 m-0 overflow-hidden">
                     <DebugPanel />
                   </TabsContent>
-                  
+
                   <TabsContent value="ai" className="flex-1 m-0 overflow-hidden">
                     <AIAssistantPanel />
                   </TabsContent>
-                  
+
                   <TabsContent value="extensions" className="flex-1 m-0 overflow-hidden">
                     <ExtensionsPanel />
                   </TabsContent>
-                  
+
                   <TabsContent value="settings" className="flex-1 m-0 overflow-hidden">
                     <SettingsPanel />
                   </TabsContent>
@@ -308,24 +518,12 @@ export default function CodeEditor() {
                       activeTabId={activeTabId}
                       onTabSelect={setActiveTabId}
                       onTabClose={handleTabClose}
+                      onTabReorder={handleTabReorder}
                     />
                   )}
-                  
-                  <div className="flex-1 relative">
-                    {activeFile && activeFile.type === "file" ? (
-                      <EditorPane
-                        value={activeContent}
-                        language={activeFile.language || "plaintext"}
-                        onChange={handleEditorChange}
-                      />
-                    ) : (
-                      <div className="h-full flex items-center justify-center text-muted-foreground">
-                        <div className="text-center">
-                          <p className="text-lg mb-2">No file open</p>
-                          <p className="text-sm">Select a file from the explorer to start editing</p>
-                        </div>
-                      </div>
-                    )}
+
+                  <div className="flex-1 relative overflow-hidden">
+                    {renderEditor()}
                   </div>
 
                   <div className="flex items-center justify-between px-4 h-6 bg-sidebar border-t border-sidebar-border">
@@ -335,19 +533,26 @@ export default function CodeEditor() {
                       language={activeFile?.language || "plaintext"}
                       encoding="UTF-8"
                     />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-5 text-xs"
-                      onClick={() => setTerminalVisible(!terminalVisible)}
-                    >
-                      <TerminalIcon className="h-3 w-3 mr-1" />
-                      Terminal
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      {editorType !== 'code' && (
+                        <span className="text-xs text-muted-foreground capitalize">
+                          {editorType} Editor
+                        </span>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-5 text-xs"
+                        onClick={() => setTerminalVisible(!terminalVisible)}
+                      >
+                        <TerminalIcon className="h-3 w-3 mr-1" />
+                        Terminal
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Panel>
-              
+
               {terminalVisible && (
                 <>
                   <PanelResizeHandle className="h-1 bg-border hover:bg-primary transition-colors cursor-row-resize" />
@@ -367,7 +572,7 @@ export default function CodeEditor() {
           <DialogHeader>
             <DialogTitle>Create New File</DialogTitle>
             <DialogDescription>
-              Enter a name for your new file. Include the extension (e.g., .c, .cpp, .sql)
+              Enter a name for your new file. Supported formats: .mmd (Mermaid), .excalidraw, .scad (OpenSCAD), .java, and more.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -375,7 +580,7 @@ export default function CodeEditor() {
               <Label htmlFor="file-name">File Name</Label>
               <Input
                 id="file-name"
-                placeholder="main.c"
+                placeholder="diagram.mmd, model.scad, Main.java"
                 value={newFileName}
                 onChange={(e) => setNewFileName(e.target.value)}
                 onKeyDown={(e) => {
@@ -431,12 +636,11 @@ export default function CodeEditor() {
         </DialogContent>
       </Dialog>
 
-      {/* Find/Replace Dialog - Note: Monaco Editor has built-in find/replace with Ctrl+F */}
+      {/* Find/Replace Dialog */}
       <FindReplaceDialog
         open={isFindDialogOpen}
         onOpenChange={setIsFindDialogOpen}
         onFind={(text) => {
-          // Monaco editor will handle the find functionality via Ctrl+F natively
           toast({
             title: "Find",
             description: "Use Ctrl+F in the editor for advanced find features",

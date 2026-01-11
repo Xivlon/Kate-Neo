@@ -1,4 +1,4 @@
-import type { FileNode } from "@/components/FileTree";
+import type { FileNode } from "@/components/layout/FileTree";
 
 const STORAGE_KEY = "kate-ide-file-system";
 
