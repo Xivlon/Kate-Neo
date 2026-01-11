@@ -86,7 +86,7 @@ export class LSPService {
       const connection = createMessageConnection(reader, writer);
 
       // Handle server notifications
-      connection.onNotification(lsp.PublishDiagnosticsNotification.type, (params) => {
+      connection.onNotification(lsp.PublishDiagnosticsNotification.type, (params: lsp.PublishDiagnosticsParams) => {
         this.handleDiagnostics(params);
       });
 
@@ -276,7 +276,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.CompletionRequest.type,
         params
-      );
+      ) as lsp.CompletionItem[] | lsp.CompletionList | null;
 
       if (!result) return [];
       
@@ -310,7 +310,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.HoverRequest.type,
         params
-      );
+      ) as lsp.Hover | null;
 
       return result || null;
     } catch (error) {
@@ -337,7 +337,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.DefinitionRequest.type,
         params
-      );
+      ) as lsp.Location | lsp.Location[] | null;
 
       return result || null;
     } catch (error) {
@@ -365,7 +365,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.ReferencesRequest.type,
         params
-      );
+      ) as lsp.Location[] | null;
 
       return result || [];
     } catch (error) {
@@ -391,7 +391,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.DocumentSymbolRequest.type,
         params
-      );
+      ) as lsp.DocumentSymbol[] | null;
 
       return result || [];
     } catch (error) {
@@ -418,7 +418,7 @@ export class LSPService {
       const result = await server.connection.sendRequest(
         lsp.DocumentFormattingRequest.type,
         params
-      );
+      ) as lsp.TextEdit[] | null;
 
       return result || [];
     } catch (error) {
