@@ -12,7 +12,7 @@
 
 import { ChildProcess, spawn } from 'child_process';
 import * as lsp from 'vscode-languageserver-protocol';
-import { StreamMessageReader, StreamMessageWriter, createMessageConnection, MessageConnection } from 'vscode-jsonrpc/node';
+import { StreamMessageReader, StreamMessageWriter, createMessageConnection, MessageConnection } from 'vscode-jsonrpc/node.js';
 import { LSPServerConfig, getLSPConfigForLanguage } from './lsp-configs';
 
 interface LSPServerConnection {
