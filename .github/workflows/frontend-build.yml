@@ -4,12 +4,12 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'frontend/**'
+      - 'client/**'
       - '.github/workflows/frontend-build.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'frontend/**'
+      - 'client/**'
       - '.github/workflows/frontend-build.yml'
 
 jobs:
@@ -31,32 +31,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-        cache-dependency-path: frontend/yarn.lock
-    
-    - name: Install Yarn
-      run: npm install -g yarn
+        cache: 'npm'
+        cache-dependency-path: package-lock.json
     
     - name: Install dependencies
-      working-directory: ./frontend
-      run: |
-        echo "TODO: Install frontend dependencies"
-        echo "Skipping yarn install in placeholder mode"
-        # yarn install --frozen-lockfile
+      run: npm ci
     
     - name: Type check
-      working-directory: ./frontend
       run: |
-        echo "TODO: Run TypeScript type checking"
-        echo "Skipping tsc in placeholder mode"
-        # yarn compile
+        echo "Running TypeScript type checking..."
+        npm run check
+        echo "✓ Type checking passed"
     
     - name: Build
-      working-directory: ./frontend
       run: |
-        echo "TODO: Build frontend application"
-        echo "Skipping yarn build in placeholder mode"
-        # yarn build
+        echo "Building application..."
+        npm run build
+        echo "✓ Build completed"
     
     - name: Upload build artifacts
       if: success()
@@ -64,8 +55,7 @@ jobs:
       with:
         name: frontend-build-${{ matrix.node-version }}
         path: |
-          frontend/lib
-          frontend/src-gen
+          dist
         retention-days: 7
         if-no-files-found: warn
     
