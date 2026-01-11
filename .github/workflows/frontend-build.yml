@@ -71,18 +71,15 @@ jobs:
     
     # TODO: Add step to run frontend tests
     # - name: Run tests
-    #   working-directory: ./frontend
-    #   run: yarn test
+    #   run: npm test
     
     # TODO: Add step to lint code
     # - name: Lint
-    #   working-directory: ./frontend
-    #   run: yarn lint
+    #   run: npm run lint
     
     # TODO: Add step to check for security vulnerabilities
     # - name: Security audit
-    #   working-directory: ./frontend
-    #   run: yarn audit
+    #   run: npm audit
 
   # TODO: Add deployment job for successful builds on main branch
   # deploy:

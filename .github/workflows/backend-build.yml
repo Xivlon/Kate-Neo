@@ -59,23 +59,15 @@ jobs:
     
     # TODO: Add step to run backend tests
     # - name: Run tests
-    #   working-directory: ./backend
     #   run: npm test
     
     # TODO: Add step to lint code
     # - name: Lint
-    #   working-directory: ./backend
     #   run: npm run lint
     
     # TODO: Add step to check for security vulnerabilities
     # - name: Security audit
-    #   working-directory: ./backend
     #   run: npm audit
-    
-    # TODO: Add step to build backend (when Kate integration is added)
-    # - name: Build
-    #   working-directory: ./backend
-    #   run: npm run build
     
     - name: Upload backend artifacts
       if: success()
