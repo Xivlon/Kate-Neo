@@ -69,7 +69,7 @@ jobs:
       with:
         name: backend-build-${{ matrix.node-version }}
         path: |
-          dist/*.js
+          dist/index.js
         retention-days: 7
         if-no-files-found: warn
 
