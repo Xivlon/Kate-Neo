@@ -191,8 +191,6 @@ export function MermaidPreview({
     URL.revokeObjectURL(url);
   };
 
-
-
   const handleCopyCode = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
