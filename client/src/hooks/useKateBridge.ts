@@ -44,7 +44,7 @@ export function useKateBridge(options: UseKateBridgeOptions = {}) {
   const connect = useCallback(() => {
     // Determine WebSocket URL (use same host as current page)
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = `${protocol}//${window.location.host}/api/kate`;
 
     console.log('[useKateBridge] Connecting to Kate bridge:', wsUrl);
 
