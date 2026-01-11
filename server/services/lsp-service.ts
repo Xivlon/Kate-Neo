@@ -284,7 +284,7 @@ export class LSPService {
       if (Array.isArray(result)) {
         return result;
       } else {
-        return (result as lsp.CompletionList).items || [];
+        return result.items || [];
       }
     } catch (error) {
       console.error('[LSPService] Completion error:', error);
