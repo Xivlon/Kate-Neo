@@ -29,8 +29,8 @@ async function loadNativeModule(): Promise<void> {
     }
 }
 
-// Initialize native module at startup
-await loadNativeModule();
+// Initialize native module at startup without blocking module initialization
+loadNativeModule();
 
 /**
  * Document wrapper that abstracts native Kate document
