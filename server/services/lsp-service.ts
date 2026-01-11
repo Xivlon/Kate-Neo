@@ -86,7 +86,7 @@ export class LSPService {
       const connection = createMessageConnection(reader, writer);
 
       // Handle server notifications
-      connection.onNotification(lsp.PublishDiagnosticsNotification.type, (params) => {
+      connection.onNotification(lsp.PublishDiagnosticsNotification.type as any, (params: lsp.PublishDiagnosticsParams) => {
         this.handleDiagnostics(params);
       });
 
@@ -131,12 +131,12 @@ export class LSPService {
       };
 
       const initializeResult = await connection.sendRequest(
-        lsp.InitializeRequest.type,
+        lsp.InitializeRequest.type as any,
         initializeParams
       ) as lsp.InitializeResult;
 
       // Send initialized notification
-      await connection.sendNotification(lsp.InitializedNotification.type, {});
+      await connection.sendNotification(lsp.InitializedNotification.type as any, {});
 
       // Store server connection
       this.servers.set(languageId, {
@@ -202,7 +202,7 @@ export class LSPService {
       }
     };
 
-    await server.connection.sendNotification(lsp.DidOpenTextDocumentNotification.type, params);
+    await server.connection.sendNotification(lsp.DidOpenTextDocumentNotification.type as any, params);
     console.log(`[LSPService] Document opened: ${uri}`);
   }
 
@@ -235,7 +235,7 @@ export class LSPService {
       contentChanges: changes
     };
 
-    await server.connection.sendNotification(lsp.DidChangeTextDocumentNotification.type, params);
+    await server.connection.sendNotification(lsp.DidChangeTextDocumentNotification.type as any, params);
   }
 
   /**
@@ -251,7 +251,7 @@ export class LSPService {
       textDocument: { uri }
     };
 
-    await server.connection.sendNotification(lsp.DidCloseTextDocumentNotification.type, params);
+    await server.connection.sendNotification(lsp.DidCloseTextDocumentNotification.type as any, params);
     console.log(`[LSPService] Document closed: ${uri}`);
   }
 
@@ -274,9 +274,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.CompletionRequest.type,
+        lsp.CompletionRequest.type as any,
         params
-      );
+      ) as lsp.CompletionItem[] | lsp.CompletionList | null;
 
       if (!result) return [];
       
@@ -284,7 +284,7 @@ export class LSPService {
       if (Array.isArray(result)) {
         return result;
       } else {
-        return result.items || [];
+        return (result as lsp.CompletionList).items || [];
       }
     } catch (error) {
       console.error('[LSPService] Completion error:', error);
@@ -308,9 +308,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.HoverRequest.type,
+        lsp.HoverRequest.type as any,
         params
-      );
+      ) as lsp.Hover | null;
 
       return result || null;
     } catch (error) {
@@ -335,9 +335,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.DefinitionRequest.type,
+        lsp.DefinitionRequest.type as any,
         params
-      );
+      ) as lsp.Location | lsp.Location[] | null;
 
       return result || null;
     } catch (error) {
@@ -363,9 +363,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.ReferencesRequest.type,
+        lsp.ReferencesRequest.type as any,
         params
-      );
+      ) as lsp.Location[] | null;
 
       return result || [];
     } catch (error) {
@@ -389,9 +389,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.DocumentSymbolRequest.type,
+        lsp.DocumentSymbolRequest.type as any,
         params
-      );
+      ) as lsp.DocumentSymbol[] | null;
 
       return result || [];
     } catch (error) {
@@ -416,9 +416,9 @@ export class LSPService {
       };
 
       const result = await server.connection.sendRequest(
-        lsp.DocumentFormattingRequest.type,
+        lsp.DocumentFormattingRequest.type as any,
         params
-      );
+      ) as lsp.TextEdit[] | null;
 
       return result || [];
     } catch (error) {
@@ -483,8 +483,8 @@ export class LSPService {
     console.log(`[LSPService] Shutting down ${languageId} server`);
     
     try {
-      await server.connection.sendRequest(lsp.ShutdownRequest.type);
-      await server.connection.sendNotification(lsp.ExitNotification.type);
+      await server.connection.sendRequest(lsp.ShutdownRequest.type as any);
+      await server.connection.sendNotification(lsp.ExitNotification.type as any);
       server.connection.dispose();
       server.process.kill();
     } catch (error) {
