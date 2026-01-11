@@ -69,9 +69,9 @@ jobs:
       with:
         name: backend-build-${{ matrix.node-version }}
         path: |
-          dist
-          package.json
+          dist/*.js
         retention-days: 7
+        if-no-files-found: warn
 
   # TODO: Add Kate engine integration test job
   # kate-integration:
