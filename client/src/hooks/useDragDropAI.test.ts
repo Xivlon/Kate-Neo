@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useDragDropAI } from './useDragDropAI';
 import type { FileNode } from '@/components/layout/FileTree';
 
@@ -219,10 +219,6 @@ describe('useDragDropAI', () => {
         await result.current.analyzeDragDrop('misplaced.tsx', 'root', 'inside');
       });
 
-      // Should suggest moving to components folder
-      const organizeSuggestion = result.current.suggestions.find(
-        (s) => s.type === 'organize'
-      );
       // May or may not have suggestions depending on implementation
       expect(result.current.isAnalyzing).toBe(false);
     });
@@ -283,7 +279,6 @@ describe('useDragDropAI', () => {
     });
 
     it('should apply suggestions', async () => {
-      const actionMock = vi.fn();
       const { result } = renderHook(() => useDragDropAI(mockFiles));
 
       // Manually add a suggestion with action

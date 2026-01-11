@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { storage } from "./core/storage";
 import { debugAdapterManager, type DebugConfiguration } from "./services/debug-service";
 import { GitService } from "./services/git-service";
 import { terminalService } from "./services/terminal-service";

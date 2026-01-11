@@ -5,7 +5,7 @@
  * move operations, and project structure improvements
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { FileNode } from '@/components/layout/FileTree';
 
 interface DragDropSuggestion {
@@ -71,7 +71,7 @@ export function useDragDropAI(
   dismissSuggestion: (id: string) => void;
   applySuggestion: (id: string) => void;
 } {
-  const { enabled = true, debounceMs = 500 } = options;
+  const { enabled = true } = options;
 
   const [state, setState] = useState<DragDropAIState>({
     suggestions: [],

@@ -4,7 +4,7 @@
  * Tests for the Java compilation and Tomcat integration service
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EventEmitter } from 'events';
 
 // Mock the JavaService class for testing

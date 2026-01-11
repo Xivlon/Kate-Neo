@@ -5,7 +5,7 @@
  * for running Java web applications within Kate Neo IDE
  */
 
-import { spawn, ChildProcess, execSync, exec } from 'child_process';
+import { spawn, ChildProcess, exec } from 'child_process';
 import { EventEmitter } from 'events';
 import * as path from 'path';
 import * as fs from 'fs/promises';

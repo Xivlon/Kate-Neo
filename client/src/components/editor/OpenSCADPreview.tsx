@@ -12,11 +12,9 @@ import {
   Download,
   Settings,
   Box,
-  Maximize2,
   ZoomIn,
   ZoomOut,
   Eye,
-  Code,
   Sliders,
   AlertCircle,
   CheckCircle,
@@ -137,7 +135,7 @@ export function OpenSCADPreview({
 
     while ((match = paramRegex.exec(content)) !== null) {
       const [, name, value] = match;
-      let type: Parameter['type'] = 'number';
+      let type: Parameter['type'];
       let parsedValue: number | string | boolean;
 
       if (value === 'true' || value === 'false') {

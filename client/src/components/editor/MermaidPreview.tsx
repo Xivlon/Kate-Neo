@@ -191,31 +191,7 @@ export function MermaidPreview({
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadPNG = async () => {
-    if (!rendered || !containerRef.current) return;
 
-    const svgElement = containerRef.current.querySelector('svg');
-    if (!svgElement) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const svgData = new XMLSerializer().serializeToString(svgElement);
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      ctx.scale(2, 2);
-      ctx.drawImage(img, 0, 0);
-
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'diagram.png';
-      a.click();
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-  };
 
   const handleCopyCode = async () => {
     await navigator.clipboard.writeText(content);
