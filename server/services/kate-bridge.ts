@@ -121,7 +121,8 @@ export class KateBridge {
    * TODO: Implement full protocol for Kate engine communication
    */
   private async setupWebSocketServer(server: Server): Promise<void> {
-    this.wss = new WebSocketServer({ server });
+    // Use a specific path to avoid conflict with other WebSocket servers (e.g., /api/terminal)
+    this.wss = new WebSocketServer({ server, path: '/api/kate' });
 
     this.wss.on('connection', (ws: WebSocket) => {
       console.log('[KateBridge] Client connected');
@@ -158,7 +159,7 @@ export class KateBridge {
       });
     });
 
-    console.log(`[KateBridge] WebSocket server ready on port ${this.config.wsPort}`);
+    console.log('[KateBridge] WebSocket server ready on path /api/kate');
   }
 
   /**
