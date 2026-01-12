@@ -133,12 +133,13 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
               </SelectContent>
             </Select>
           )}
-          {models.length > 0 && !isCustom && !isOllama && (
-            <p className="text-xs text-muted-foreground">
-              {models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel)?.description ||
-               models[0]?.description || ''}
-            </p>
-          )}
+          {models.length > 0 && !isCustom && !isOllama && (() => {
+            const selectedModel = models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel);
+            const description = selectedModel?.description || models[0]?.description || '';
+            return description ? (
+              <p className="text-xs text-muted-foreground">{description}</p>
+            ) : null;
+          })()}
         </div>
 
         {/* Enable Provider */}

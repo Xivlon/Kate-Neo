@@ -258,12 +258,11 @@ export function useOverflowDetection(
     const observer = new ResizeObserver(debouncedCheck);
     observer.observe(element);
 
-    // Also observe children for content changes (without observing the entire subtree)
+    // Observe children for content changes that affect overflow
+    // Only observing childList to minimize performance impact
     const mutationObserver = new MutationObserver(debouncedCheck);
     mutationObserver.observe(element, {
       childList: true,
-      attributes: true,
-      characterData: true,
     });
 
     return () => {
