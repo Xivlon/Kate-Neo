@@ -300,13 +300,20 @@ export default function CodeEditor() {
             e.preventDefault();
             setIsFindDialogOpen(true);
             break;
+          case ",":
+            e.preventDefault();
+            setSidebarTab("settings");
+            if (sidebarCollapsed) {
+              setSidebarCollapsed(false);
+            }
+            break;
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeTabId, fileContents, openTabs]);
+  }, [activeTabId, fileContents, openTabs, sidebarCollapsed]);
 
   const activeFile = activeTabId ? fileSystem.findFileById(activeTabId) : null;
   const activeContent = activeTabId ? fileContents.get(activeTabId) || "" : "";
@@ -372,7 +379,12 @@ export default function CodeEditor() {
         onNewFolder={() => setNewFolderDialogOpen(true)}
         onSave={handleSave}
         onSearch={() => setIsFindDialogOpen(true)}
-        onSettings={() => console.log("Settings")}
+        onSettings={() => {
+          setSidebarTab("settings");
+          if (sidebarCollapsed) {
+            setSidebarCollapsed(false);
+          }
+        }}
         onGithubConnect={() => {
           toast({
             title: "GitHub Integration",
