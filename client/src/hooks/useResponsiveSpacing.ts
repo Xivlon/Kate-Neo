@@ -333,4 +333,86 @@ export function useElementResponsive<T extends HTMLElement = HTMLElement>() {
   };
 }
 
+/**
+ * Hook for automatic space filling with dynamic spacing
+ * This is a convenience hook for components that want to use the SpaceFill system
+ * without using the SpaceFill component wrapper.
+ */
+export function useSpaceFill(
+  variant: import('@/lib/spacing').SpaceFillVariant = 'panel',
+  options: {
+    debounceDelay?: number;
+    direction?: 'row' | 'column';
+    align?: 'start' | 'center' | 'end' | 'stretch';
+    justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+  } = {}
+) {
+  const {
+    debounceDelay = 50,
+    direction = 'column',
+    align = 'stretch',
+    justify = 'start',
+  } = options;
+
+  const { containerRef, dimensions } = useResponsiveSpacing({
+    debounceDelay,
+    trackHeight: true,
+  });
+
+  // Import dynamically to avoid circular dependencies
+  const {
+    SPACE_FILL_CONFIGS,
+    getAutoFillSpacing,
+    getSpaceFillClasses,
+    getSpaceFillStyles,
+  } = require('@/lib/spacing');
+
+  const config = SPACE_FILL_CONFIGS[variant];
+  const hasDimensions = dimensions.width > 0 && dimensions.height > 0;
+
+  // Get computed spacing values
+  const spacing = hasDimensions
+    ? getAutoFillSpacing(dimensions.width, dimensions.height, variant)
+    : {
+        padding: 0,
+        paddingClass: '',
+        gap: 0,
+        gapClass: '',
+        shouldScroll: config.scrollable,
+      };
+
+  // Get computed class names
+  const className = getSpaceFillClasses(variant, {
+    containerWidth: hasDimensions ? dimensions.width : undefined,
+    containerHeight: hasDimensions ? dimensions.height : undefined,
+    direction,
+    align,
+    justify,
+  });
+
+  // Get computed inline styles (for precise dynamic values)
+  const style = hasDimensions
+    ? getSpaceFillStyles(dimensions.width, dimensions.height, variant)
+    : {};
+
+  return {
+    /** Ref to attach to the container element */
+    containerRef,
+    /** Current container dimensions */
+    dimensions,
+    /** Whether dimensions are available */
+    hasDimensions,
+    /** Computed spacing values */
+    spacing,
+    /** Pre-computed CSS classes for the container */
+    className,
+    /** Pre-computed inline styles for precise spacing */
+    style,
+    /** The variant configuration being used */
+    config,
+    /** Whether the container should be scrollable */
+    shouldScroll: config.scrollable,
+  };
+}
+
 export { MIN_COMPONENT_WIDTHS, MIN_GAPS, BREAKPOINTS };

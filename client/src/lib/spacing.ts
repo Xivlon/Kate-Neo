@@ -266,3 +266,266 @@ export function getGapClass(size: GapKey): string {
 
   return gapMap[size];
 }
+
+// ============================================================================
+// Auto-Fill Spacing System
+// ============================================================================
+
+/**
+ * Space fill variants for different container types
+ */
+export type SpaceFillVariant =
+  | 'panel'      // Side panels (file explorer, extensions, etc.)
+  | 'content'    // Main content areas
+  | 'toolbar'    // Toolbars and action bars
+  | 'card'       // Card-like containers
+  | 'dialog'     // Dialogs and modals
+  | 'list'       // List containers
+  | 'form'       // Form containers
+  | 'none';      // No automatic spacing
+
+/**
+ * Configuration for auto-fill spacing behavior
+ */
+export interface SpaceFillConfig {
+  /** Base padding for the variant */
+  basePadding: SpacingKey;
+  /** Minimum padding to maintain */
+  minPadding: SpacingKey;
+  /** Maximum padding allowed */
+  maxPadding: SpacingKey;
+  /** Gap between child elements */
+  gap: GapKey;
+  /** Whether to fill available height */
+  fillHeight: boolean;
+  /** Whether to fill available width */
+  fillWidth: boolean;
+  /** Whether content should scroll */
+  scrollable: boolean;
+  /** Overflow behavior */
+  overflow: 'auto' | 'hidden' | 'visible' | 'scroll';
+}
+
+/**
+ * Default configurations for each space fill variant
+ */
+export const SPACE_FILL_CONFIGS: Record<SpaceFillVariant, SpaceFillConfig> = {
+  panel: {
+    basePadding: 'md',
+    minPadding: 'sm',
+    maxPadding: 'lg',
+    gap: 'compact',
+    fillHeight: true,
+    fillWidth: true,
+    scrollable: true,
+    overflow: 'auto',
+  },
+  content: {
+    basePadding: 'lg',
+    minPadding: 'md',
+    maxPadding: 'xl',
+    gap: 'normal',
+    fillHeight: true,
+    fillWidth: true,
+    scrollable: true,
+    overflow: 'auto',
+  },
+  toolbar: {
+    basePadding: 'sm',
+    minPadding: 'xs',
+    maxPadding: 'md',
+    gap: 'compact',
+    fillHeight: false,
+    fillWidth: true,
+    scrollable: false,
+    overflow: 'hidden',
+  },
+  card: {
+    basePadding: 'md',
+    minPadding: 'sm',
+    maxPadding: 'lg',
+    gap: 'normal',
+    fillHeight: false,
+    fillWidth: false,
+    scrollable: false,
+    overflow: 'hidden',
+  },
+  dialog: {
+    basePadding: 'lg',
+    minPadding: 'md',
+    maxPadding: 'xl',
+    gap: 'relaxed',
+    fillHeight: false,
+    fillWidth: false,
+    scrollable: true,
+    overflow: 'auto',
+  },
+  list: {
+    basePadding: 'sm',
+    minPadding: 'xs',
+    maxPadding: 'md',
+    gap: 'inline',
+    fillHeight: true,
+    fillWidth: true,
+    scrollable: true,
+    overflow: 'auto',
+  },
+  form: {
+    basePadding: 'md',
+    minPadding: 'sm',
+    maxPadding: 'lg',
+    gap: 'normal',
+    fillHeight: false,
+    fillWidth: true,
+    scrollable: false,
+    overflow: 'visible',
+  },
+  none: {
+    basePadding: 'none',
+    minPadding: 'none',
+    maxPadding: 'none',
+    gap: 'inline',
+    fillHeight: false,
+    fillWidth: false,
+    scrollable: false,
+    overflow: 'visible',
+  },
+};
+
+/**
+ * Calculate auto-fill spacing based on container dimensions and variant
+ */
+export function getAutoFillSpacing(
+  containerWidth: number,
+  containerHeight: number,
+  variant: SpaceFillVariant = 'panel'
+): {
+  padding: number;
+  paddingClass: string;
+  gap: number;
+  gapClass: string;
+  shouldScroll: boolean;
+} {
+  const config = SPACE_FILL_CONFIGS[variant];
+
+  // Get responsive padding based on container size
+  const responsivePadding = getDynamicSpacing(
+    Math.min(containerWidth, containerHeight),
+    config.basePadding,
+    { minSpacing: config.minPadding, maxSpacing: config.maxPadding }
+  );
+
+  const padding = getSpacing(responsivePadding);
+  const paddingClass = getSpacingClasses('both', responsivePadding);
+  const gap = MIN_GAPS[config.gap];
+  const gapClass = getGapClass(config.gap);
+
+  // Determine if scrolling is needed based on available space
+  const shouldScroll = config.scrollable;
+
+  return {
+    padding,
+    paddingClass,
+    gap,
+    gapClass,
+    shouldScroll,
+  };
+}
+
+/**
+ * Generate CSS classes for a space fill container
+ */
+export function getSpaceFillClasses(
+  variant: SpaceFillVariant,
+  options?: {
+    containerWidth?: number;
+    containerHeight?: number;
+    direction?: 'row' | 'column';
+    align?: 'start' | 'center' | 'end' | 'stretch';
+    justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+  }
+): string {
+  const config = SPACE_FILL_CONFIGS[variant];
+  const {
+    containerWidth = 0,
+    containerHeight = 0,
+    direction = 'column',
+    align = 'stretch',
+    justify = 'start',
+  } = options || {};
+
+  const classes: string[] = ['flex', 'min-w-0', 'min-h-0'];
+
+  // Direction
+  classes.push(direction === 'row' ? 'flex-row' : 'flex-col');
+
+  // Alignment
+  const alignMap = {
+    start: 'items-start',
+    center: 'items-center',
+    end: 'items-end',
+    stretch: 'items-stretch',
+  };
+  classes.push(alignMap[align]);
+
+  // Justification
+  const justifyMap = {
+    start: 'justify-start',
+    center: 'justify-center',
+    end: 'justify-end',
+    between: 'justify-between',
+    around: 'justify-around',
+  };
+  classes.push(justifyMap[justify]);
+
+  // Fill behavior
+  if (config.fillWidth) {
+    classes.push('w-full');
+  }
+  if (config.fillHeight) {
+    classes.push('h-full', 'flex-1');
+  }
+
+  // Overflow
+  const overflowMap = {
+    auto: 'overflow-auto',
+    hidden: 'overflow-hidden',
+    visible: 'overflow-visible',
+    scroll: 'overflow-scroll',
+  };
+  classes.push(overflowMap[config.overflow]);
+
+  // Dynamic spacing based on container size
+  if (containerWidth > 0 || containerHeight > 0) {
+    const { paddingClass, gapClass } = getAutoFillSpacing(
+      containerWidth,
+      containerHeight,
+      variant
+    );
+    classes.push(paddingClass, gapClass);
+  } else {
+    // Use base spacing when dimensions unknown
+    classes.push(
+      getSpacingClasses('both', config.basePadding),
+      getGapClass(config.gap)
+    );
+  }
+
+  return classes.join(' ');
+}
+
+/**
+ * Generate inline styles for dynamic spacing that can't be expressed with Tailwind classes
+ */
+export function getSpaceFillStyles(
+  containerWidth: number,
+  containerHeight: number,
+  variant: SpaceFillVariant = 'panel'
+): React.CSSProperties {
+  const { padding, gap } = getAutoFillSpacing(containerWidth, containerHeight, variant);
+
+  return {
+    padding: `${padding}px`,
+    gap: `${gap}px`,
+  };
+}
