@@ -4,8 +4,8 @@
  * Provides UI for managing Kate Neo IDE settings
  */
 
-import { useState, useEffect } from 'react';
-import { Settings, Save, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -18,11 +18,144 @@ import { useI18n } from '../../hooks/useI18n';
 import type { KateNeoSettings, SettingsScope } from '../../../../shared/settings-types';
 import {
   AIProvider,
-  AI_PROVIDER_TEMPLATES,
   getAvailableProviders,
   getProviderTemplate,
   getProviderModels,
 } from '../../../../shared/ai-types';
+
+interface ProviderConfigCardProps {
+  provider: AIProvider;
+  settings: Partial<KateNeoSettings>;
+  saveSetting: (key: string, value: unknown) => void;
+}
+
+function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigCardProps) {
+  const template = getProviderTemplate(provider);
+  const models = getProviderModels(provider);
+  const isOllama = provider === AIProvider.Ollama;
+  const isCustom = provider === AIProvider.Custom;
+
+  return (
+    <Card className="border-2 border-primary/30 bg-accent/30">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base">{template.name} Configuration</CardTitle>
+          {template.apiKeyLink && (
+            <a
+              href={template.apiKeyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
+            >
+              Get API Key
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* API Key (not required for Ollama unless remote) */}
+        <div className="grid gap-2">
+          <Label htmlFor="providerApiKey">
+            API Key {isOllama && '(Optional for local)'}
+          </Label>
+          <Input
+            id="providerApiKey"
+            type="password"
+            placeholder={template.apiKeyPlaceholder || 'Enter your API key...'}
+            value={settings.ai?.providers?.[provider]?.apiKey || ''}
+            onChange={(e) => saveSetting(`ai.providers.${provider}.apiKey`, e.target.value)}
+          />
+        </div>
+
+        {/* Custom Base URL for Ollama and Custom */}
+        {(isOllama || isCustom) && (
+          <div className="grid gap-2">
+            <Label htmlFor="providerBaseUrl">Base URL</Label>
+            <Input
+              id="providerBaseUrl"
+              placeholder={template.baseUrl || 'https://api.example.com'}
+              value={settings.ai?.providers?.[provider]?.customConfig?.baseUrl || ''}
+              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.baseUrl`, e.target.value)}
+            />
+            {isOllama && (
+              <p className="text-xs text-muted-foreground">
+                Default: http://localhost:11434 (local Ollama instance)
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Custom Endpoint for Custom provider */}
+        {isCustom && (
+          <div className="grid gap-2">
+            <Label htmlFor="providerEndpoint">API Endpoint</Label>
+            <Input
+              id="providerEndpoint"
+              placeholder="/v1/chat/completions"
+              value={settings.ai?.providers?.[provider]?.customConfig?.endpoint || ''}
+              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.endpoint`, e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* Model Selection */}
+        <div className="grid gap-2">
+          <Label htmlFor="providerModel">Default Model</Label>
+          {isCustom || isOllama ? (
+            <Input
+              id="providerModel"
+              placeholder={isOllama ? 'llama3, codellama, mistral...' : 'model-name'}
+              value={settings.ai?.providers?.[provider]?.defaultModel || ''}
+              onChange={(e) => saveSetting(`ai.providers.${provider}.defaultModel`, e.target.value)}
+            />
+          ) : (
+            <Select
+              value={settings.ai?.providers?.[provider]?.defaultModel || models[0]?.id || ''}
+              onValueChange={(v) => saveSetting(`ai.providers.${provider}.defaultModel`, v)}
+            >
+              <SelectTrigger id="providerModel">
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent>
+                {models.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    <div className="flex flex-col">
+                      <span>{model.name}</span>
+                      {model.contextWindow && (
+                        <span className="text-xs text-muted-foreground">
+                          {(model.contextWindow / 1000).toFixed(0)}K context
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          {models.length > 0 && !isCustom && !isOllama && (
+            <p className="text-xs text-muted-foreground">
+              {models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel)?.description ||
+               models[0]?.description || ''}
+            </p>
+          )}
+        </div>
+
+        {/* Enable Provider */}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <Label htmlFor="providerEnabled">Enable {template.name}</Label>
+          <input
+            id="providerEnabled"
+            type="checkbox"
+            checked={settings.ai?.providers?.[provider]?.enabled !== false}
+            onChange={(e) => saveSetting(`ai.providers.${provider}.enabled`, e.target.checked)}
+            className="h-4 w-4"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function SettingsPanel() {
   const { t, locale, locales, setLocale } = useI18n();
@@ -122,6 +255,19 @@ export function SettingsPanel() {
       console.error('[SettingsPanel] Failed to change locale');
     }
   };
+
+  // Memoize provider data to avoid recalculating on every render
+  const providers = useMemo(() => getAvailableProviders(), []);
+  
+  const providerData = useMemo(() => {
+    return providers.map((provider) => ({
+      provider,
+      template: getProviderTemplate(provider),
+      models: getProviderModels(provider),
+      isActive: settings.ai?.activeProvider === provider,
+      isConfigured: !!settings.ai?.providers?.[provider]?.apiKey,
+    }));
+  }, [providers, settings.ai?.activeProvider, settings.ai?.providers]);
 
   if (loading) {
     return (
@@ -397,6 +543,7 @@ export function SettingsPanel() {
                     checked={settings.ai?.enabled === true}
                     onChange={(e) => saveSetting('ai.enabled', e.target.checked)}
                     className="h-5 w-5"
+                    aria-label="AI Assistant"
                   />
                 </div>
               </CardHeader>
@@ -415,176 +562,52 @@ export function SettingsPanel() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Provider Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {getAvailableProviders().map((provider) => {
-                    const template = getProviderTemplate(provider);
-                    const isActive = settings.ai?.activeProvider === provider;
-                    const isConfigured = !!settings.ai?.providers?.[provider]?.apiKey;
-
-                    return (
-                      <button
-                        key={provider}
-                        onClick={() => saveSetting('ai.activeProvider', provider)}
-                        className={`
-                          relative p-3 rounded-lg border-2 text-left transition-all
-                          hover:border-primary/50 hover:bg-accent/50
-                          ${isActive ? 'border-primary bg-accent' : 'border-border'}
-                        `}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-sm">{template.name}</span>
-                          {isConfigured && (
-                            <Check className="h-4 w-4 text-green-500" />
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {template.description}
-                        </p>
-                        {template.openaiCompatible && provider !== AIProvider.OpenAI && (
-                          <Badge variant="outline" className="mt-2 text-xs">
-                            OpenAI Compatible
-                          </Badge>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2" role="radiogroup" aria-label="AI Provider Selection">
+                  {providerData.map(({ provider, template, isActive, isConfigured }) => (
+                    <button
+                      key={provider}
+                      onClick={() => saveSetting('ai.activeProvider', provider)}
+                      role="radio"
+                      aria-checked={isActive}
+                      aria-label={template.name}
+                      className={`
+                        relative p-3 rounded-lg border-2 text-left transition-all
+                        hover:border-primary/50 hover:bg-accent/50
+                        ${isActive ? 'border-primary bg-accent' : 'border-border'}
+                      `}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{template.name}</span>
+                        {isConfigured && (
+                          <Check className="h-4 w-4 text-green-500" />
                         )}
-                        {provider === AIProvider.Ollama && (
-                          <Badge variant="outline" className="mt-2 text-xs">
-                            <Server className="h-3 w-3 mr-1" />
-                            Local
-                          </Badge>
-                        )}
-                      </button>
-                    );
-                  })}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {template.description}
+                      </p>
+                      {template.openaiCompatible && provider !== AIProvider.OpenAI && (
+                        <Badge variant="outline" className="mt-2 text-xs">
+                          OpenAI Compatible
+                        </Badge>
+                      )}
+                      {provider === AIProvider.Ollama && (
+                        <Badge variant="outline" className="mt-2 text-xs">
+                          <Server className="h-3 w-3 mr-1" />
+                          Local
+                        </Badge>
+                      )}
+                    </button>
+                  ))}
                 </div>
 
                 {/* Active Provider Configuration */}
-                {settings.ai?.activeProvider && (() => {
-                  const provider = settings.ai.activeProvider;
-                  const template = getProviderTemplate(provider);
-                  const models = getProviderModels(provider);
-                  const isOllama = provider === AIProvider.Ollama;
-                  const isCustom = provider === AIProvider.Custom;
-
-                  return (
-                    <Card className="border-2 border-primary/30 bg-accent/30">
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-base">{template.name} Configuration</CardTitle>
-                          {template.apiKeyLink && (
-                            <a
-                              href={template.apiKeyLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline flex items-center gap-1"
-                            >
-                              Get API Key
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {/* API Key (not required for Ollama unless remote) */}
-                        <div className="grid gap-2">
-                          <Label htmlFor="providerApiKey">
-                            API Key {isOllama && '(Optional for local)'}
-                          </Label>
-                          <Input
-                            id="providerApiKey"
-                            type="password"
-                            placeholder={template.apiKeyPlaceholder || 'Enter your API key...'}
-                            value={settings.ai?.providers?.[provider]?.apiKey || ''}
-                            onChange={(e) => saveSetting(`ai.providers.${provider}.apiKey`, e.target.value)}
-                          />
-                        </div>
-
-                        {/* Custom Base URL for Ollama and Custom */}
-                        {(isOllama || isCustom) && (
-                          <div className="grid gap-2">
-                            <Label htmlFor="providerBaseUrl">Base URL</Label>
-                            <Input
-                              id="providerBaseUrl"
-                              placeholder={template.baseUrl || 'https://api.example.com'}
-                              value={settings.ai?.providers?.[provider]?.customConfig?.baseUrl || ''}
-                              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.baseUrl`, e.target.value)}
-                            />
-                            {isOllama && (
-                              <p className="text-xs text-muted-foreground">
-                                Default: http://localhost:11434 (local Ollama instance)
-                              </p>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Custom Endpoint for Custom provider */}
-                        {isCustom && (
-                          <div className="grid gap-2">
-                            <Label htmlFor="providerEndpoint">API Endpoint</Label>
-                            <Input
-                              id="providerEndpoint"
-                              placeholder="/v1/chat/completions"
-                              value={settings.ai?.providers?.[provider]?.customConfig?.endpoint || ''}
-                              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.endpoint`, e.target.value)}
-                            />
-                          </div>
-                        )}
-
-                        {/* Model Selection */}
-                        <div className="grid gap-2">
-                          <Label htmlFor="providerModel">Default Model</Label>
-                          {isCustom || isOllama ? (
-                            <Input
-                              id="providerModel"
-                              placeholder={isOllama ? 'llama3, codellama, mistral...' : 'model-name'}
-                              value={settings.ai?.providers?.[provider]?.defaultModel || ''}
-                              onChange={(e) => saveSetting(`ai.providers.${provider}.defaultModel`, e.target.value)}
-                            />
-                          ) : (
-                            <Select
-                              value={settings.ai?.providers?.[provider]?.defaultModel || models[0]?.id || ''}
-                              onValueChange={(v) => saveSetting(`ai.providers.${provider}.defaultModel`, v)}
-                            >
-                              <SelectTrigger id="providerModel">
-                                <SelectValue placeholder="Select a model" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {models.map((model) => (
-                                  <SelectItem key={model.id} value={model.id}>
-                                    <div className="flex flex-col">
-                                      <span>{model.name}</span>
-                                      {model.contextWindow && (
-                                        <span className="text-xs text-muted-foreground">
-                                          {(model.contextWindow / 1000).toFixed(0)}K context
-                                        </span>
-                                      )}
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                          {models.length > 0 && !isCustom && !isOllama && (
-                            <p className="text-xs text-muted-foreground">
-                              {models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel)?.description ||
-                               models[0]?.description}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Enable Provider */}
-                        <div className="flex items-center justify-between pt-2 border-t">
-                          <Label htmlFor="providerEnabled">Enable {template.name}</Label>
-                          <input
-                            id="providerEnabled"
-                            type="checkbox"
-                            checked={settings.ai?.providers?.[provider]?.enabled !== false}
-                            onChange={(e) => saveSetting(`ai.providers.${provider}.enabled`, e.target.checked)}
-                            className="h-4 w-4"
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })()}
+                {settings.ai?.activeProvider && (
+                  <ProviderConfigCard
+                    provider={settings.ai.activeProvider}
+                    settings={settings}
+                    saveSetting={saveSetting}
+                  />
+                )}
               </CardContent>
             </Card>
 

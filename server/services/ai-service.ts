@@ -216,7 +216,11 @@ export class AIService extends EventEmitter {
     } else if (data.content) {
       content = typeof data.content === 'string' ? data.content : data.content[0]?.text;
     } else {
-      content = JSON.stringify(data);
+      console.warn(
+        `[AIService] Unexpected chat completion response format from provider "${template.name}".`,
+        { responseData: data }
+      );
+      content = 'The AI provider returned an unexpected response format. Please try again.';
     }
 
     const message: ChatMessage = {

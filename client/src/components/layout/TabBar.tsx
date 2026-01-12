@@ -49,7 +49,7 @@ export function TabBar({
 
   // Track overflow state for scroll indicators
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { hasOverflow, canScrollStart, canScrollEnd, scrollTo } = useOverflowDetection(
+  const { hasOverflow, canScrollStart, canScrollEnd } = useOverflowDetection(
     scrollContainerRef,
     { direction: 'horizontal' }
   );
@@ -58,17 +58,13 @@ export function TabBar({
   const getTabWidth = useCallback(() => {
     if (tabs.length === 0 || dimensions.width === 0) return MIN_COMPONENT_WIDTHS.tabWithClose;
 
-    // Account for scroll buttons if they're visible (each ~24px) and overflow menu (~32px)
-    const reservedSpace = hasOverflow ? 80 : 0;
-    const availableWidth = dimensions.width - reservedSpace;
-
     return getFlexWidth(
       tabs.length,
       MIN_COMPONENT_WIDTHS.tab,
       MIN_COMPONENT_WIDTHS.tabWithClose * 1.5, // max width
       4 // gap
     );
-  }, [tabs.length, dimensions.width, hasOverflow, getFlexWidth]);
+  }, [tabs.length, dimensions.width, getFlexWidth]);
 
   // Scroll by one tab width
   const scrollByTab = useCallback((direction: 'left' | 'right') => {
@@ -82,11 +78,20 @@ export function TabBar({
 
   // Ensure active tab is visible
   useEffect(() => {
-    if (!activeTabId || !scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!activeTabId || !container) return;
 
-    const activeTab = scrollContainerRef.current.querySelector(`[data-tab-id="${activeTabId}"]`);
-    if (activeTab) {
-      activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    const activeTab = container.querySelector<HTMLElement>(`[data-tab-id="${activeTabId}"]`);
+    if (!activeTab) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const tabRect = activeTab.getBoundingClientRect();
+
+    const isFullyVisible =
+      tabRect.left >= containerRect.left && tabRect.right <= containerRect.right;
+
+    if (!isFullyVisible) {
+      activeTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
     }
   }, [activeTabId]);
 
@@ -179,7 +184,6 @@ export function TabBar({
         className="flex-1 flex items-center overflow-x-auto scrollbar-hide min-w-0"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {tabs.map((tab, index) => {
           const isDragging = dragState.draggedIndex === index;

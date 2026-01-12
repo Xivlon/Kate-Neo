@@ -9,6 +9,10 @@ import {
   shouldCollapse,
   getFlexibleWidth,
   getVisibleItemCount,
+  SPACE_FILL_CONFIGS,
+  getAutoFillSpacing,
+  getSpaceFillClasses,
+  getSpaceFillStyles,
   type SpacingKey,
   type GapKey,
   type BreakpointKey,
@@ -254,9 +258,13 @@ export function useOverflowDetection(
     const observer = new ResizeObserver(debouncedCheck);
     observer.observe(element);
 
-    // Also observe children for content changes
+    // Also observe children for content changes (without observing the entire subtree)
     const mutationObserver = new MutationObserver(debouncedCheck);
-    mutationObserver.observe(element, { childList: true, subtree: true });
+    mutationObserver.observe(element, {
+      childList: true,
+      attributes: true,
+      characterData: true,
+    });
 
     return () => {
       element.removeEventListener('scroll', debouncedCheck);
@@ -358,14 +366,6 @@ export function useSpaceFill(
     debounceDelay,
     trackHeight: true,
   });
-
-  // Import dynamically to avoid circular dependencies
-  const {
-    SPACE_FILL_CONFIGS,
-    getAutoFillSpacing,
-    getSpaceFillClasses,
-    getSpaceFillStyles,
-  } = require('@/lib/spacing');
 
   const config = SPACE_FILL_CONFIGS[variant];
   const hasDimensions = dimensions.width > 0 && dimensions.height > 0;
