@@ -16,13 +16,21 @@ import type {
 let kateNative: any = null;
 let isNativeAvailable = false;
 
-try {
-    kateNative = require('@kate-neo/native');
-    isNativeAvailable = kateNative?.isKateAvailable() || false;
-} catch (error) {
-    console.warn('[KateService] Native module not available:', (error as Error).message);
-    console.warn('[KateService] Running without KTextEditor support');
+// Use dynamic import for ESM compatibility
+async function loadNativeModule(): Promise<void> {
+    try {
+        const nativeModule = await import('@kate-neo/native');
+        // Handle both default and named exports
+        kateNative = nativeModule.default || nativeModule;
+        isNativeAvailable = kateNative?.isKateAvailable?.() || false;
+    } catch (error) {
+        console.warn('[KateService] Native module not available:', (error as Error).message);
+        console.warn('[KateService] Running without KTextEditor support');
+    }
 }
+
+// Initialize native module at startup without blocking module initialization
+loadNativeModule();
 
 /**
  * Document wrapper that abstracts native Kate document
