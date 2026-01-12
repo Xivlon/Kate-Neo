@@ -4,7 +4,7 @@
  * Provides UI for managing Kate Neo IDE settings
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -569,42 +569,48 @@ export function SettingsPanel() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Provider Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2" role="radiogroup" aria-label="AI Provider Selection">
-                  {providerData.map(({ provider, template, isActive, isConfigured }) => (
-                    <button
-                      key={provider}
-                      onClick={() => saveSetting('ai.activeProvider', provider)}
-                      role="radio"
-                      aria-checked={isActive}
-                      aria-label={template.name}
-                      className={`
-                        relative p-3 rounded-lg border-2 text-left transition-all
-                        hover:border-primary/50 hover:bg-accent/50
-                        ${isActive ? 'border-primary bg-accent' : 'border-border'}
-                      `}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm">{template.name}</span>
-                        {isConfigured && (
-                          <Check className="h-4 w-4 text-green-500" />
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {template.description}
-                      </p>
-                      {template.openaiCompatible && provider !== AIProvider.OpenAI && (
-                        <Badge variant="outline" className="mt-2 text-xs">
-                          OpenAI Compatible
-                        </Badge>
-                      )}
-                      {provider === AIProvider.Ollama && (
-                        <Badge variant="outline" className="mt-2 text-xs">
-                          <Server className="h-3 w-3 mr-1" />
-                          Local
-                        </Badge>
-                      )}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {(() => {
+                    const providers = getAvailableProviders();
+                    return providers.map((provider) => {
+                      const template = getProviderTemplate(provider);
+                      const isActive = settings.ai?.activeProvider === provider;
+                      const isConfigured = !!settings.ai?.providers?.[provider]?.apiKey;
+
+                      return (
+                        <button
+                          key={provider}
+                          onClick={() => saveSetting('ai.activeProvider', provider)}
+                          className={`
+                            relative p-3 rounded-lg border-2 text-left transition-all
+                            hover:border-primary/50 hover:bg-accent/50
+                            ${isActive ? 'border-primary bg-accent' : 'border-border'}
+                          `}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-sm">{template.name}</span>
+                            {isConfigured && (
+                              <Check className="h-4 w-4 text-green-500" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {template.description}
+                          </p>
+                          {template.openaiCompatible && provider !== AIProvider.OpenAI && (
+                            <Badge variant="outline" className="mt-2 text-xs">
+                              OpenAI Compatible
+                            </Badge>
+                          )}
+                          {provider === AIProvider.Ollama && (
+                            <Badge variant="outline" className="mt-2 text-xs">
+                              <Server className="h-3 w-3 mr-1" />
+                              Local
+                            </Badge>
+                          )}
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
 
                 {/* Active Provider Configuration */}
