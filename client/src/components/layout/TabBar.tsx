@@ -49,7 +49,7 @@ export function TabBar({
 
   // Track overflow state for scroll indicators
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { hasOverflow, canScrollStart, canScrollEnd, scrollTo } = useOverflowDetection(
+  const { hasOverflow, canScrollStart, canScrollEnd } = useOverflowDetection(
     scrollContainerRef,
     { direction: 'horizontal' }
   );
