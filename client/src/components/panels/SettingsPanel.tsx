@@ -4,7 +4,7 @@
  * Provides UI for managing Kate Neo IDE settings
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -267,7 +267,7 @@ export function SettingsPanel() {
   const providers = useMemo(() => getAvailableProviders(), []);
   
   const providerData = useMemo(() => {
-    return providers.map((provider) => ({
+    return providers.map((provider: AIProvider) => ({
       provider,
       template: getProviderTemplate(provider),
       models: getProviderModels(provider),
