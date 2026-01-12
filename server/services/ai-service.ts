@@ -1,8 +1,8 @@
 /**
  * AI Service
- * 
+ *
  * Manages AI API integrations for code assistance and chat functionality.
- * Supports OpenAI, Anthropic, and custom API endpoints.
+ * Supports OpenAI, Anthropic, and many popular alternative providers.
  */
 
 import { EventEmitter } from 'events';
@@ -17,6 +17,8 @@ import {
   AIProviderConfig,
   AIModel,
   KNOWN_MODELS,
+  AI_PROVIDER_TEMPLATES,
+  getProviderModels,
 } from '../../shared/ai-types.js';
 
 /**
@@ -71,12 +73,13 @@ export class AIService extends EventEmitter {
     const provider = this.settings.activeProvider;
     const providerConfig = this.settings.providers[provider];
 
+    // First check if user has custom models configured
     if (providerConfig?.models && providerConfig.models.length > 0) {
       return providerConfig.models;
     }
 
-    // Return default models for known providers
-    return KNOWN_MODELS.filter(m => m.provider === provider);
+    // Use provider template models or fall back to KNOWN_MODELS
+    return getProviderModels(provider);
   }
 
   /**
@@ -101,19 +104,21 @@ export class AIService extends EventEmitter {
     }
 
     try {
-      switch (provider) {
-        case AIProvider.OpenAI:
-          return await this.openAIChatCompletion(request, providerConfig);
-        case AIProvider.Anthropic:
-          return await this.anthropicChatCompletion(request, providerConfig);
-        case AIProvider.Custom:
-          return await this.customChatCompletion(request, providerConfig);
-        default:
-          return {
-            success: false,
-            error: `Unsupported provider: ${provider}`,
-          };
+      // Get provider template for configuration
+      const template = AI_PROVIDER_TEMPLATES[provider];
+
+      // Anthropic has a different API format
+      if (provider === AIProvider.Anthropic) {
+        return await this.anthropicChatCompletion(request, providerConfig);
       }
+
+      // All other providers use OpenAI-compatible format
+      if (template.openaiCompatible) {
+        return await this.openAICompatibleChatCompletion(request, providerConfig, provider);
+      }
+
+      // Fallback for truly custom APIs
+      return await this.customChatCompletion(request, providerConfig);
     } catch (error) {
       console.error('[AIService] Chat completion error:', error);
       return {
@@ -124,22 +129,65 @@ export class AIService extends EventEmitter {
   }
 
   /**
-   * OpenAI chat completion
+   * OpenAI-compatible chat completion
+   * Works with OpenAI, Deepseek, Qwen, Groq, Together, Mistral, Ollama, OpenRouter, Perplexity, and custom APIs
    */
-  private async openAIChatCompletion(
+  private async openAICompatibleChatCompletion(
     request: ChatCompletionRequest,
-    config: AIProviderConfig
+    config: AIProviderConfig,
+    provider: AIProvider
   ): Promise<ChatCompletionResponse> {
-    const model = request.model || config.defaultModel || 'gpt-3.5-turbo';
+    const template = AI_PROVIDER_TEMPLATES[provider];
+
+    // Determine base URL and endpoint
+    let baseUrl = template.baseUrl;
+    let endpoint = template.endpoint;
+
+    // For custom provider or if user has custom config, use those values
+    if (provider === AIProvider.Custom && config.customConfig) {
+      baseUrl = config.customConfig.baseUrl || baseUrl;
+      endpoint = config.customConfig.endpoint || endpoint;
+    }
+
+    // For Ollama, allow custom base URL from config
+    if (provider === AIProvider.Ollama && config.customConfig?.baseUrl) {
+      baseUrl = config.customConfig.baseUrl;
+    }
+
+    const url = `${baseUrl}${endpoint}`;
+
+    // Get default model from template if not specified
+    const defaultModel = config.defaultModel ||
+      (template.defaultModels.length > 0 ? template.defaultModels[0].id : 'default');
+    const model = request.model || defaultModel;
     const temperature = request.temperature ?? this.settings?.temperature ?? 0.7;
     const maxTokens = request.maxTokens ?? this.settings?.maxResponseTokens ?? 2000;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Build headers using template configuration
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add authentication header
+    if (config.apiKey) {
+      const authHeader = config.customConfig?.authHeader || template.authHeader;
+      const authPrefix = template.authPrefix;
+      headers[authHeader] = `${authPrefix}${config.apiKey}`;
+    }
+
+    // Add any additional headers from template
+    if (template.additionalHeaders) {
+      Object.assign(headers, template.additionalHeaders);
+    }
+
+    // Add custom headers from config
+    if (config.customConfig?.headers) {
+      Object.assign(headers, config.customConfig.headers);
+    }
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${config.apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model,
         messages: request.messages.map(m => ({
@@ -154,14 +202,27 @@ export class AIService extends EventEmitter {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} ${error}`);
+      throw new Error(`${template.name} API error: ${response.status} ${error}`);
     }
 
     const data = await response.json();
+
+    // Parse response (OpenAI format)
+    let content: string;
+    if (data.choices && data.choices[0]?.message?.content) {
+      content = data.choices[0].message.content;
+    } else if (data.response) {
+      content = data.response;
+    } else if (data.content) {
+      content = typeof data.content === 'string' ? data.content : data.content[0]?.text;
+    } else {
+      content = JSON.stringify(data);
+    }
+
     const message: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'assistant',
-      content: data.choices[0].message.content,
+      content,
       timestamp: Date.now(),
       model,
     };

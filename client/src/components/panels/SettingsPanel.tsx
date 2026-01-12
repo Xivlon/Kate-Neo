@@ -1,11 +1,11 @@
 /**
  * Settings Panel Component
- * 
+ *
  * Provides UI for managing Kate Neo IDE settings
  */
 
 import { useState, useEffect } from 'react';
-import { Settings, Save, RotateCcw, Globe, Sparkles } from 'lucide-react';
+import { Settings, Save, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -13,9 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
 import { useI18n } from '../../hooks/useI18n';
 import type { KateNeoSettings, SettingsScope } from '../../../../shared/settings-types';
-import type { AIProvider } from '../../../../shared/ai-types';
+import {
+  AIProvider,
+  AI_PROVIDER_TEMPLATES,
+  getAvailableProviders,
+  getProviderTemplate,
+  getProviderModels,
+} from '../../../../shared/ai-types';
 
 export function SettingsPanel() {
   const { t, locale, locales, setLocale } = useI18n();
@@ -373,228 +380,250 @@ export function SettingsPanel() {
 
           {/* AI Settings */}
           <TabsContent value="ai" className="space-y-4">
+            {/* Enable/Disable AI */}
             <Card>
-              <CardHeader>
-                <CardTitle>AI Assistant Configuration</CardTitle>
-                <CardDescription>Configure AI providers and models for code assistance</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="aiEnabled">Enable AI Assistant</Label>
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      AI Assistant
+                    </CardTitle>
+                    <CardDescription>Enable AI-powered code assistance</CardDescription>
+                  </div>
                   <input
                     id="aiEnabled"
                     type="checkbox"
                     checked={settings.ai?.enabled === true}
                     onChange={(e) => saveSetting('ai.enabled', e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-5 w-5"
                   />
                 </div>
+              </CardHeader>
+            </Card>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="aiProvider">Active Provider</Label>
-                  <Select
-                    value={settings.ai?.activeProvider || 'openai'}
-                    onValueChange={(v) => saveSetting('ai.activeProvider', v as AIProvider)}
-                  >
-                    <SelectTrigger id="aiProvider">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="openai">OpenAI</SelectItem>
-                      <SelectItem value="anthropic">Anthropic</SelectItem>
-                      <SelectItem value="custom">Custom API</SelectItem>
-                    </SelectContent>
-                  </Select>
+            {/* Quick Connect - Provider Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5" />
+                  Quick Connect
+                </CardTitle>
+                <CardDescription>
+                  Select a provider and enter your API key to get started
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Provider Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {getAvailableProviders().map((provider) => {
+                    const template = getProviderTemplate(provider);
+                    const isActive = settings.ai?.activeProvider === provider;
+                    const isConfigured = !!settings.ai?.providers?.[provider]?.apiKey;
+
+                    return (
+                      <button
+                        key={provider}
+                        onClick={() => saveSetting('ai.activeProvider', provider)}
+                        className={`
+                          relative p-3 rounded-lg border-2 text-left transition-all
+                          hover:border-primary/50 hover:bg-accent/50
+                          ${isActive ? 'border-primary bg-accent' : 'border-border'}
+                        `}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm">{template.name}</span>
+                          {isConfigured && (
+                            <Check className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {template.description}
+                        </p>
+                        {template.openaiCompatible && provider !== AIProvider.OpenAI && (
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            OpenAI Compatible
+                          </Badge>
+                        )}
+                        {provider === AIProvider.Ollama && (
+                          <Badge variant="outline" className="mt-2 text-xs">
+                            <Server className="h-3 w-3 mr-1" />
+                            Local
+                          </Badge>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* OpenAI Settings */}
-                {settings.ai?.activeProvider === 'openai' && (
-                  <Card className="border-2">
-                    <CardHeader>
-                      <CardTitle className="text-sm">OpenAI Configuration</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="openaiApiKey">API Key</Label>
-                        <Input
-                          id="openaiApiKey"
-                          type="password"
-                          placeholder="sk-..."
-                          value={settings.ai?.providers?.openai?.apiKey || ''}
-                          onChange={(e) => saveSetting('ai.providers.openai.apiKey', e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="openaiModel">Default Model</Label>
-                        <Select
-                          value={settings.ai?.providers?.openai?.defaultModel || 'gpt-3.5-turbo'}
-                          onValueChange={(v) => saveSetting('ai.providers.openai.defaultModel', v)}
-                        >
-                          <SelectTrigger id="openaiModel">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="gpt-4">GPT-4</SelectItem>
-                            <SelectItem value="gpt-4-turbo-preview">GPT-4 Turbo</SelectItem>
-                            <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="openaiEnabled">Enable OpenAI</Label>
-                        <input
-                          id="openaiEnabled"
-                          type="checkbox"
-                          checked={settings.ai?.providers?.openai?.enabled !== false}
-                          onChange={(e) => saveSetting('ai.providers.openai.enabled', e.target.checked)}
-                          className="h-4 w-4"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {/* Active Provider Configuration */}
+                {settings.ai?.activeProvider && (() => {
+                  const provider = settings.ai.activeProvider;
+                  const template = getProviderTemplate(provider);
+                  const models = getProviderModels(provider);
+                  const isOllama = provider === AIProvider.Ollama;
+                  const isCustom = provider === AIProvider.Custom;
 
-                {/* Anthropic Settings */}
-                {settings.ai?.activeProvider === 'anthropic' && (
-                  <Card className="border-2">
-                    <CardHeader>
-                      <CardTitle className="text-sm">Anthropic Configuration</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="anthropicApiKey">API Key</Label>
-                        <Input
-                          id="anthropicApiKey"
-                          type="password"
-                          placeholder="sk-ant-..."
-                          value={settings.ai?.providers?.anthropic?.apiKey || ''}
-                          onChange={(e) => saveSetting('ai.providers.anthropic.apiKey', e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="anthropicModel">Default Model</Label>
-                        <Select
-                          value={settings.ai?.providers?.anthropic?.defaultModel || 'claude-3-sonnet-20240229'}
-                          onValueChange={(v) => saveSetting('ai.providers.anthropic.defaultModel', v)}
-                        >
-                          <SelectTrigger id="anthropicModel">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="claude-3-opus-20240229">Claude 3 Opus</SelectItem>
-                            <SelectItem value="claude-3-sonnet-20240229">Claude 3 Sonnet</SelectItem>
-                            <SelectItem value="claude-3-haiku-20240307">Claude 3 Haiku</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="anthropicEnabled">Enable Anthropic</Label>
-                        <input
-                          id="anthropicEnabled"
-                          type="checkbox"
-                          checked={settings.ai?.providers?.anthropic?.enabled !== false}
-                          onChange={(e) => saveSetting('ai.providers.anthropic.enabled', e.target.checked)}
-                          className="h-4 w-4"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                  return (
+                    <Card className="border-2 border-primary/30 bg-accent/30">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">{template.name} Configuration</CardTitle>
+                          {template.apiKeyLink && (
+                            <a
+                              href={template.apiKeyLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:underline flex items-center gap-1"
+                            >
+                              Get API Key
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {/* API Key (not required for Ollama unless remote) */}
+                        <div className="grid gap-2">
+                          <Label htmlFor="providerApiKey">
+                            API Key {isOllama && '(Optional for local)'}
+                          </Label>
+                          <Input
+                            id="providerApiKey"
+                            type="password"
+                            placeholder={template.apiKeyPlaceholder || 'Enter your API key...'}
+                            value={settings.ai?.providers?.[provider]?.apiKey || ''}
+                            onChange={(e) => saveSetting(`ai.providers.${provider}.apiKey`, e.target.value)}
+                          />
+                        </div>
 
-                {/* Custom API Settings */}
-                {settings.ai?.activeProvider === 'custom' && (
-                  <Card className="border-2">
-                    <CardHeader>
-                      <CardTitle className="text-sm">Custom API Configuration</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="customApiKey">API Key (Optional)</Label>
-                        <Input
-                          id="customApiKey"
-                          type="password"
-                          placeholder="Your API key..."
-                          value={settings.ai?.providers?.custom?.apiKey || ''}
-                          onChange={(e) => saveSetting('ai.providers.custom.apiKey', e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="customBaseUrl">Base URL</Label>
-                        <Input
-                          id="customBaseUrl"
-                          placeholder="https://api.example.com"
-                          value={settings.ai?.providers?.custom?.customConfig?.baseUrl || ''}
-                          onChange={(e) => saveSetting('ai.providers.custom.customConfig.baseUrl', e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="customEndpoint">Endpoint (Optional)</Label>
-                        <Input
-                          id="customEndpoint"
-                          placeholder="/v1/chat/completions"
-                          value={settings.ai?.providers?.custom?.customConfig?.endpoint || ''}
-                          onChange={(e) => saveSetting('ai.providers.custom.customConfig.endpoint', e.target.value)}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="customFormat">API Format</Label>
-                        <Select
-                          value={settings.ai?.providers?.custom?.customConfig?.format || 'openai'}
-                          onValueChange={(v) => saveSetting('ai.providers.custom.customConfig.format', v)}
-                        >
-                          <SelectTrigger id="customFormat">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="openai">OpenAI Compatible</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="customEnabled">Enable Custom API</Label>
-                        <input
-                          id="customEnabled"
-                          type="checkbox"
-                          checked={settings.ai?.providers?.custom?.enabled !== false}
-                          onChange={(e) => saveSetting('ai.providers.custom.enabled', e.target.checked)}
-                          className="h-4 w-4"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                        {/* Custom Base URL for Ollama and Custom */}
+                        {(isOllama || isCustom) && (
+                          <div className="grid gap-2">
+                            <Label htmlFor="providerBaseUrl">Base URL</Label>
+                            <Input
+                              id="providerBaseUrl"
+                              placeholder={template.baseUrl || 'https://api.example.com'}
+                              value={settings.ai?.providers?.[provider]?.customConfig?.baseUrl || ''}
+                              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.baseUrl`, e.target.value)}
+                            />
+                            {isOllama && (
+                              <p className="text-xs text-muted-foreground">
+                                Default: http://localhost:11434 (local Ollama instance)
+                              </p>
+                            )}
+                          </div>
+                        )}
 
-                {/* General AI Settings */}
-                <div className="grid gap-2">
-                  <Label htmlFor="temperature">Temperature (0-2)</Label>
-                  <Input
-                    id="temperature"
-                    type="number"
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    value={settings.ai?.temperature || 0.7}
-                    onChange={(e) => saveSetting('ai.temperature', parseFloat(e.target.value))}
-                    className="w-32"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Controls randomness: 0 is deterministic, 2 is very creative
-                  </p>
-                </div>
+                        {/* Custom Endpoint for Custom provider */}
+                        {isCustom && (
+                          <div className="grid gap-2">
+                            <Label htmlFor="providerEndpoint">API Endpoint</Label>
+                            <Input
+                              id="providerEndpoint"
+                              placeholder="/v1/chat/completions"
+                              value={settings.ai?.providers?.[provider]?.customConfig?.endpoint || ''}
+                              onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.endpoint`, e.target.value)}
+                            />
+                          </div>
+                        )}
 
-                <div className="grid gap-2">
-                  <Label htmlFor="maxResponseTokens">Max Response Tokens</Label>
-                  <Input
-                    id="maxResponseTokens"
-                    type="number"
-                    min="100"
-                    max="32000"
-                    step="100"
-                    value={settings.ai?.maxResponseTokens || 2000}
-                    onChange={(e) => saveSetting('ai.maxResponseTokens', parseInt(e.target.value))}
-                    className="w-32"
-                  />
+                        {/* Model Selection */}
+                        <div className="grid gap-2">
+                          <Label htmlFor="providerModel">Default Model</Label>
+                          {isCustom || isOllama ? (
+                            <Input
+                              id="providerModel"
+                              placeholder={isOllama ? 'llama3, codellama, mistral...' : 'model-name'}
+                              value={settings.ai?.providers?.[provider]?.defaultModel || ''}
+                              onChange={(e) => saveSetting(`ai.providers.${provider}.defaultModel`, e.target.value)}
+                            />
+                          ) : (
+                            <Select
+                              value={settings.ai?.providers?.[provider]?.defaultModel || models[0]?.id || ''}
+                              onValueChange={(v) => saveSetting(`ai.providers.${provider}.defaultModel`, v)}
+                            >
+                              <SelectTrigger id="providerModel">
+                                <SelectValue placeholder="Select a model" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {models.map((model) => (
+                                  <SelectItem key={model.id} value={model.id}>
+                                    <div className="flex flex-col">
+                                      <span>{model.name}</span>
+                                      {model.contextWindow && (
+                                        <span className="text-xs text-muted-foreground">
+                                          {(model.contextWindow / 1000).toFixed(0)}K context
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          {models.length > 0 && !isCustom && !isOllama && (
+                            <p className="text-xs text-muted-foreground">
+                              {models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel)?.description ||
+                               models[0]?.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Enable Provider */}
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <Label htmlFor="providerEnabled">Enable {template.name}</Label>
+                          <input
+                            id="providerEnabled"
+                            type="checkbox"
+                            checked={settings.ai?.providers?.[provider]?.enabled !== false}
+                            onChange={(e) => saveSetting(`ai.providers.${provider}.enabled`, e.target.checked)}
+                            className="h-4 w-4"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+
+            {/* Advanced Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Advanced Settings</CardTitle>
+                <CardDescription>Fine-tune AI behavior for your workflow</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="temperature">Temperature</Label>
+                    <Input
+                      id="temperature"
+                      type="number"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={settings.ai?.temperature || 0.7}
+                      onChange={(e) => saveSetting('ai.temperature', parseFloat(e.target.value))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      0 = deterministic, 2 = creative
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="maxResponseTokens">Max Response Tokens</Label>
+                    <Input
+                      id="maxResponseTokens"
+                      type="number"
+                      min="100"
+                      max="32000"
+                      step="100"
+                      value={settings.ai?.maxResponseTokens || 2000}
+                      onChange={(e) => saveSetting('ai.maxResponseTokens', parseInt(e.target.value))}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
@@ -606,6 +635,9 @@ export function SettingsPanel() {
                     onChange={(e) => saveSetting('ai.systemPrompt', e.target.value)}
                     rows={3}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Customize how the AI assistant behaves and responds
+                  </p>
                 </div>
               </CardContent>
             </Card>
