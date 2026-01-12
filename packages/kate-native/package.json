@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Native KTextEditor bindings for Node.js",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "install": "node-gyp rebuild",
     "build": "node-gyp build",
