@@ -1,5 +1,5 @@
 import { ChevronRight, ChevronDown, File, Folder, FolderOpen, FileCode, FileJson, FileText, Image, Database, Cpu, Box } from "lucide-react";
-import { useState, useCallback, DragEvent, useRef } from "react";
+import { useState, useCallback, DragEvent } from "react";
 import { useResponsiveSpacing } from "@/hooks/useResponsiveSpacing";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
