@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Settings, Save, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
+import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
