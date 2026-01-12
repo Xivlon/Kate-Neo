@@ -184,7 +184,6 @@ export function TabBar({
         className="flex-1 flex items-center overflow-x-auto scrollbar-hide min-w-0"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {tabs.map((tab, index) => {
           const isDragging = dragState.draggedIndex === index;
