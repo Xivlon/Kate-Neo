@@ -265,6 +265,10 @@ export interface AIModel {
   maxTokens?: number;
   /** Whether model supports streaming */
   supportsStreaming?: boolean;
+  /** Model description */
+  description?: string;
+  /** Context window size (alias for maxTokens for backward compatibility) */
+  contextWindow?: number;
 }
 
 /**
