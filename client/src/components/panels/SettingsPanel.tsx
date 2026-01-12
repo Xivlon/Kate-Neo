@@ -272,7 +272,7 @@ export function SettingsPanel() {
       template: getProviderTemplate(provider),
       models: getProviderModels(provider),
       isActive: settings.ai?.activeProvider === provider,
-      isConfigured: !!settings.ai?.providers?.[provider as AIProvider]?.apiKey,
+      isConfigured: !!settings.ai?.providers?.[provider]?.apiKey,
     }));
   }, [providers, settings.ai?.activeProvider, settings.ai?.providers]);
 
