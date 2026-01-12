@@ -254,9 +254,13 @@ export function useOverflowDetection(
     const observer = new ResizeObserver(debouncedCheck);
     observer.observe(element);
 
-    // Also observe children for content changes
+    // Also observe children for content changes (without observing the entire subtree)
     const mutationObserver = new MutationObserver(debouncedCheck);
-    mutationObserver.observe(element, { childList: true, subtree: true });
+    mutationObserver.observe(element, {
+      childList: true,
+      attributes: true,
+      characterData: true,
+    });
 
     return () => {
       element.removeEventListener('scroll', debouncedCheck);
