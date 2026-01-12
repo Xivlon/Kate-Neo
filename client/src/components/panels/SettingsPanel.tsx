@@ -40,7 +40,7 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
     if (models.length === 0 || isCustom || isOllama) return null;
     const selectedModel = models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel);
     const description = selectedModel?.description || models[0]?.description || '';
-    return description ? description : null;
+    return description || null;
   };
 
   const modelDescription = getModelDescription();

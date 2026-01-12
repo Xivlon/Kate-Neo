@@ -162,13 +162,14 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     }
 
     // Build final className, filtering out padding/gap classes if overridden
+    // Note: These regex patterns handle standard (p-4), fractional (p-2.5), and arbitrary (p-[12px]) Tailwind values
+    // Pattern breakdown: p[xytblr]? matches padding with optional directional suffix
+    //                   (\d+(\.\d+)?|\[[^\]]+\]) matches numbers, decimals, or bracket expressions
     let finalBaseClasses = baseClasses;
     if (padding) {
-      // Remove all padding-related classes including fractional values and arbitrary values
       finalBaseClasses = finalBaseClasses.replace(/p[xytblr]?-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
     if (gap) {
-      // Remove all gap classes including fractional values and arbitrary values
       finalBaseClasses = finalBaseClasses.replace(/gap-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
 
