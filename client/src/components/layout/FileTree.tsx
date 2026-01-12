@@ -1,5 +1,7 @@
 import { ChevronRight, ChevronDown, File, Folder, FolderOpen, FileCode, FileJson, FileText, Image, Database, Cpu, Box } from "lucide-react";
-import { useState, useCallback, DragEvent } from "react";
+import { useState, useCallback, DragEvent, useRef } from "react";
+import { useResponsiveSpacing } from "@/hooks/useResponsiveSpacing";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface FileNode {
   id: string;
@@ -40,6 +42,23 @@ export function FileTree({
     dropTarget: null,
     dropPosition: null
   });
+
+  // Dynamic spacing based on container width
+  const { containerRef, dimensions, isCompact, getIndent } = useResponsiveSpacing({
+    debounceDelay: 50,
+  });
+
+  // Calculate dynamic indentation based on container width
+  const getDynamicIndent = useCallback((level: number) => {
+    // Base padding for all items
+    const basePadding = 8;
+    // Get responsive indent that adjusts based on available width
+    const levelIndent = getIndent(level, isCompact ? 10 : 14);
+    return basePadding + levelIndent;
+  }, [getIndent, isCompact]);
+
+  // Calculate if text should be truncated more aggressively
+  const shouldCompactView = dimensions.width > 0 && dimensions.width < 180;
 
   const toggleFolder = (id: string) => {
     setExpandedFolders(prev => {
@@ -213,43 +232,68 @@ export function FileTree({
     const isDragging = dragState.draggedItem?.id === node.id;
     const dropIndicator = getDropIndicatorStyle(node.id);
 
+    // Calculate dynamic padding based on container width and nesting level
+    const dynamicPadding = getDynamicIndent(level);
+
+    // Determine gap size based on available space
+    const gapClass = shouldCompactView ? "gap-1" : "gap-2";
+
+    const fileItem = (
+      <div
+        className={`flex items-center ${gapClass} h-8 cursor-pointer text-sm transition-all duration-150 min-w-0
+          ${isSelected ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"}
+          ${isDragging ? "opacity-50" : ""}
+          ${dropIndicator}
+        `}
+        style={{
+          paddingLeft: `${dynamicPadding}px`,
+          paddingRight: shouldCompactView ? '4px' : '8px'
+        }}
+        onClick={() => {
+          if (node.type === "folder") {
+            toggleFolder(node.id);
+          } else {
+            onFileSelect(node);
+          }
+        }}
+        draggable
+        onDragStart={(e) => handleDragStart(e, node)}
+        onDragOver={(e) => handleDragOver(e, node)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e, node)}
+        onDragEnd={handleDragEnd}
+        data-testid={`file-tree-item-${node.id}`}
+      >
+        {node.type === "folder" && (
+          <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
+          </span>
+        )}
+        {node.type === "file" && <span className="w-4 flex-shrink-0" />}
+        <span className="flex-shrink-0">{getFileIcon(node)}</span>
+        <span className="flex-1 truncate font-mono text-xs min-w-0">{node.name}</span>
+      </div>
+    );
+
     return (
       <div key={node.id}>
-        <div
-          className={`flex items-center gap-2 h-8 px-2 cursor-pointer text-sm transition-all duration-150
-            ${isSelected ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"}
-            ${isDragging ? "opacity-50" : ""}
-            ${dropIndicator}
-          `}
-          style={{ paddingLeft: `${level * 12 + 8}px` }}
-          onClick={() => {
-            if (node.type === "folder") {
-              toggleFolder(node.id);
-            } else {
-              onFileSelect(node);
-            }
-          }}
-          draggable
-          onDragStart={(e) => handleDragStart(e, node)}
-          onDragOver={(e) => handleDragOver(e, node)}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => handleDrop(e, node)}
-          onDragEnd={handleDragEnd}
-          data-testid={`file-tree-item-${node.id}`}
-        >
-          {node.type === "folder" && (
-            <span className="w-4 h-4 flex items-center justify-center">
-              {isExpanded ? (
-                <ChevronDown className="w-4 h-4" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
-            </span>
-          )}
-          {node.type === "file" && <span className="w-4" />}
-          {getFileIcon(node)}
-          <span className="flex-1 truncate font-mono text-xs">{node.name}</span>
-        </div>
+        {/* Wrap in tooltip when in compact view to show full filename on hover */}
+        {shouldCompactView ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {fileItem}
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-mono text-xs">
+              {node.name}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          fileItem
+        )}
         {node.type === "folder" && isExpanded && node.children && (
           <div>
             {node.children.map(child => renderNode(child, level + 1))}
@@ -261,7 +305,8 @@ export function FileTree({
 
   return (
     <div
-      className="h-full overflow-y-auto"
+      ref={containerRef as React.RefObject<HTMLDivElement>}
+      className="h-full overflow-y-auto overflow-x-hidden"
       data-testid="file-tree"
       onDragOver={(e) => {
         e.preventDefault();
