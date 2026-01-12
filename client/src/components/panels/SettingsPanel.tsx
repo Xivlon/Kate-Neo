@@ -35,6 +35,16 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
   const isOllama = provider === AIProvider.Ollama;
   const isCustom = provider === AIProvider.Custom;
 
+  // Get model description with fallback
+  const getModelDescription = () => {
+    if (models.length === 0 || isCustom || isOllama) return null;
+    const selectedModel = models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel);
+    const description = selectedModel?.description || models[0]?.description || '';
+    return description ? description : null;
+  };
+
+  const modelDescription = getModelDescription();
+
   return (
     <Card className="border-2 border-primary/30 bg-accent/30">
       <CardHeader className="pb-3">
@@ -133,13 +143,9 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
               </SelectContent>
             </Select>
           )}
-          {models.length > 0 && !isCustom && !isOllama && (() => {
-            const selectedModel = models.find(m => m.id === settings.ai?.providers?.[provider]?.defaultModel);
-            const description = selectedModel?.description || models[0]?.description || '';
-            return description ? (
-              <p className="text-xs text-muted-foreground">{description}</p>
-            ) : null;
-          })()}
+          {modelDescription && (
+            <p className="text-xs text-muted-foreground">{modelDescription}</p>
+          )}
         </div>
 
         {/* Enable Provider */}

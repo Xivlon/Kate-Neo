@@ -150,7 +150,8 @@ export function getVisibleItemCount(
 ): number {
   if (containerWidth <= 0 || itemWidth <= 0) return 0;
 
-  // Normalize gap to avoid negative or unreasonably large values
+  // Normalize gap to avoid negative values; allow gaps larger than itemWidth for flexibility
+  // but cap at itemWidth to prevent degenerate cases where gap exceeds item size
   const safeGap = Math.min(Math.max(0, gap), itemWidth);
 
   // First item doesn't need a leading gap

@@ -165,11 +165,11 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     let finalBaseClasses = baseClasses;
     if (padding) {
       // Remove all padding-related classes including fractional values and arbitrary values
-      finalBaseClasses = finalBaseClasses.replace(/p[xytblr]?-(\d+(\.\d+)?|\[[\w\d]+\])/g, '').trim();
+      finalBaseClasses = finalBaseClasses.replace(/p[xytblr]?-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
     if (gap) {
       // Remove all gap classes including fractional values and arbitrary values
-      finalBaseClasses = finalBaseClasses.replace(/gap-(\d+(\.\d+)?|\[[\w\d]+\])/g, '').trim();
+      finalBaseClasses = finalBaseClasses.replace(/gap-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
 
     // Build inline styles for dynamic spacing (when needed)
