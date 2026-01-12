@@ -397,6 +397,7 @@ export function SettingsPanel() {
                     checked={settings.ai?.enabled === true}
                     onChange={(e) => saveSetting('ai.enabled', e.target.checked)}
                     className="h-5 w-5"
+                    aria-label="AI Assistant"
                   />
                 </div>
               </CardHeader>
