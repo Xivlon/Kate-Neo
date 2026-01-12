@@ -58,17 +58,13 @@ export function TabBar({
   const getTabWidth = useCallback(() => {
     if (tabs.length === 0 || dimensions.width === 0) return MIN_COMPONENT_WIDTHS.tabWithClose;
 
-    // Account for scroll buttons if they're visible (each ~24px) and overflow menu (~32px)
-    const reservedSpace = hasOverflow ? 80 : 0;
-    const availableWidth = dimensions.width - reservedSpace;
-
     return getFlexWidth(
       tabs.length,
       MIN_COMPONENT_WIDTHS.tab,
       MIN_COMPONENT_WIDTHS.tabWithClose * 1.5, // max width
       4 // gap
     );
-  }, [tabs.length, dimensions.width, hasOverflow, getFlexWidth]);
+  }, [tabs.length, dimensions.width, getFlexWidth]);
 
   // Scroll by one tab width
   const scrollByTab = useCallback((direction: 'left' | 'right') => {
