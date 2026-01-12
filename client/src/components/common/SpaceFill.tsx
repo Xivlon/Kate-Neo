@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useEffect, useRef } from 'react';
 import { useResponsiveSpacing } from '@/hooks/useResponsiveSpacing';
 import {
   type SpaceFillVariant,
@@ -117,8 +117,23 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
       trackHeight: true,
     });
 
-    // Get configuration for the variant
-    const config = SPACE_FILL_CONFIGS[variant];
+    // Local ref to track the actual DOM node
+    const localRef = useRef<HTMLDivElement | null>(null);
+
+    // Sync local ref with containerRef and forward ref
+    useEffect(() => {
+      const node = localRef.current;
+      if (node) {
+        // Update internal ref
+        (containerRef as React.MutableRefObject<HTMLElement | null>).current = node;
+        // Forward external ref
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      }
+    }, [containerRef, ref]);
 
     // Calculate dynamic spacing if enabled and dimensions are available
     const hasDimensions = dynamic && dimensions.width > 0 && dimensions.height > 0;
@@ -147,25 +162,16 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     }
 
     // Build final className, filtering out padding/gap classes if overridden
+    // Note: These regex patterns handle standard (p-4), fractional (p-2.5), and arbitrary (p-[12px]) Tailwind values
+    // Pattern breakdown: p[xytblr]? matches padding with optional directional suffix
+    //                   (\d+(\.\d+)?|\[[^\]]+\]) matches numbers, decimals, or bracket expressions
     let finalBaseClasses = baseClasses;
     if (padding) {
-      finalBaseClasses = finalBaseClasses.replace(/p-\d+|px-\d+|py-\d+/g, '').trim();
+      finalBaseClasses = finalBaseClasses.replace(/p[xytblr]?-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
     if (gap) {
-      finalBaseClasses = finalBaseClasses.replace(/gap-\d+/g, '').trim();
+      finalBaseClasses = finalBaseClasses.replace(/gap-(\d+(\.\d+)?|\[[^\]]+\])/g, '').trim();
     }
-
-    // Combine refs
-    const combinedRef = (node: HTMLDivElement | null) => {
-      // Update internal ref
-      (containerRef as React.MutableRefObject<HTMLElement | null>).current = node;
-      // Forward external ref
-      if (typeof ref === 'function') {
-        ref(node);
-      } else if (ref) {
-        ref.current = node;
-      }
-    };
 
     // Build inline styles for dynamic spacing (when needed)
     const dynamicStyles: React.CSSProperties = {};
@@ -180,7 +186,7 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
 
     return (
       <ElementComponent
-        ref={combinedRef}
+        ref={localRef}
         className={cn(finalBaseClasses, ...overrideClasses, className)}
         style={{ ...dynamicStyles, ...style }}
         data-space-fill={variant}

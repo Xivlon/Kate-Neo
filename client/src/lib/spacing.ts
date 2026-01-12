@@ -150,9 +150,12 @@ export function getVisibleItemCount(
 ): number {
   if (containerWidth <= 0 || itemWidth <= 0) return 0;
 
+  // Normalize gap: ensure non-negative and cap at itemWidth for reasonable layouts
+  const safeGap = Math.min(Math.max(0, gap), itemWidth);
+
   // First item doesn't need a leading gap
-  const availableForItems = containerWidth + gap;
-  const itemWithGap = itemWidth + gap;
+  const availableForItems = containerWidth + safeGap;
+  const itemWithGap = itemWidth + safeGap;
 
   return Math.floor(availableForItems / itemWithGap);
 }
@@ -175,6 +178,9 @@ export function getResponsiveIndent(
     maxTotalIndent
   } = options || {};
 
+  // Special case: level 0 should have no indent
+  if (level === 0) return 0;
+
   // Calculate max total indent based on container width (leave at least 40% for content)
   const effectiveMaxIndent = maxTotalIndent ?? containerWidth * 0.4;
 
@@ -183,7 +189,7 @@ export function getResponsiveIndent(
 
   // If we exceed max, reduce indent per level
   if (idealTotalIndent > effectiveMaxIndent) {
-    const adjustedIndent = Math.max(minIndent, effectiveMaxIndent / Math.max(1, level));
+    const adjustedIndent = Math.max(minIndent, effectiveMaxIndent / level);
     return adjustedIndent * level;
   }
 

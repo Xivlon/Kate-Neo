@@ -48,7 +48,12 @@ export interface AIProviderTemplate {
   apiKeyLink?: string;
   /** Whether this is an OpenAI-compatible API */
   openaiCompatible: boolean;
-  /** Default models for this provider */
+  /** 
+   * Default models for this provider.
+   * If empty, getProviderModels() will fall back to KNOWN_MODELS.
+   * This allows providers to leverage the common model catalog when they don't 
+   * have provider-specific models defined.
+   */
   defaultModels: AIModel[];
   /** Whether the provider supports local/self-hosted */
   supportsLocal?: boolean;

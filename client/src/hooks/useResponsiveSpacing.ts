@@ -9,6 +9,10 @@ import {
   shouldCollapse,
   getFlexibleWidth,
   getVisibleItemCount,
+  SPACE_FILL_CONFIGS,
+  getAutoFillSpacing,
+  getSpaceFillClasses,
+  getSpaceFillStyles,
   type SpacingKey,
   type GapKey,
   type BreakpointKey,
@@ -362,14 +366,6 @@ export function useSpaceFill(
     debounceDelay,
     trackHeight: true,
   });
-
-  // Import dynamically to avoid circular dependencies
-  const {
-    SPACE_FILL_CONFIGS,
-    getAutoFillSpacing,
-    getSpaceFillClasses,
-    getSpaceFillStyles,
-  } = require('@/lib/spacing');
 
   const config = SPACE_FILL_CONFIGS[variant];
   const hasDimensions = dimensions.width > 0 && dimensions.height > 0;

@@ -522,6 +522,9 @@
   }
 
   /* Enable container queries on space fill elements */
+  /* Note: Container queries are a relatively new CSS feature. 
+     Browser support: Chrome 105+, Edge 105+, Safari 16+, Firefox 110+ 
+     For older browsers, consider adding a fallback or polyfill. */
   .space-fill-container {
     container-type: inline-size;
   }
