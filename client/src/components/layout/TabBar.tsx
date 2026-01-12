@@ -78,11 +78,20 @@ export function TabBar({
 
   // Ensure active tab is visible
   useEffect(() => {
-    if (!activeTabId || !scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    if (!activeTabId || !container) return;
 
-    const activeTab = scrollContainerRef.current.querySelector(`[data-tab-id="${activeTabId}"]`);
-    if (activeTab) {
-      activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    const activeTab = container.querySelector<HTMLElement>(`[data-tab-id="${activeTabId}"]`);
+    if (!activeTab) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const tabRect = activeTab.getBoundingClientRect();
+
+    const isFullyVisible =
+      tabRect.left >= containerRect.left && tabRect.right <= containerRect.right;
+
+    if (!isFullyVisible) {
+      activeTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
     }
   }, [activeTabId]);
 
