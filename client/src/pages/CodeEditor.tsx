@@ -300,13 +300,20 @@ export default function CodeEditor() {
             e.preventDefault();
             setIsFindDialogOpen(true);
             break;
+          case ",":
+            e.preventDefault();
+            setSidebarTab("settings");
+            if (sidebarCollapsed) {
+              setSidebarCollapsed(false);
+            }
+            break;
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeTabId, fileContents, openTabs]);
+  }, [activeTabId, fileContents, openTabs, sidebarCollapsed]);
 
   const activeFile = activeTabId ? fileSystem.findFileById(activeTabId) : null;
   const activeContent = activeTabId ? fileContents.get(activeTabId) || "" : "";
@@ -372,7 +379,12 @@ export default function CodeEditor() {
         onNewFolder={() => setNewFolderDialogOpen(true)}
         onSave={handleSave}
         onSearch={() => setIsFindDialogOpen(true)}
-        onSettings={() => console.log("Settings")}
+        onSettings={() => {
+          setSidebarTab("settings");
+          if (sidebarCollapsed) {
+            setSidebarCollapsed(false);
+          }
+        }}
         onGithubConnect={() => {
           toast({
             title: "GitHub Integration",
@@ -386,53 +398,56 @@ export default function CodeEditor() {
           {!sidebarCollapsed && (
             <>
               <Panel defaultSize={20} minSize={15} maxSize={30}>
-                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full flex flex-col">
-                  <div className="border-b border-sidebar-border bg-sidebar">
-                    <TabsList className="w-full justify-start rounded-none h-12 bg-transparent p-0">
+                <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full flex flex-row">
+                  {/* Vertical Activity Bar */}
+                  <div className="flex flex-col border-r border-sidebar-border bg-sidebar">
+                    <TabsList className="flex flex-col h-auto w-12 rounded-none bg-transparent p-0 gap-0">
                       <TabsTrigger
                         value="files"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="Files"
                       >
-                        <Files className="h-4 w-4 mr-2" />
-                        Files
+                        <Files className="h-5 w-5" />
                       </TabsTrigger>
                       <TabsTrigger
                         value="git"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="Git"
                       >
-                        <GitBranch className="h-4 w-4 mr-2" />
-                        Git
+                        <GitBranch className="h-5 w-5" />
                       </TabsTrigger>
                       <TabsTrigger
                         value="debug"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="Debug"
                       >
-                        <Bug className="h-4 w-4 mr-2" />
-                        Debug
+                        <Bug className="h-5 w-5" />
                       </TabsTrigger>
                       <TabsTrigger
                         value="ai"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="AI"
                       >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        AI
+                        <Sparkles className="h-5 w-5" />
                       </TabsTrigger>
                       <TabsTrigger
                         value="extensions"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="Extensions"
                       >
-                        <Package className="h-4 w-4 mr-2" />
-                        Extensions
+                        <Package className="h-5 w-5" />
                       </TabsTrigger>
                       <TabsTrigger
                         value="settings"
-                        className="h-12 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary"
+                        className="w-12 h-12 rounded-none data-[state=active]:border-l-2 data-[state=active]:border-primary data-[state=active]:bg-sidebar-accent"
+                        title="Settings"
                       >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings
+                        <Settings className="h-5 w-5" />
                       </TabsTrigger>
                     </TabsList>
                   </div>
+                  {/* Sidebar Content */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
 
                   <TabsContent value="files" className="flex-1 m-0 overflow-hidden flex flex-col">
                     <FileTree
@@ -502,6 +517,7 @@ export default function CodeEditor() {
                   <TabsContent value="settings" className="flex-1 m-0 overflow-hidden">
                     <SettingsPanel />
                   </TabsContent>
+                  </div>
                 </Tabs>
               </Panel>
               <PanelResizeHandle className="w-1 bg-border hover:bg-primary transition-colors cursor-col-resize" />
