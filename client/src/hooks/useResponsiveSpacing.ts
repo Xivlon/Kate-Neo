@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo, useContext } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   BREAKPOINTS,
   MIN_COMPONENT_WIDTHS,

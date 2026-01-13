@@ -766,39 +766,6 @@ export function SettingsPanel() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Extensions Settings */}
-          <TabsContent value="extensions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.extensions')}</CardTitle>
-                <CardDescription>Configure extension behavior</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="autoUpdate">Auto Update Extensions</Label>
-                  <input
-                    id="autoUpdate"
-                    type="checkbox"
-                    checked={settings.extensions?.autoUpdate === true}
-                    onChange={(e) => saveSetting('extensions.autoUpdate', e.target.checked)}
-                    className="h-4 w-4"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="showRecommendations">Show Recommendations</Label>
-                  <input
-                    id="showRecommendations"
-                    type="checkbox"
-                    checked={settings.extensions?.showRecommendations !== false}
-                    onChange={(e) => saveSetting('extensions.showRecommendations', e.target.checked)}
-                    className="h-4 w-4"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>
