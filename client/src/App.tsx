@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { DynamicAdaptationProvider } from "@/contexts/DynamicAdaptationContext";
+import { LayoutModeProvider } from "@/contexts/LayoutModeContext";
 import CodeEditor from "@/pages/CodeEditor";
 import NotFound from "@/pages/not-found";
 
@@ -20,10 +21,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <DynamicAdaptationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <LayoutModeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </LayoutModeProvider>
       </DynamicAdaptationProvider>
     </QueryClientProvider>
   );

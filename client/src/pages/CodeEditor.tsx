@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FileTree, type FileNode } from "@/components/layout/FileTree";
 import { TabBar, type Tab } from "@/components/layout/TabBar";
@@ -15,6 +15,10 @@ import { TerminalPanel } from "@/components/panels/TerminalPanel";
 import { ExtensionsPanel } from "@/components/panels/ExtensionsPanel";
 import { SettingsPanel } from "@/components/panels/SettingsPanel";
 import { AIAssistantPanel } from "@/components/panels/AIAssistantPanel";
+import { GridLayout } from "@/components/layout/GridLayout";
+import { GridLayoutProvider } from "@/contexts/GridLayoutContext";
+import { useLayoutMode } from "@/contexts/LayoutModeContext";
+import type { GridPane } from "@/lib/gridLayout";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
 import { useDragDropAI } from "@/hooks/useDragDropAI";
@@ -75,6 +79,7 @@ export default function CodeEditor() {
   const [newFolderName, setNewFolderName] = useState("");
   const [showAISuggestions, setShowAISuggestions] = useState(true);
   const { toast } = useToast();
+  const { layoutMode } = useLayoutMode();
 
   // AI-powered drag-drop suggestions
   const {
@@ -372,6 +377,69 @@ export default function CodeEditor() {
     }
   };
 
+  // Render content for a grid pane based on its type
+  const renderGridPaneContent = useCallback((pane: GridPane) => {
+    switch (pane.type) {
+      case 'EDITOR':
+        return (
+          <div className="h-full flex flex-col">
+            {openTabs.length > 0 && (
+              <TabBar
+                tabs={openTabs}
+                activeTabId={activeTabId}
+                onTabSelect={setActiveTabId}
+                onTabClose={handleTabClose}
+                onTabReorder={handleTabReorder}
+              />
+            )}
+            <div className="flex-1 relative overflow-hidden">
+              {renderEditor()}
+            </div>
+          </div>
+        );
+      case 'TERMINAL':
+        return <TerminalPanel />;
+      case 'FILE_TREE':
+        return (
+          <FileTree
+            files={files}
+            selectedFileId={activeTabId}
+            onFileSelect={handleFileSelect}
+            onFileMove={handleFileMove}
+            onExternalFileDrop={handleExternalFileDrop}
+          />
+        );
+      case 'AI_ASSISTANT':
+        return <AIAssistantPanel />;
+      case 'SOURCE_CONTROL':
+        return <SourceControlPanel />;
+      case 'DEBUG':
+        return <DebugPanel />;
+      case 'EXTENSIONS':
+        return <ExtensionsPanel />;
+      case 'SETTINGS':
+        return <SettingsPanel />;
+      case 'PREVIEW':
+        return (
+          <div className="h-full flex items-center justify-center text-muted-foreground">
+            <p>Preview pane</p>
+          </div>
+        );
+      default:
+        return (
+          <div className="h-full flex items-center justify-center text-muted-foreground">
+            <p>Unknown pane type</p>
+          </div>
+        );
+    }
+  }, [openTabs, activeTabId, files, handleFileSelect, handleFileMove, handleExternalFileDrop, handleTabClose, handleTabReorder, renderEditor]);
+
+  // Initial panes for grid layout
+  const initialGridPanes = useMemo(() => [
+    { id: 'editor-1', type: 'EDITOR' as const, x: 1, y: 0, cols: 2, rows: 2, size: 'TALL' as const, locked: true },
+    { id: 'filetree-1', type: 'FILE_TREE' as const, x: 0, y: 0, cols: 1, rows: 2, size: 'STD' as const, locked: true },
+  ], []);
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopMenuBar
@@ -394,7 +462,17 @@ export default function CodeEditor() {
       />
 
       <div className="flex-1 overflow-hidden">
-        <PanelGroup direction="horizontal">
+        {layoutMode === 'grid' ? (
+          /* Grid Layout Mode */
+          <GridLayoutProvider initialPanes={initialGridPanes}>
+            <GridLayout
+              className="h-full w-full"
+              renderPane={renderGridPaneContent}
+            />
+          </GridLayoutProvider>
+        ) : (
+          /* Flex Layout Mode (default) */
+          <PanelGroup direction="horizontal">
           {!sidebarCollapsed && (
             <>
               <Panel defaultSize={20} minSize={15} maxSize={30}>
@@ -580,6 +658,7 @@ export default function CodeEditor() {
             </PanelGroup>
           </Panel>
         </PanelGroup>
+        )}
       </div>
 
       {/* New File Dialog */}
