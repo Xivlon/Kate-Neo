@@ -18,6 +18,7 @@ import { AIAssistantPanel } from "@/components/panels/AIAssistantPanel";
 import { GridLayout } from "@/components/layout/GridLayout";
 import { GridLayoutProvider } from "@/contexts/GridLayoutContext";
 import { useLayoutMode } from "@/contexts/LayoutModeContext";
+import { useAI } from "@/contexts/AIContext";
 import type { GridPane } from "@/lib/gridLayout";
 import { fileSystem } from "@/lib/fileSystem";
 import { useToast } from "@/hooks/use-toast";
@@ -80,6 +81,7 @@ export default function CodeEditor() {
   const [showAISuggestions, setShowAISuggestions] = useState(true);
   const { toast } = useToast();
   const { layoutMode } = useLayoutMode();
+  const { updateEditorContext } = useAI();
 
   // AI-powered drag-drop suggestions
   const {
@@ -93,6 +95,27 @@ export default function CodeEditor() {
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
+
+  // Update AI context with current editor state
+  useEffect(() => {
+    if (activeTabId) {
+      const activeFile = fileSystem.findFileById(activeTabId);
+      const content = fileContents.get(activeTabId) || activeFile?.content || null;
+      updateEditorContext({
+        filePath: activeFile?.path || activeTabId,
+        fileName: activeFile?.name || null,
+        content: content,
+        selection: null, // Selection is handled by editor component
+      });
+    } else {
+      updateEditorContext({
+        filePath: null,
+        fileName: null,
+        content: null,
+        selection: null,
+      });
+    }
+  }, [activeTabId, fileContents, updateEditorContext]);
 
   // Load file contents when file system changes
   useEffect(() => {
