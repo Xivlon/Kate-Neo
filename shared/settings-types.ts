@@ -139,6 +139,22 @@ export interface ExtensionSettings {
 }
 
 /**
+ * Appearance settings
+ */
+export interface AppearanceSettings {
+  /** Enable dynamic adaptation for responsive spacing and layouts */
+  dynamicAdaptation: boolean;
+  /** Theme preference */
+  theme: 'light' | 'dark' | 'system';
+  /** Sidebar position */
+  sidebarPosition: 'left' | 'right';
+  /** Activity bar position */
+  activityBarPosition: 'left' | 'top' | 'hidden';
+  /** Layout mode: flex (traditional) or grid (tactical 4x4) */
+  layoutMode: 'flex' | 'grid';
+}
+
+/**
  * Language-specific settings
  * Key is the language ID (e.g., 'typescript', 'python', 'rust')
  */
@@ -178,6 +194,8 @@ export interface KateNeoSettings {
   extensions: ExtensionSettings;
   /** AI assistant settings */
   ai: AISettings;
+  /** Appearance settings */
+  appearance: AppearanceSettings;
   /** Language-specific settings */
   languages: LanguageSettings;
   /** Custom settings from extensions or plugins */
@@ -241,6 +259,13 @@ export const DEFAULT_SETTINGS: KateNeoSettings = {
     showRecommendations: true,
   },
   ai: DEFAULT_AI_SETTINGS,
+  appearance: {
+    dynamicAdaptation: true,
+    theme: 'dark',
+    sidebarPosition: 'left',
+    activityBarPosition: 'left',
+    layoutMode: 'flex',
+  },
   languages: {},
 };
 
