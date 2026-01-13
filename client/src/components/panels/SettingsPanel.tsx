@@ -4,8 +4,8 @@
  * Provides UI for managing Kate Neo IDE settings
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server, Maximize2, Monitor, PanelLeft } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server, Maximize2, Monitor, PanelLeft, Save, Undo2, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -167,9 +167,15 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
 export function SettingsPanel() {
   const { t, locale, locales, setLocale } = useI18n();
   const [settings, setSettings] = useState<Partial<KateNeoSettings>>({});
+  const [pendingChanges, setPendingChanges] = useState<Map<string, unknown>>(new Map());
   const [scope, setScope] = useState<SettingsScope>('workspace' as SettingsScope);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [applySuccess, setApplySuccess] = useState<boolean | null>(null);
+  const originalSettings = useRef<Partial<KateNeoSettings>>({});
+
+  // Track if there are unsaved changes
+  const hasChanges = pendingChanges.size > 0;
 
   // Load settings on mount
   useEffect(() => {
@@ -184,6 +190,8 @@ export function SettingsPanel() {
         const data = await res.json();
         if (data.success) {
           setSettings(data.settings || {});
+          originalSettings.current = data.settings || {};
+          setPendingChanges(new Map()); // Clear pending changes on load
         }
       }
     } catch (error) {
@@ -193,44 +201,88 @@ export function SettingsPanel() {
     }
   };
 
-  const saveSetting = async (key: string, value: unknown) => {
+  // Update local setting state without saving to server
+  const updateSetting = useCallback((key: string, value: unknown) => {
+    // Prevent prototype pollution
+    const parts = key.split('.');
+    if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) {
+      console.error('[SettingsPanel] Invalid key:', key);
+      return;
+    }
+
+    // Track the change
+    setPendingChanges(prev => {
+      const updated = new Map(prev);
+      updated.set(key, value);
+      return updated;
+    });
+
+    // Update local state for immediate UI feedback
+    setSettings((prev) => {
+      const updated = { ...prev };
+      let current: any = updated;
+      for (let i = 0; i < parts.length - 1; i++) {
+        if (!current[parts[i]]) current[parts[i]] = {};
+        current = current[parts[i]];
+      }
+      current[parts[parts.length - 1]] = value;
+      return updated;
+    });
+
+    // Clear success indicator when new changes are made
+    setApplySuccess(null);
+  }, []);
+
+  // Apply all pending changes to the server
+  const applySettings = useCallback(async () => {
+    if (pendingChanges.size === 0) return;
+
     try {
       setSaving(true);
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scope, key, value }),
-      });
+      setApplySuccess(null);
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          // Update local state
-          setSettings((prev) => {
-            const updated = { ...prev };
-            const parts = key.split('.');
-            
-            // Prevent prototype pollution
-            if (parts.some(p => p === '__proto__' || p === 'constructor' || p === 'prototype')) {
-              console.error('[SettingsPanel] Invalid key:', key);
-              return prev;
-            }
-            
-            let current: any = updated;
-            for (let i = 0; i < parts.length - 1; i++) {
-              if (!current[parts[i]]) current[parts[i]] = {};
-              current = current[parts[i]];
-            }
-            current[parts[parts.length - 1]] = value;
-            return updated;
-          });
-        }
+      // Save all pending changes
+      const savePromises = Array.from(pendingChanges.entries()).map(([key, value]) =>
+        fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scope, key, value }),
+        })
+      );
+
+      const results = await Promise.all(savePromises);
+      const allSuccess = results.every(res => res.ok);
+
+      if (allSuccess) {
+        // Update original settings reference
+        originalSettings.current = { ...settings };
+        setPendingChanges(new Map());
+        setApplySuccess(true);
+
+        // Clear success indicator after 3 seconds
+        setTimeout(() => setApplySuccess(null), 3000);
+      } else {
+        setApplySuccess(false);
+        console.error('[SettingsPanel] Some settings failed to save');
       }
     } catch (error) {
-      console.error('[SettingsPanel] Save error:', error);
+      console.error('[SettingsPanel] Apply error:', error);
+      setApplySuccess(false);
     } finally {
       setSaving(false);
     }
+  }, [pendingChanges, scope, settings]);
+
+  // Discard pending changes and revert to original settings
+  const discardChanges = useCallback(() => {
+    setSettings({ ...originalSettings.current });
+    setPendingChanges(new Map());
+    setApplySuccess(null);
+  }, []);
+
+  // Legacy function for backwards compatibility (used by locale change which should apply immediately)
+  const saveSetting = async (key: string, value: unknown) => {
+    updateSetting(key, value);
   };
 
   const resetSettings = async () => {
@@ -292,6 +344,24 @@ export function SettingsPanel() {
           <div className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
             <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
+            {hasChanges && (
+              <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded">
+                <AlertCircle className="h-3 w-3" />
+                Unsaved changes
+              </span>
+            )}
+            {applySuccess === true && (
+              <span className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded">
+                <Check className="h-3 w-3" />
+                Settings applied
+              </span>
+            )}
+            {applySuccess === false && (
+              <span className="flex items-center gap-1 text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+                <AlertCircle className="h-3 w-3" />
+                Failed to apply
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Select value={scope} onValueChange={(v) => setScope(v as SettingsScope)}>
@@ -303,7 +373,31 @@ export function SettingsPanel() {
                 <SelectItem value="workspace">{t('settings.workspace')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm" onClick={resetSettings} disabled={saving}>
+            {hasChanges && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={discardChanges}
+                  disabled={saving}
+                  className="text-muted-foreground"
+                >
+                  <Undo2 className="h-4 w-4 mr-2" />
+                  Discard
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={applySettings}
+                  disabled={saving}
+                  className="bg-primary"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {saving ? 'Applying...' : 'Apply'}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" size="sm" onClick={resetSettings} disabled={saving || hasChanges}>
               <RotateCcw className="h-4 w-4 mr-2" />
               {t('settings.reset')}
             </Button>
