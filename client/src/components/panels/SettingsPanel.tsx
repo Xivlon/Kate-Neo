@@ -337,35 +337,35 @@ export function SettingsPanel() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
+      <div className="border-b px-4 py-3 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Settings className="h-5 w-5 flex-shrink-0" />
+            <h2 className="text-lg font-semibold truncate">{t('settings.title')}</h2>
             {hasChanges && (
-              <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded">
+              <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded flex-shrink-0">
                 <AlertCircle className="h-3 w-3" />
                 Unsaved changes
               </span>
             )}
             {applySuccess === true && (
-              <span className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded">
+              <span className="flex items-center gap-1 text-xs text-green-500 bg-green-500/10 px-2 py-0.5 rounded flex-shrink-0">
                 <Check className="h-3 w-3" />
                 Settings applied
               </span>
             )}
             {applySuccess === false && (
-              <span className="flex items-center gap-1 text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded">
+              <span className="flex items-center gap-1 text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded flex-shrink-0">
                 <AlertCircle className="h-3 w-3" />
                 Failed to apply
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 ml-auto">
             <Select value={scope} onValueChange={(v) => setScope(v as SettingsScope)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -406,19 +406,21 @@ export function SettingsPanel() {
       </div>
 
       {/* Settings Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 min-h-0">
         <Tabs defaultValue="editor" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="editor">{t('settings.editor')}</TabsTrigger>
-            <TabsTrigger value="terminal">{t('settings.terminal')}</TabsTrigger>
-            <TabsTrigger value="git">{t('settings.git')}</TabsTrigger>
-            <TabsTrigger value="ai">
-              <Sparkles className="h-4 w-4 mr-1" />
-              AI
-            </TabsTrigger>
-            <TabsTrigger value="appearance">{t('settings.appearance')}</TabsTrigger>
-            <TabsTrigger value="extensions">{t('settings.extensions')}</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-1 px-1 pb-2">
+            <TabsList className="inline-flex w-max min-w-full">
+              <TabsTrigger value="editor" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">{t('settings.editor')}</TabsTrigger>
+              <TabsTrigger value="terminal" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">{t('settings.terminal')}</TabsTrigger>
+              <TabsTrigger value="git" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">{t('settings.git')}</TabsTrigger>
+              <TabsTrigger value="ai" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">
+                <Sparkles className="h-4 w-4 mr-1" />
+                AI
+              </TabsTrigger>
+              <TabsTrigger value="appearance" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">{t('settings.appearance')}</TabsTrigger>
+              <TabsTrigger value="extensions" className="flex-1 min-w-0 px-2 text-xs sm:text-sm sm:px-3">{t('settings.extensions')}</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Editor Settings */}
           <TabsContent value="editor" className="space-y-4">
