@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, useContext } from 'react';
 import {
   BREAKPOINTS,
   MIN_COMPONENT_WIDTHS,
@@ -17,6 +17,7 @@ import {
   type GapKey,
   type BreakpointKey,
 } from '@/lib/spacing';
+import { useDynamicAdaptationEnabled } from '@/contexts/DynamicAdaptationContext';
 
 export interface ContainerDimensions {
   width: number;
@@ -30,6 +31,8 @@ export interface ResponsiveSpacingOptions {
   minWidth?: number;
   /** Enable height tracking */
   trackHeight?: boolean;
+  /** Override the global dynamic adaptation setting (for testing or special cases) */
+  forceEnabled?: boolean;
 }
 
 export interface ResponsiveSpacingResult {
@@ -63,7 +66,11 @@ export interface ResponsiveSpacingResult {
 export function useResponsiveSpacing(
   options: ResponsiveSpacingOptions = {}
 ): ResponsiveSpacingResult {
-  const { debounceDelay = 100, minWidth = 200, trackHeight = false } = options;
+  const { debounceDelay = 100, minWidth = 200, trackHeight = false, forceEnabled } = options;
+
+  // Check if dynamic adaptation is globally enabled
+  const globalEnabled = useDynamicAdaptationEnabled();
+  const isDynamicEnabled = forceEnabled !== undefined ? forceEnabled : globalEnabled;
 
   const containerRef = useRef<HTMLElement | null>(null);
   const [dimensions, setDimensions] = useState<ContainerDimensions>({
@@ -131,53 +138,59 @@ export function useResponsiveSpacing(
     return '2xl';
   }, [dimensions]);
 
-  // Derived state
-  const isCompact = dimensions.width < BREAKPOINTS.md;
-  const isNarrow = dimensions.width < minWidth;
+  // Derived state - when dynamic adaptation is disabled, never report compact/narrow
+  const isCompact = isDynamicEnabled && dimensions.width > 0 && dimensions.width < BREAKPOINTS.md;
+  const isNarrow = isDynamicEnabled && dimensions.width > 0 && dimensions.width < minWidth;
 
-  // Memoized utility functions
+  // Memoized utility functions - return fixed defaults when dynamic adaptation is disabled
   const getSpacing = useCallback(
     (baseSpacing: SpacingKey = 'md'): SpacingKey => {
+      if (!isDynamicEnabled) return baseSpacing;
       return getDynamicSpacing(dimensions.width, baseSpacing);
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   const getGap = useCallback(
     (elementCount: number, minElementWidth: number, preferredGap: GapKey = 'normal'): number => {
+      if (!isDynamicEnabled) return MIN_GAPS[preferredGap];
       return getDynamicGap(dimensions.width, elementCount, minElementWidth, {
         preferredGap,
       });
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   const getIndent = useCallback(
     (level: number, baseIndent: number = 16): number => {
+      if (!isDynamicEnabled) return level * baseIndent;
       return getResponsiveIndent(level, dimensions.width, { baseIndent });
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   const checkShouldCollapse = useCallback(
     (elementCount: number, minElementWidth: number): boolean => {
+      if (!isDynamicEnabled) return false;
       return shouldCollapse(dimensions.width, elementCount, minElementWidth, MIN_GAPS.inline);
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   const getFlexWidth = useCallback(
     (elementCount: number, minWidth: number, maxWidth: number, gap: number): number => {
+      if (!isDynamicEnabled) return maxWidth;
       return getFlexibleWidth(dimensions.width, elementCount, minWidth, maxWidth, gap);
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   const getVisibleCount = useCallback(
     (itemWidth: number, gap: number): number => {
+      if (!isDynamicEnabled || dimensions.width === 0) return 999; // Show all when disabled
       return getVisibleItemCount(dimensions.width, itemWidth, gap);
     },
-    [dimensions.width]
+    [dimensions.width, isDynamicEnabled]
   );
 
   return {
@@ -353,6 +366,7 @@ export function useSpaceFill(
     direction?: 'row' | 'column';
     align?: 'start' | 'center' | 'end' | 'stretch';
     justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+    forceEnabled?: boolean;
   } = {}
 ) {
   const {
@@ -360,38 +374,55 @@ export function useSpaceFill(
     direction = 'column',
     align = 'stretch',
     justify = 'start',
+    forceEnabled,
   } = options;
+
+  // Check if dynamic adaptation is globally enabled
+  const globalEnabled = useDynamicAdaptationEnabled();
+  const isDynamicEnabled = forceEnabled !== undefined ? forceEnabled : globalEnabled;
 
   const { containerRef, dimensions } = useResponsiveSpacing({
     debounceDelay,
     trackHeight: true,
+    forceEnabled: isDynamicEnabled,
   });
 
   const config = SPACE_FILL_CONFIGS[variant];
   const hasDimensions = dimensions.width > 0 && dimensions.height > 0;
 
+  // When dynamic adaptation is disabled, use default fixed spacing
+  const defaultSpacing = {
+    padding: 16,
+    paddingClass: 'p-4',
+    gap: 16,
+    gapClass: 'gap-4',
+    shouldScroll: config.scrollable,
+  };
+
   // Get computed spacing values
-  const spacing = hasDimensions
-    ? getAutoFillSpacing(dimensions.width, dimensions.height, variant)
-    : {
-        padding: 0,
-        paddingClass: '',
-        gap: 0,
-        gapClass: '',
-        shouldScroll: config.scrollable,
-      };
+  const spacing = !isDynamicEnabled
+    ? defaultSpacing
+    : hasDimensions
+      ? getAutoFillSpacing(dimensions.width, dimensions.height, variant)
+      : {
+          padding: 0,
+          paddingClass: '',
+          gap: 0,
+          gapClass: '',
+          shouldScroll: config.scrollable,
+        };
 
   // Get computed class names
   const className = getSpaceFillClasses(variant, {
-    containerWidth: hasDimensions ? dimensions.width : undefined,
-    containerHeight: hasDimensions ? dimensions.height : undefined,
+    containerWidth: isDynamicEnabled && hasDimensions ? dimensions.width : undefined,
+    containerHeight: isDynamicEnabled && hasDimensions ? dimensions.height : undefined,
     direction,
     align,
     justify,
   });
 
   // Get computed inline styles (for precise dynamic values)
-  const style = hasDimensions
+  const style = isDynamicEnabled && hasDimensions
     ? getSpaceFillStyles(dimensions.width, dimensions.height, variant)
     : {};
 
@@ -412,6 +443,8 @@ export function useSpaceFill(
     config,
     /** Whether the container should be scrollable */
     shouldScroll: config.scrollable,
+    /** Whether dynamic adaptation is currently enabled */
+    isDynamicEnabled,
   };
 }
 

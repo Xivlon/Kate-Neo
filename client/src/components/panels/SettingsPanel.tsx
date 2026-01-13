@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server } from 'lucide-react';
+import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server, Maximize2, Monitor, PanelLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -470,30 +470,118 @@ export function SettingsPanel() {
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-4">
+            {/* Dynamic Adaptation */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Maximize2 className="h-5 w-5" />
+                      Dynamic Adaptation
+                    </CardTitle>
+                    <CardDescription>
+                      Automatically adjust spacing, layouts, and element sizes based on available space
+                    </CardDescription>
+                  </div>
+                  <input
+                    id="dynamicAdaptation"
+                    type="checkbox"
+                    checked={settings.appearance?.dynamicAdaptation !== false}
+                    onChange={(e) => saveSetting('appearance.dynamicAdaptation', e.target.checked)}
+                    className="h-5 w-5"
+                    aria-label="Dynamic Adaptation"
+                  />
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Theme & Layout */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('settings.appearance')}</CardTitle>
-                <CardDescription>Configure IDE appearance</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="h-5 w-5" />
+                  Theme & Layout
+                </CardTitle>
+                <CardDescription>Configure IDE appearance and layout</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="language">
-                    <Globe className="h-4 w-4 inline mr-2" />
-                    {t('settings.language')}
-                  </Label>
-                  <Select value={locale} onValueChange={handleLocaleChange}>
-                    <SelectTrigger id="language">
+                  <Label htmlFor="theme">Theme</Label>
+                  <Select
+                    value={settings.appearance?.theme || 'dark'}
+                    onValueChange={(v) => saveSetting('appearance.theme', v)}
+                  >
+                    <SelectTrigger id="theme">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {locales.map((loc) => (
-                        <SelectItem key={loc} value={loc}>
-                          {loc.toUpperCase()}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="system">System</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="sidebarPosition">
+                    <PanelLeft className="h-4 w-4 inline mr-2" />
+                    Sidebar Position
+                  </Label>
+                  <Select
+                    value={settings.appearance?.sidebarPosition || 'left'}
+                    onValueChange={(v) => saveSetting('appearance.sidebarPosition', v)}
+                  >
+                    <SelectTrigger id="sidebarPosition">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="activityBarPosition">Activity Bar Position</Label>
+                  <Select
+                    value={settings.appearance?.activityBarPosition || 'left'}
+                    onValueChange={(v) => saveSetting('appearance.activityBarPosition', v)}
+                  >
+                    <SelectTrigger id="activityBarPosition">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="top">Top</SelectItem>
+                      <SelectItem value="hidden">Hidden</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Language */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  {t('settings.language')}
+                </CardTitle>
+                <CardDescription>Select your preferred language</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select value={locale} onValueChange={handleLocaleChange}>
+                  <SelectTrigger id="language">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locales.map((loc) => (
+                      <SelectItem key={loc} value={loc}>
+                        {loc.toUpperCase()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </CardContent>
             </Card>
           </TabsContent>

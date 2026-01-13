@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { useResponsiveSpacing } from '@/hooks/useResponsiveSpacing';
+import { useDynamicAdaptationEnabled } from '@/contexts/DynamicAdaptationContext';
 import {
   type SpaceFillVariant,
   SPACE_FILL_CONFIGS,
@@ -108,6 +109,10 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     },
     ref
   ) => {
+    // Check if dynamic adaptation is globally enabled
+    const globalDynamicEnabled = useDynamicAdaptationEnabled();
+    const isDynamicEnabled = dynamic && globalDynamicEnabled;
+
     // Use responsive spacing hook for dynamic sizing
     const {
       containerRef,
@@ -115,6 +120,7 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     } = useResponsiveSpacing({
       debounceDelay: 50,
       trackHeight: true,
+      forceEnabled: isDynamicEnabled,
     });
 
     // Local ref to track the actual DOM node
@@ -136,7 +142,7 @@ export const SpaceFill = forwardRef<HTMLDivElement, SpaceFillProps>(
     }, [containerRef, ref]);
 
     // Calculate dynamic spacing if enabled and dimensions are available
-    const hasDimensions = dynamic && dimensions.width > 0 && dimensions.height > 0;
+    const hasDimensions = isDynamicEnabled && dimensions.width > 0 && dimensions.height > 0;
     const dynamicSpacing = hasDimensions
       ? getAutoFillSpacing(dimensions.width, dimensions.height, variant)
       : null;
