@@ -47,9 +47,9 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
 
   return (
     <Card className="border-2 border-primary/30 bg-accent/30">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{template.name} Configuration</CardTitle>
+      <CardHeader className="p-3 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-sm">{template.name} Config</CardTitle>
           {template.apiKeyLink && (
             <a
               href={template.apiKeyLink}
@@ -57,40 +57,42 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
               rel="noopener noreferrer"
               className="text-xs text-primary hover:underline flex items-center gap-1"
             >
-              Get API Key
+              Get Key
               <ExternalLink className="h-3 w-3" />
             </a>
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-3 pt-0 space-y-2.5">
         {/* API Key (not required for Ollama unless remote) */}
-        <div className="grid gap-2">
-          <Label htmlFor="providerApiKey">
-            API Key {isOllama && '(Optional for local)'}
+        <div className="grid gap-1">
+          <Label htmlFor="providerApiKey" className="text-xs">
+            API Key {isOllama && '(Optional)'}
           </Label>
           <Input
             id="providerApiKey"
             type="password"
-            placeholder={template.apiKeyPlaceholder || 'Enter your API key...'}
+            placeholder={template.apiKeyPlaceholder || 'Enter API key...'}
             value={settings.ai?.providers?.[provider]?.apiKey || ''}
             onChange={(e) => saveSetting(`ai.providers.${provider}.apiKey`, e.target.value)}
+            className="h-8 text-sm"
           />
         </div>
 
         {/* Custom Base URL for Ollama and Custom */}
         {(isOllama || isCustom) && (
-          <div className="grid gap-2">
-            <Label htmlFor="providerBaseUrl">Base URL</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="providerBaseUrl" className="text-xs">Base URL</Label>
             <Input
               id="providerBaseUrl"
               placeholder={template.baseUrl || 'https://api.example.com'}
               value={settings.ai?.providers?.[provider]?.customConfig?.baseUrl || ''}
               onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.baseUrl`, e.target.value)}
+              className="h-8 text-sm"
             />
             {isOllama && (
-              <p className="text-xs text-muted-foreground">
-                Default: http://localhost:11434 (local Ollama instance)
+              <p className="text-[10px] text-muted-foreground">
+                Default: http://localhost:11434
               </p>
             )}
           </div>
@@ -98,40 +100,42 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
 
         {/* Custom Endpoint for Custom provider */}
         {isCustom && (
-          <div className="grid gap-2">
-            <Label htmlFor="providerEndpoint">API Endpoint</Label>
+          <div className="grid gap-1">
+            <Label htmlFor="providerEndpoint" className="text-xs">API Endpoint</Label>
             <Input
               id="providerEndpoint"
               placeholder="/v1/chat/completions"
               value={settings.ai?.providers?.[provider]?.customConfig?.endpoint || ''}
               onChange={(e) => saveSetting(`ai.providers.${provider}.customConfig.endpoint`, e.target.value)}
+              className="h-8 text-sm"
             />
           </div>
         )}
 
         {/* Model Selection */}
-        <div className="grid gap-2">
-          <Label htmlFor="providerModel">Default Model</Label>
+        <div className="grid gap-1">
+          <Label htmlFor="providerModel" className="text-xs">Default Model</Label>
           {isCustom || isOllama ? (
             <Input
               id="providerModel"
-              placeholder={isOllama ? 'llama3, codellama, mistral...' : 'model-name'}
+              placeholder={isOllama ? 'llama3, codellama...' : 'model-name'}
               value={settings.ai?.providers?.[provider]?.defaultModel || ''}
               onChange={(e) => saveSetting(`ai.providers.${provider}.defaultModel`, e.target.value)}
+              className="h-8 text-sm"
             />
           ) : (
             <Select
               value={settings.ai?.providers?.[provider]?.defaultModel || models[0]?.id || ''}
               onValueChange={(v) => saveSetting(`ai.providers.${provider}.defaultModel`, v)}
             >
-              <SelectTrigger id="providerModel">
-                <SelectValue placeholder="Select a model" />
+              <SelectTrigger id="providerModel" className="h-8 text-sm">
+                <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
                 {models.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     <div className="flex flex-col">
-                      <span>{model.name}</span>
+                      <span className="text-sm">{model.name}</span>
                       {model.contextWindow && (
                         <span className="text-xs text-muted-foreground">
                           {(model.contextWindow / 1000).toFixed(0)}K context
@@ -144,19 +148,19 @@ function ProviderConfigCard({ provider, settings, saveSetting }: ProviderConfigC
             </Select>
           )}
           {modelDescription && (
-            <p className="text-xs text-muted-foreground">{modelDescription}</p>
+            <p className="text-[10px] text-muted-foreground line-clamp-2">{modelDescription}</p>
           )}
         </div>
 
         {/* Enable Provider */}
-        <div className="flex items-center justify-between pt-2 border-t">
-          <Label htmlFor="providerEnabled">Enable {template.name}</Label>
+        <div className="flex items-center justify-between pt-2 border-t gap-2">
+          <Label htmlFor="providerEnabled" className="text-xs">Enable {template.name}</Label>
           <input
             id="providerEnabled"
             type="checkbox"
             checked={settings.ai?.providers?.[provider]?.enabled !== false}
             onChange={(e) => saveSetting(`ai.providers.${provider}.enabled`, e.target.checked)}
-            className="h-4 w-4"
+            className="h-4 w-4 flex-shrink-0"
           />
         </div>
       </CardContent>
@@ -423,51 +427,52 @@ export function SettingsPanel() {
           </div>
 
           {/* Editor Settings */}
-          <TabsContent value="editor" className="space-y-4">
+          <TabsContent value="editor" className="space-y-3">
             <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.editor')}</CardTitle>
-                <CardDescription>Configure editor behavior and appearance</CardDescription>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">{t('settings.editor')}</CardTitle>
+                <CardDescription className="text-xs">Configure editor behavior and appearance</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="fontSize">{t('settings.fontSize')}</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="fontSize" className="text-sm">{t('settings.fontSize')}</Label>
                   <Input
                     id="fontSize"
                     type="number"
                     value={settings.editor?.fontSize || 14}
                     onChange={(e) => saveSetting('editor.fontSize', parseInt(e.target.value))}
-                    className="w-32"
+                    className="w-24 h-8 text-sm"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="fontFamily">{t('settings.fontFamily')}</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="fontFamily" className="text-sm">{t('settings.fontFamily')}</Label>
                   <Input
                     id="fontFamily"
                     value={settings.editor?.fontFamily || 'monospace'}
                     onChange={(e) => saveSetting('editor.fontFamily', e.target.value)}
+                    className="h-8 text-sm"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="tabSize">{t('settings.tabSize')}</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="tabSize" className="text-sm">{t('settings.tabSize')}</Label>
                   <Input
                     id="tabSize"
                     type="number"
                     value={settings.editor?.tabSize || 4}
                     onChange={(e) => saveSetting('editor.tabSize', parseInt(e.target.value))}
-                    className="w-32"
+                    className="w-24 h-8 text-sm"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="lineNumbers">{t('settings.lineNumbers')}</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="lineNumbers" className="text-sm">{t('settings.lineNumbers')}</Label>
                   <Select
                     value={settings.editor?.lineNumbers || 'on'}
                     onValueChange={(v) => saveSetting('editor.lineNumbers', v)}
                   >
-                    <SelectTrigger id="lineNumbers">
+                    <SelectTrigger id="lineNumbers" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -479,13 +484,13 @@ export function SettingsPanel() {
                   </Select>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="wordWrap">{t('settings.wordWrap')}</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="wordWrap" className="text-sm">{t('settings.wordWrap')}</Label>
                   <Select
                     value={settings.editor?.wordWrap || 'off'}
                     onValueChange={(v) => saveSetting('editor.wordWrap', v)}
                   >
-                    <SelectTrigger id="wordWrap">
+                    <SelectTrigger id="wordWrap" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -501,30 +506,31 @@ export function SettingsPanel() {
           </TabsContent>
 
           {/* Terminal Settings */}
-          <TabsContent value="terminal" className="space-y-4">
+          <TabsContent value="terminal" className="space-y-3">
             <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.terminal')}</CardTitle>
-                <CardDescription>Configure terminal behavior</CardDescription>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">{t('settings.terminal')}</CardTitle>
+                <CardDescription className="text-xs">Configure terminal behavior</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="terminalFontSize">{t('settings.fontSize')}</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="terminalFontSize" className="text-sm">{t('settings.fontSize')}</Label>
                   <Input
                     id="terminalFontSize"
                     type="number"
                     value={settings.terminal?.fontSize || 14}
                     onChange={(e) => saveSetting('terminal.fontSize', parseInt(e.target.value))}
-                    className="w-32"
+                    className="w-24 h-8 text-sm"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="terminalFontFamily">{t('settings.fontFamily')}</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="terminalFontFamily" className="text-sm">{t('settings.fontFamily')}</Label>
                   <Input
                     id="terminalFontFamily"
                     value={settings.terminal?.fontFamily || 'monospace'}
                     onChange={(e) => saveSetting('terminal.fontFamily', e.target.value)}
+                    className="h-8 text-sm"
                   />
                 </div>
               </CardContent>
@@ -532,32 +538,32 @@ export function SettingsPanel() {
           </TabsContent>
 
           {/* Git Settings */}
-          <TabsContent value="git" className="space-y-4">
+          <TabsContent value="git" className="space-y-3">
             <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.git')}</CardTitle>
-                <CardDescription>Configure Git integration</CardDescription>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">{t('settings.git')}</CardTitle>
+                <CardDescription className="text-xs">Configure Git integration</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="gitEnabled">Enable Git Integration</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="gitEnabled" className="text-sm">Enable Git Integration</Label>
                   <input
                     id="gitEnabled"
                     type="checkbox"
                     checked={settings.git?.enabled !== false}
                     onChange={(e) => saveSetting('git.enabled', e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 flex-shrink-0"
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="autoFetch">Auto Fetch</Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="autoFetch" className="text-sm">Auto Fetch</Label>
                   <input
                     id="autoFetch"
                     type="checkbox"
                     checked={settings.git?.autoFetch === true}
                     onChange={(e) => saveSetting('git.autoFetch', e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 flex-shrink-0"
                   />
                 </div>
               </CardContent>
@@ -565,18 +571,18 @@ export function SettingsPanel() {
           </TabsContent>
 
           {/* Appearance Settings */}
-          <TabsContent value="appearance" className="space-y-4">
+          <TabsContent value="appearance" className="space-y-3">
             {/* Dynamic Adaptation */}
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Maximize2 className="h-5 w-5" />
-                      Dynamic Adaptation
+              <CardHeader className="p-4 pb-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Maximize2 className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">Dynamic Adaptation</span>
                     </CardTitle>
-                    <CardDescription>
-                      Automatically adjust spacing, layouts, and element sizes based on available space
+                    <CardDescription className="text-xs mt-1">
+                      Auto-adjust spacing and layouts based on available space
                     </CardDescription>
                   </div>
                   <input
@@ -584,7 +590,7 @@ export function SettingsPanel() {
                     type="checkbox"
                     checked={settings.appearance?.dynamicAdaptation !== false}
                     onChange={(e) => saveSetting('appearance.dynamicAdaptation', e.target.checked)}
-                    className="h-5 w-5"
+                    className="h-5 w-5 flex-shrink-0 mt-0.5"
                     aria-label="Dynamic Adaptation"
                   />
                 </div>
@@ -593,21 +599,21 @@ export function SettingsPanel() {
 
             {/* Theme & Layout */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Monitor className="h-5 w-5" />
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Monitor className="h-4 w-4 flex-shrink-0" />
                   Theme & Layout
                 </CardTitle>
-                <CardDescription>Configure IDE appearance and layout</CardDescription>
+                <CardDescription className="text-xs">Configure IDE appearance</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="theme">Theme</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="theme" className="text-sm">Theme</Label>
                   <Select
                     value={settings.appearance?.theme || 'dark'}
                     onValueChange={(v) => saveSetting('appearance.theme', v)}
                   >
-                    <SelectTrigger id="theme">
+                    <SelectTrigger id="theme" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -618,16 +624,16 @@ export function SettingsPanel() {
                   </Select>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="sidebarPosition">
-                    <PanelLeft className="h-4 w-4 inline mr-2" />
+                <div className="grid gap-1.5">
+                  <Label htmlFor="sidebarPosition" className="text-sm flex items-center">
+                    <PanelLeft className="h-3.5 w-3.5 mr-1.5" />
                     Sidebar Position
                   </Label>
                   <Select
                     value={settings.appearance?.sidebarPosition || 'left'}
                     onValueChange={(v) => saveSetting('appearance.sidebarPosition', v)}
                   >
-                    <SelectTrigger id="sidebarPosition">
+                    <SelectTrigger id="sidebarPosition" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -637,13 +643,13 @@ export function SettingsPanel() {
                   </Select>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="activityBarPosition">Activity Bar Position</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="activityBarPosition" className="text-sm">Activity Bar Position</Label>
                   <Select
                     value={settings.appearance?.activityBarPosition || 'left'}
                     onValueChange={(v) => saveSetting('appearance.activityBarPosition', v)}
                   >
-                    <SelectTrigger id="activityBarPosition">
+                    <SelectTrigger id="activityBarPosition" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -654,12 +660,12 @@ export function SettingsPanel() {
                   </Select>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="layoutMode">
+                <div className="grid gap-1.5">
+                  <Label htmlFor="layoutMode" className="text-sm flex items-center">
                     {settings.appearance?.layoutMode === 'grid' ? (
-                      <LayoutGrid className="h-4 w-4 inline mr-2" />
+                      <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
                     ) : (
-                      <Rows className="h-4 w-4 inline mr-2" />
+                      <Rows className="h-3.5 w-3.5 mr-1.5" />
                     )}
                     Layout Mode
                   </Label>
@@ -667,7 +673,7 @@ export function SettingsPanel() {
                     value={settings.appearance?.layoutMode || 'flex'}
                     onValueChange={(v) => saveSetting('appearance.layoutMode', v)}
                   >
-                    <SelectTrigger id="layoutMode">
+                    <SelectTrigger id="layoutMode" className="h-8 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -696,16 +702,16 @@ export function SettingsPanel() {
 
             {/* Language */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Globe className="h-4 w-4 flex-shrink-0" />
                   {t('settings.language')}
                 </CardTitle>
-                <CardDescription>Select your preferred language</CardDescription>
+                <CardDescription className="text-xs">Select your preferred language</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-2">
                 <Select value={locale} onValueChange={handleLocaleChange}>
-                  <SelectTrigger id="language">
+                  <SelectTrigger id="language" className="h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -721,32 +727,32 @@ export function SettingsPanel() {
           </TabsContent>
 
           {/* Extensions Settings */}
-          <TabsContent value="extensions" className="space-y-4">
+          <TabsContent value="extensions" className="space-y-3">
             <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.extensions')}</CardTitle>
-                <CardDescription>Configure extension behavior</CardDescription>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">{t('settings.extensions')}</CardTitle>
+                <CardDescription className="text-xs">Configure extension behavior</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="autoUpdate">Auto Update Extensions</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="autoUpdate" className="text-sm">Auto Update Extensions</Label>
                   <input
                     id="autoUpdate"
                     type="checkbox"
                     checked={settings.extensions?.autoUpdate === true}
                     onChange={(e) => saveSetting('extensions.autoUpdate', e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 flex-shrink-0"
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="showRecommendations">Show Recommendations</Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="showRecommendations" className="text-sm">Show Recommendations</Label>
                   <input
                     id="showRecommendations"
                     type="checkbox"
                     checked={settings.extensions?.showRecommendations !== false}
                     onChange={(e) => saveSetting('extensions.showRecommendations', e.target.checked)}
-                    className="h-4 w-4"
+                    className="h-4 w-4 flex-shrink-0"
                   />
                 </div>
               </CardContent>
@@ -754,24 +760,24 @@ export function SettingsPanel() {
           </TabsContent>
 
           {/* AI Settings */}
-          <TabsContent value="ai" className="space-y-4">
+          <TabsContent value="ai" className="space-y-3">
             {/* Enable/Disable AI */}
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5" />
+              <CardHeader className="p-4 pb-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Sparkles className="h-4 w-4 flex-shrink-0" />
                       AI Assistant
                     </CardTitle>
-                    <CardDescription>Enable AI-powered code assistance</CardDescription>
+                    <CardDescription className="text-xs mt-1">Enable AI-powered code assistance</CardDescription>
                   </div>
                   <input
                     id="aiEnabled"
                     type="checkbox"
                     checked={settings.ai?.enabled === true}
                     onChange={(e) => saveSetting('ai.enabled', e.target.checked)}
-                    className="h-5 w-5"
+                    className="h-5 w-5 flex-shrink-0 mt-0.5"
                     aria-label="AI Assistant"
                   />
                 </div>
@@ -780,18 +786,18 @@ export function SettingsPanel() {
 
             {/* Quick Connect - Provider Selection */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Zap className="h-4 w-4 flex-shrink-0" />
                   Quick Connect
                 </CardTitle>
-                <CardDescription>
-                  Select a provider and enter your API key to get started
+                <CardDescription className="text-xs">
+                  Select a provider and enter your API key
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Provider Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              <CardContent className="p-4 pt-2 space-y-3">
+                {/* Provider Grid - single column on narrow, 2 cols on wider */}
+                <div className="grid grid-cols-1 gap-2">
                   {(() => {
                     const providers = getAvailableProviders();
                     return providers.map((provider) => {
@@ -804,31 +810,30 @@ export function SettingsPanel() {
                           key={provider}
                           onClick={() => saveSetting('ai.activeProvider', provider)}
                           className={`
-                            relative p-3 rounded-lg border-2 text-left transition-all
+                            relative p-2.5 rounded-lg border-2 text-left transition-all
                             hover:border-primary/50 hover:bg-accent/50
                             ${isActive ? 'border-primary bg-accent' : 'border-border'}
                           `}
                         >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-sm">{template.name}</span>
-                            {isConfigured && (
-                              <Check className="h-4 w-4 text-green-500" />
-                            )}
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-medium text-sm truncate">{template.name}</span>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              {template.openaiCompatible && provider !== AIProvider.OpenAI && (
+                                <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                  OpenAI
+                                </Badge>
+                              )}
+                              {provider === AIProvider.Ollama && (
+                                <Badge variant="outline" className="text-[10px] px-1 py-0">
+                                  <Server className="h-2.5 w-2.5 mr-0.5" />
+                                  Local
+                                </Badge>
+                              )}
+                              {isConfigured && (
+                                <Check className="h-4 w-4 text-green-500" />
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
-                            {template.description}
-                          </p>
-                          {template.openaiCompatible && provider !== AIProvider.OpenAI && (
-                            <Badge variant="outline" className="mt-2 text-xs">
-                              OpenAI Compatible
-                            </Badge>
-                          )}
-                          {provider === AIProvider.Ollama && (
-                            <Badge variant="outline" className="mt-2 text-xs">
-                              <Server className="h-3 w-3 mr-1" />
-                              Local
-                            </Badge>
-                          )}
                         </button>
                       );
                     });
@@ -848,14 +853,14 @@ export function SettingsPanel() {
 
             {/* Advanced Settings */}
             <Card>
-              <CardHeader>
-                <CardTitle>Advanced Settings</CardTitle>
-                <CardDescription>Fine-tune AI behavior for your workflow</CardDescription>
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-base">Advanced Settings</CardTitle>
+                <CardDescription className="text-xs">Fine-tune AI behavior</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="temperature">Temperature</Label>
+              <CardContent className="p-4 pt-2 space-y-3">
+                <div className="grid gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="temperature" className="text-sm">Temperature</Label>
                     <Input
                       id="temperature"
                       type="number"
@@ -864,14 +869,15 @@ export function SettingsPanel() {
                       step="0.1"
                       value={settings.ai?.temperature || 0.7}
                       onChange={(e) => saveSetting('ai.temperature', parseFloat(e.target.value))}
+                      className="h-8 text-sm w-24"
                     />
                     <p className="text-xs text-muted-foreground">
                       0 = deterministic, 2 = creative
                     </p>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="maxResponseTokens">Max Response Tokens</Label>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="maxResponseTokens" className="text-sm">Max Response Tokens</Label>
                     <Input
                       id="maxResponseTokens"
                       type="number"
@@ -880,21 +886,23 @@ export function SettingsPanel() {
                       step="100"
                       value={settings.ai?.maxResponseTokens || 2000}
                       onChange={(e) => saveSetting('ai.maxResponseTokens', parseInt(e.target.value))}
+                      className="h-8 text-sm w-28"
                     />
                   </div>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="systemPrompt">System Prompt</Label>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="systemPrompt" className="text-sm">System Prompt</Label>
                   <Textarea
                     id="systemPrompt"
                     placeholder="You are a helpful AI coding assistant..."
                     value={settings.ai?.systemPrompt || ''}
                     onChange={(e) => saveSetting('ai.systemPrompt', e.target.value)}
                     rows={3}
+                    className="text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Customize how the AI assistant behaves and responds
+                    Customize AI behavior and responses
                   </p>
                 </div>
               </CardContent>
