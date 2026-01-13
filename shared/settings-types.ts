@@ -150,6 +150,8 @@ export interface AppearanceSettings {
   sidebarPosition: 'left' | 'right';
   /** Activity bar position */
   activityBarPosition: 'left' | 'top' | 'hidden';
+  /** Layout mode: flex (traditional) or grid (tactical 4x4) */
+  layoutMode: 'flex' | 'grid';
 }
 
 /**
@@ -262,6 +264,7 @@ export const DEFAULT_SETTINGS: KateNeoSettings = {
     theme: 'dark',
     sidebarPosition: 'left',
     activityBarPosition: 'left',
+    layoutMode: 'flex',
   },
   languages: {},
 };

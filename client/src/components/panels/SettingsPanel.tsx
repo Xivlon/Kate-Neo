@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server, Maximize2, Monitor, PanelLeft, Save, Undo2, AlertCircle } from 'lucide-react';
+import { Settings, RotateCcw, Globe, Sparkles, ExternalLink, Check, Zap, Server, Maximize2, Monitor, PanelLeft, Save, Undo2, AlertCircle, LayoutGrid, Rows } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -650,6 +650,44 @@ export function SettingsPanel() {
                       <SelectItem value="hidden">Hidden</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="layoutMode">
+                    {settings.appearance?.layoutMode === 'grid' ? (
+                      <LayoutGrid className="h-4 w-4 inline mr-2" />
+                    ) : (
+                      <Rows className="h-4 w-4 inline mr-2" />
+                    )}
+                    Layout Mode
+                  </Label>
+                  <Select
+                    value={settings.appearance?.layoutMode || 'flex'}
+                    onValueChange={(v) => saveSetting('appearance.layoutMode', v)}
+                  >
+                    <SelectTrigger id="layoutMode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="flex">
+                        <div className="flex items-center gap-2">
+                          <Rows className="h-4 w-4" />
+                          <span>Flex Layout</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="grid">
+                        <div className="flex items-center gap-2">
+                          <LayoutGrid className="h-4 w-4" />
+                          <span>Grid Layout (4x4)</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {settings.appearance?.layoutMode === 'grid'
+                      ? 'Crystal Reflow grid with elastic pane expansion'
+                      : 'Traditional flexible panel layout'}
+                  </p>
                 </div>
               </CardContent>
             </Card>
