@@ -13,16 +13,11 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import logoUrl from "@assets/Fennec-removebg-light.png";
-import { MenuBar } from "./MenuBar";
+import { MenuBar, type MenuBarProps } from "./MenuBar";
 import { useResponsiveSpacing } from "@/hooks/useResponsiveSpacing";
 import { BREAKPOINTS } from "@/lib/spacing";
 
-interface TopMenuBarProps {
-  onNewFile?: () => void;
-  onNewFolder?: () => void;
-  onSave?: () => void;
-  onSearch?: () => void;
-  onSettings?: () => void;
+interface TopMenuBarProps extends MenuBarProps {
   onGithubConnect?: () => void;
 }
 
@@ -30,8 +25,26 @@ export function TopMenuBar({
   onNewFile,
   onNewFolder,
   onSave,
-  onSearch,
-  onSettings,
+  onCloseFile,
+  onCloseAllFiles,
+  onUndo,
+  onRedo,
+  onCut,
+  onCopy,
+  onPaste,
+  onFind,
+  onReplace,
+  onSelectAll,
+  onToggleSidebar,
+  onToggleTerminal,
+  sidebarVisible,
+  terminalVisible,
+  onGoToLine,
+  onGoToFile,
+  onOpenTerminal,
+  onOpenSettings,
+  onShowAbout,
+  onShowKeyboardShortcuts,
   onGithubConnect,
 }: TopMenuBarProps) {
   // Dynamic spacing based on container width
@@ -54,7 +67,7 @@ export function TopMenuBar({
     { icon: FilePlus, label: 'New File (Ctrl+N)', onClick: onNewFile, testId: 'button-new-file' },
     { icon: FolderPlus, label: 'New Folder', onClick: onNewFolder, testId: 'button-new-folder' },
     { icon: Save, label: 'Save (Ctrl+S)', onClick: onSave, testId: 'button-save' },
-    { icon: Search, label: 'Find (Ctrl+F)', onClick: onSearch, testId: 'button-search' },
+    { icon: Search, label: 'Find (Ctrl+F)', onClick: onFind, testId: 'button-search' },
   ];
 
   const renderToolbarButton = (item: typeof toolbarItems[0], compact: boolean = false) => (
@@ -74,6 +87,33 @@ export function TopMenuBar({
     </Tooltip>
   );
 
+  // MenuBar props
+  const menuBarProps: MenuBarProps = {
+    onNewFile,
+    onNewFolder,
+    onSave,
+    onCloseFile,
+    onCloseAllFiles,
+    onUndo,
+    onRedo,
+    onCut,
+    onCopy,
+    onPaste,
+    onFind,
+    onReplace,
+    onSelectAll,
+    onToggleSidebar,
+    onToggleTerminal,
+    sidebarVisible,
+    terminalVisible,
+    onGoToLine,
+    onGoToFile,
+    onOpenTerminal,
+    onOpenSettings,
+    onShowAbout,
+    onShowKeyboardShortcuts,
+  };
+
   return (
     <div ref={containerRef as React.RefObject<HTMLDivElement>} className="flex flex-col">
       {/* Main header row */}
@@ -84,18 +124,18 @@ export function TopMenuBar({
             alt="IDE Logo"
             className={`${logoSize} w-auto flex-shrink-0 transition-all duration-150`}
           />
-          {!isVeryNarrow && <MenuBar />}
+          {!isVeryNarrow && <MenuBar {...menuBarProps} />}
         </div>
 
         <div className={`flex items-center ${itemGap} flex-shrink-0`}>
           {/* Show MenuBar in overflow on very narrow screens */}
-          {isVeryNarrow && <MenuBar />}
+          {isVeryNarrow && <MenuBar {...menuBarProps} />}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={onSettings}
+                onClick={onOpenSettings}
                 className={isCompact ? "h-5 w-5" : "h-6 w-6"}
                 data-testid="button-settings"
               >

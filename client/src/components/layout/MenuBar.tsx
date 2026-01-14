@@ -6,180 +6,192 @@ import {
   MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
+  MenubarCheckboxItem,
 } from "@/components/ui/menubar";
 
-export function MenuBar() {
+export interface MenuBarProps {
+  // File menu
+  onNewFile?: () => void;
+  onNewFolder?: () => void;
+  onSave?: () => void;
+  onCloseFile?: () => void;
+  onCloseAllFiles?: () => void;
+
+  // Edit menu
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onCut?: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
+  onFind?: () => void;
+  onReplace?: () => void;
+  onSelectAll?: () => void;
+
+  // View menu
+  onToggleSidebar?: () => void;
+  onToggleTerminal?: () => void;
+  sidebarVisible?: boolean;
+  terminalVisible?: boolean;
+
+  // Go menu
+  onGoToLine?: () => void;
+  onGoToFile?: () => void;
+
+  // Tools menu
+  onOpenTerminal?: () => void;
+
+  // Settings menu
+  onOpenSettings?: () => void;
+
+  // Help menu
+  onShowAbout?: () => void;
+  onShowKeyboardShortcuts?: () => void;
+}
+
+export function MenuBar({
+  onNewFile,
+  onNewFolder,
+  onSave,
+  onCloseFile,
+  onCloseAllFiles,
+  onUndo,
+  onRedo,
+  onCut,
+  onCopy,
+  onPaste,
+  onFind,
+  onReplace,
+  onSelectAll,
+  onToggleSidebar,
+  onToggleTerminal,
+  sidebarVisible = true,
+  terminalVisible = false,
+  onGoToLine,
+  onGoToFile,
+  onOpenTerminal,
+  onOpenSettings,
+  onShowAbout,
+  onShowKeyboardShortcuts,
+}: MenuBarProps) {
   return (
     <Menubar className="border-0 bg-transparent" data-testid="menu-bar">
       <MenubarMenu>
         <MenubarTrigger className="text-xs">File</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem onClick={onNewFile}>
             New File <MenubarShortcut>Ctrl+N</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
-            Open <MenubarShortcut>Ctrl+O</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Save <MenubarShortcut>Ctrl+S</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>
-            Save As <MenubarShortcut>Ctrl+Shift+S</MenubarShortcut>
+          <MenubarItem onClick={onNewFolder}>
+            New Folder
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>Close File</MenubarItem>
-          <MenubarItem>Close All</MenubarItem>
+          <MenubarItem onClick={onSave}>
+            Save <MenubarShortcut>Ctrl+S</MenubarShortcut>
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem onClick={onCloseFile}>
+            Close File
+          </MenubarItem>
+          <MenubarItem onClick={onCloseAllFiles}>
+            Close All
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger className="text-xs">Edit</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem onClick={onUndo}>
             Undo <MenubarShortcut>Ctrl+Z</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={onRedo}>
             Redo <MenubarShortcut>Ctrl+Y</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem onClick={onCut}>
             Cut <MenubarShortcut>Ctrl+X</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={onCopy}>
             Copy <MenubarShortcut>Ctrl+C</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={onPaste}>
             Paste <MenubarShortcut>Ctrl+V</MenubarShortcut>
           </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>
+          <MenubarItem onClick={onSelectAll}>
+            Select All <MenubarShortcut>Ctrl+A</MenubarShortcut>
+          </MenubarItem>
+          <MenubarSeparator />
+          <MenubarItem onClick={onFind}>
             Find <MenubarShortcut>Ctrl+F</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>
+          <MenubarItem onClick={onReplace}>
             Replace <MenubarShortcut>Ctrl+H</MenubarShortcut>
           </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
-        <MenubarTrigger className="text-xs">Selection</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            Select All <MenubarShortcut>Ctrl+A</MenubarShortcut>
-          </MenubarItem>
-          <MenubarItem>Expand Selection</MenubarItem>
-          <MenubarItem>Shrink Selection</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
         <MenubarTrigger className="text-xs">View</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Toggle Sidebar</MenubarItem>
-          <MenubarItem>Toggle Output</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>Zoom In</MenubarItem>
-          <MenubarItem>Zoom Out</MenubarItem>
-          <MenubarItem>Reset Zoom</MenubarItem>
+          <MenubarCheckboxItem
+            checked={sidebarVisible}
+            onClick={onToggleSidebar}
+          >
+            Sidebar <MenubarShortcut>Ctrl+B</MenubarShortcut>
+          </MenubarCheckboxItem>
+          <MenubarCheckboxItem
+            checked={terminalVisible}
+            onClick={onToggleTerminal}
+          >
+            Terminal <MenubarShortcut>Ctrl+`</MenubarShortcut>
+          </MenubarCheckboxItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger className="text-xs">Go</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>
+          <MenubarItem onClick={onGoToLine}>
             Go to Line <MenubarShortcut>Ctrl+G</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Go to File</MenubarItem>
-          <MenubarItem>Go to Symbol</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">Projects</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>Open Project</MenubarItem>
-          <MenubarItem>Close Project</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>Project Settings</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">LSP Client</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>Restart Server</MenubarItem>
-          <MenubarItem>Show Diagnostics</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>Go to Definition</MenubarItem>
-          <MenubarItem>Find References</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">Build</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>
-            Build <MenubarShortcut>F7</MenubarShortcut>
+          <MenubarItem onClick={onGoToFile}>
+            Go to File <MenubarShortcut>Ctrl+P</MenubarShortcut>
           </MenubarItem>
-          <MenubarItem>Rebuild</MenubarItem>
-          <MenubarItem>Clean</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem>Run</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">SQL</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>Execute Query</MenubarItem>
-          <MenubarItem>New Connection</MenubarItem>
-          <MenubarItem>Close Connection</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">XML</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>Format XML</MenubarItem>
-          <MenubarItem>Validate</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
-
-      <MenubarMenu>
-        <MenubarTrigger className="text-xs">Sessions</MenubarTrigger>
-        <MenubarContent>
-          <MenubarItem>Save Session</MenubarItem>
-          <MenubarItem>Load Session</MenubarItem>
-          <MenubarItem>Manage Sessions</MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger className="text-xs">Tools</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Color Picker</MenubarItem>
-          <MenubarItem>External Tools</MenubarItem>
-          <MenubarItem>Terminal</MenubarItem>
+          <MenubarItem onClick={onOpenTerminal}>
+            Terminal <MenubarShortcut>Ctrl+`</MenubarShortcut>
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger className="text-xs">Settings</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Preferences</MenubarItem>
-          <MenubarItem>Editor Settings</MenubarItem>
-          <MenubarItem>Keyboard Shortcuts</MenubarItem>
+          <MenubarItem onClick={onOpenSettings}>
+            Preferences <MenubarShortcut>Ctrl+,</MenubarShortcut>
+          </MenubarItem>
+          <MenubarItem onClick={onShowKeyboardShortcuts}>
+            Keyboard Shortcuts
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
 
       <MenubarMenu>
         <MenubarTrigger className="text-xs">Help</MenubarTrigger>
         <MenubarContent>
-          <MenubarItem>Documentation</MenubarItem>
-          <MenubarItem>Keyboard Shortcuts</MenubarItem>
+          <MenubarItem onClick={onShowKeyboardShortcuts}>
+            Keyboard Shortcuts
+          </MenubarItem>
           <MenubarSeparator />
-          <MenubarItem>About</MenubarItem>
+          <MenubarItem onClick={onShowAbout}>
+            About
+          </MenubarItem>
         </MenubarContent>
       </MenubarMenu>
     </Menubar>

@@ -311,6 +311,70 @@ export default function CodeEditor() {
     }
   };
 
+  // Close current file
+  const handleCloseFile = useCallback(() => {
+    if (activeTabId) {
+      handleTabClose(activeTabId);
+    }
+  }, [activeTabId]);
+
+  // Close all files
+  const handleCloseAllFiles = useCallback(() => {
+    setOpenTabs([]);
+    setActiveTabId(undefined);
+    setFileContents(new Map());
+  }, []);
+
+  // Toggle sidebar visibility
+  const handleToggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => !prev);
+  }, []);
+
+  // Toggle terminal visibility
+  const handleToggleTerminal = useCallback(() => {
+    setTerminalVisible(prev => !prev);
+  }, []);
+
+  // Open settings
+  const handleOpenSettings = useCallback(() => {
+    setSidebarTab("settings");
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+    }
+  }, [sidebarCollapsed]);
+
+  // Go to line dialog (placeholder - will use toast for now)
+  const handleGoToLine = useCallback(() => {
+    toast({
+      title: "Go to Line",
+      description: "Use Ctrl+G in the editor to go to a specific line.",
+    });
+  }, [toast]);
+
+  // Go to file (quick open - placeholder)
+  const handleGoToFile = useCallback(() => {
+    toast({
+      title: "Quick Open",
+      description: "Use the file tree to navigate to files.",
+    });
+  }, [toast]);
+
+  // Show keyboard shortcuts
+  const handleShowKeyboardShortcuts = useCallback(() => {
+    toast({
+      title: "Keyboard Shortcuts",
+      description: "Ctrl+S: Save | Ctrl+N: New File | Ctrl+F: Find | Ctrl+,: Settings | Ctrl+B: Toggle Sidebar | Ctrl+`: Toggle Terminal",
+    });
+  }, [toast]);
+
+  // Show about dialog
+  const handleShowAbout = useCallback(() => {
+    toast({
+      title: "Kate-Neo IDE",
+      description: "A modern web-based IDE with AI assistance. Version 1.0.0",
+    });
+  }, [toast]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -330,10 +394,19 @@ export default function CodeEditor() {
             break;
           case ",":
             e.preventDefault();
-            setSidebarTab("settings");
-            if (sidebarCollapsed) {
-              setSidebarCollapsed(false);
-            }
+            handleOpenSettings();
+            break;
+          case "b":
+            e.preventDefault();
+            handleToggleSidebar();
+            break;
+          case "`":
+            e.preventDefault();
+            handleToggleTerminal();
+            break;
+          case "w":
+            e.preventDefault();
+            handleCloseFile();
             break;
         }
       }
@@ -341,7 +414,7 @@ export default function CodeEditor() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeTabId, fileContents, openTabs, sidebarCollapsed]);
+  }, [activeTabId, fileContents, openTabs, sidebarCollapsed, handleOpenSettings, handleToggleSidebar, handleToggleTerminal, handleCloseFile]);
 
   const activeFile = activeTabId ? fileSystem.findFileById(activeTabId) : null;
   const activeContent = activeTabId ? fileContents.get(activeTabId) || "" : "";
@@ -466,16 +539,31 @@ export default function CodeEditor() {
   return (
     <div className="h-screen flex flex-col bg-background">
       <TopMenuBar
+        // File menu
         onNewFile={() => setNewFileDialogOpen(true)}
         onNewFolder={() => setNewFolderDialogOpen(true)}
         onSave={handleSave}
-        onSearch={() => setIsFindDialogOpen(true)}
-        onSettings={() => {
-          setSidebarTab("settings");
-          if (sidebarCollapsed) {
-            setSidebarCollapsed(false);
-          }
-        }}
+        onCloseFile={handleCloseFile}
+        onCloseAllFiles={handleCloseAllFiles}
+        // Edit menu
+        onFind={() => setIsFindDialogOpen(true)}
+        onReplace={() => setIsFindDialogOpen(true)}
+        // View menu
+        onToggleSidebar={handleToggleSidebar}
+        onToggleTerminal={handleToggleTerminal}
+        sidebarVisible={!sidebarCollapsed}
+        terminalVisible={terminalVisible}
+        // Go menu
+        onGoToLine={handleGoToLine}
+        onGoToFile={handleGoToFile}
+        // Tools menu
+        onOpenTerminal={handleToggleTerminal}
+        // Settings menu
+        onOpenSettings={handleOpenSettings}
+        onShowKeyboardShortcuts={handleShowKeyboardShortcuts}
+        // Help menu
+        onShowAbout={handleShowAbout}
+        // GitHub
         onGithubConnect={() => {
           toast({
             title: "GitHub Integration",
