@@ -679,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/settings", requireAuthOrDev, fileOperationLimiter, (req, res) => {
+  app.post("/api/agent/settings", fileOperationLimiter, requireAuthOrDev, (req, res) => {
     try {
       agentService.updateSettings(req.body);
       res.json({ success: true, settings: agentService.getSettings() });
@@ -688,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/execute", requireAuthOrDev, fileOperationLimiter, async (req, res) => {
+  app.post("/api/agent/execute", fileOperationLimiter, requireAuthOrDev, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.executeTask(request);
@@ -698,7 +698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/file-operation", requireAuthOrDev, fileOperationLimiter, async (req, res) => {
+  app.post("/api/agent/file-operation", fileOperationLimiter, requireAuthOrDev, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.fileOperation(request);
