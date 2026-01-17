@@ -54,7 +54,9 @@ describe('AuthService', () => {
       const user1 = await authService.createUser('user1', 'samepassword');
       const user2 = await authService.createUser('user2', 'samepassword');
 
-      // Same password should produce same hash
+      // Note: SHA-256 without salt produces same hash for same password
+      // This test will need to be updated when migrating to bcrypt/argon2
+      // which should produce DIFFERENT hashes due to unique salts per user
       expect(user1.password).toBe(user2.password);
     });
   });

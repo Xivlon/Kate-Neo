@@ -679,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/settings", fileOperationLimiter, requireAuthOrDev, (req, res) => {
+  app.post("/api/agent/settings", fileOperationLimiter, requireAuthOrDev, async (req, res) => {
     try {
       agentService.updateSettings(req.body);
       res.json({ success: true, settings: agentService.getSettings() });

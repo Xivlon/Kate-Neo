@@ -21,7 +21,18 @@ export class AuthService {
 
     // Hash the provided password and compare with stored hash
     const hashedPassword = this.hashPassword(password);
-    if (hashedPassword === user.password) {
+    
+    // Use constant-time comparison to prevent timing attacks
+    const storedHashBuffer = Buffer.from(user.password, 'hex');
+    const providedHashBuffer = Buffer.from(hashedPassword, 'hex');
+    
+    if (storedHashBuffer.length !== providedHashBuffer.length) {
+      return null;
+    }
+    
+    const isValid = crypto.timingSafeEqual(storedHashBuffer, providedHashBuffer);
+    
+    if (isValid) {
       return user;
     }
 
