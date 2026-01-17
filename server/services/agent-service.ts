@@ -529,7 +529,7 @@ Generate a complete, production-ready component following the project's conventi
         throw new Error('No target file specified');
       }
 
-      const filePath = path.resolve(this.workspaceRoot, request.targetFile);
+      const filePath = this.validateAndResolvePath(request.targetFile);
       const originalCode = await fs.readFile(filePath, 'utf-8');
 
       const prompt = `Refactor the following ${request.language || ''} code to improve ${request.instruction || 'code quality, readability, and maintainability'}:
