@@ -30,7 +30,7 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
 
   // Agent mode state
   const [agentMode, setAgentMode] = useState<AgentMode>('chat');
-  const [agentSettings, setAgentSettings] = useState<AgentSettings | null>(null);
+  const [, setAgentSettings] = useState<AgentSettings | null>(null);
   const [generatedCode, setGeneratedCode] = useState<string>('');
   const [currentTask, setCurrentTask] = useState<AgentTaskResponse | null>(null);
   const [contextFiles, setContextFiles] = useState<string[]>([]);
