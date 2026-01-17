@@ -610,6 +610,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Agent API endpoints
+  const { AgentService } = await import('./services/agent-service.js');
+  const agentService = new AgentService(aiService, workspacePath);
+
+  app.get("/api/agent/capabilities", async (req, res) => {
+    try {
+      const capabilities = agentService.getCapabilities();
+      res.json({ success: true, capabilities });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.get("/api/agent/settings", async (req, res) => {
+    try {
+      const settings = agentService.getSettings();
+      res.json({ success: true, settings });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/agent/settings", async (req, res) => {
+    try {
+      agentService.updateSettings(req.body);
+      res.json({ success: true, settings: agentService.getSettings() });
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/agent/execute", async (req, res) => {
+    try {
+      const request = req.body;
+      const response = await agentService.executeTask(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  app.post("/api/agent/file-operation", async (req, res) => {
+    try {
+      const request = req.body;
+      const response = await agentService.fileOperation(request);
+      res.json(response);
+    } catch (error: any) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // LSP API endpoints (Phase 8)
   // Import LSP service
   const { lspService } = await import('./services/lsp-service');
