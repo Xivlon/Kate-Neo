@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/auth/session", (req, res) => {
-    if (req.isAuthenticated && req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
       res.json({ 
         authenticated: true, 
         user: req.user 

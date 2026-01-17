@@ -20,9 +20,14 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: false }));
 
 // Session configuration
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET environment variable must be set in production');
+}
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'kate-neo-dev-secret-change-in-production',
+    secret: sessionSecret || 'kate-neo-dev-secret-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {

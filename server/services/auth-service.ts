@@ -30,7 +30,27 @@ export class AuthService {
 
   /**
    * Hash password using SHA-256
-   * In production, use bcrypt or argon2 for better security
+   * 
+   * WARNING: SHA-256 is NOT secure for password hashing in production!
+   * This is a placeholder implementation for development/testing only.
+   * 
+   * For production, you MUST use:
+   * - bcrypt (recommended): npm install bcrypt
+   * - argon2 (modern alternative): npm install argon2
+   * - scrypt (built into Node.js crypto module)
+   * 
+   * These algorithms are specifically designed for password hashing with:
+   * - Automatic salting
+   * - Configurable computational cost
+   * - Resistance to GPU/ASIC attacks
+   * - Protection against rainbow tables
+   * 
+   * Example with bcrypt:
+   * ```
+   * import bcrypt from 'bcrypt';
+   * const saltRounds = 10;
+   * return await bcrypt.hash(password, saltRounds);
+   * ```
    */
   private hashPassword(password: string): string {
     return crypto.createHash('sha256').update(password).digest('hex');
