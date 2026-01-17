@@ -32,7 +32,6 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
   const [agentMode, setAgentMode] = useState<AgentMode>('chat');
   const [, setAgentSettings] = useState<AgentSettings | null>(null);
   const [generatedCode, setGeneratedCode] = useState<string>('');
-  const [currentTask, setCurrentTask] = useState<AgentTaskResponse | null>(null);
   const [contextFiles, setContextFiles] = useState<string[]>([]);
 
   // Fetch AI status and agent settings on mount
@@ -160,7 +159,6 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
   const clearChat = () => {
     setMessages([]);
     setGeneratedCode('');
-    setCurrentTask(null);
   };
 
   const copyToClipboard = async (text: string, messageId: string) => {
@@ -198,7 +196,6 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
   // Execute agent task
   const executeAgentTask = async (request: AgentTaskRequest) => {
     setIsLoading(true);
-    setCurrentTask(null);
 
     try {
       const response = await fetch('/api/agent/execute', {
@@ -212,7 +209,6 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
       const data: AgentTaskResponse = await response.json();
 
       if (data.success) {
-        setCurrentTask(data);
         if (data.generatedCode) {
           setGeneratedCode(data.generatedCode);
         }
