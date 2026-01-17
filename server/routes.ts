@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  app.get("/api/auth/session", (req, res) => {
+  app.get("/api/auth/session", authLimiter, (req, res) => {
     if (req.isAuthenticated()) {
       res.json({ 
         authenticated: true, 
@@ -679,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/settings", requireAuthOrDev, (req, res) => {
+  app.post("/api/agent/settings", requireAuthOrDev, fileOperationLimiter, (req, res) => {
     try {
       agentService.updateSettings(req.body);
       res.json({ success: true, settings: agentService.getSettings() });
