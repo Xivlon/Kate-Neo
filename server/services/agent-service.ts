@@ -415,8 +415,14 @@ Please provide the complete modified code. Only output the code, nothing else.`;
 
       const modifiedCode = this.extractCodeFromResponse(response.message.content);
 
-      // Write the modified code if autoExecute is enabled
-      if (this.settings.autoExecute && !this.settings.confirmFileWrites) {
+      // Write the modified code if autoExecute is enabled and file writes are confirmed
+      if (this.settings.autoExecute) {
+        if (!this.settings.confirmFileWrites) {
+          throw new Error(
+            'Refusing to auto-apply code changes without confirmed file writes. ' +
+            'Enable confirmFileWrites in settings to allow automatic overwrites.'
+          );
+        }
         await fs.writeFile(filePath, modifiedCode, 'utf-8');
       }
 
