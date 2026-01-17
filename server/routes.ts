@@ -15,6 +15,71 @@ import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
 import * as path from "path";
 import * as fs from "fs/promises";
+import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
+
+// Constants for validation limits
+const MAX_TEXT_LENGTH = 5000;
+const MAX_CONTENT_LENGTH = 500000; // ~500KB worth of characters (conservative for 1MB UTF-8)
+const MAX_TOKENS = 100000;
+const MIN_TOKENS = 100;
+
+// Validation schemas for agent endpoints
+const AgentOperationTypeSchema = z.enum([
+  'read_file',
+  'write_file',
+  'list_files',
+  'generate_code',
+  'modify_code',
+  'create_component',
+  'refactor',
+  'analyze_project',
+  'run_command',
+  'multi_step_task'
+]);
+
+const AgentTaskRequestSchema = z.object({
+  type: AgentOperationTypeSchema,
+  description: z.string().min(1).max(MAX_TEXT_LENGTH).trim(),
+  files: z.array(z.string().trim()).optional(),
+  targetFile: z.string().trim().optional(),
+  code: z.string().max(MAX_CONTENT_LENGTH).optional(),
+  language: z.string().trim().optional(),
+  instruction: z.string().max(MAX_TEXT_LENGTH).trim().optional(),
+  context: z.record(z.unknown()).optional(), // Use unknown instead of any for better safety
+}).strict(); // Reject unknown properties
+
+const AgentSettingsSchema = z.object({
+  mode: z.enum(['chat', 'agent', 'autonomous']).optional(),
+  autoExecute: z.boolean().optional(),
+  confirmFileWrites: z.boolean().optional(),
+  maxTokensPerTask: z.number().int().min(MIN_TOKENS).max(MAX_TOKENS).optional(),
+  includeProjectContext: z.boolean().optional(),
+  workingDirectory: z.string().trim().optional(),
+}).strict(); // Reject unknown properties
+
+const FileOperationRequestSchema = z.object({
+  operation: z.enum(['read', 'write', 'list', 'delete']),
+  path: z.string().min(1).trim(),
+  content: z.string().max(MAX_CONTENT_LENGTH).optional(),
+  recursive: z.boolean().optional(),
+}).strict(); // Reject unknown properties
+
+/**
+ * Sanitize validation error messages for production
+ * In development, return detailed errors. In production, return generic messages.
+ */
+function formatValidationError(error: z.ZodError): string {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    // In development, return detailed error messages
+    return fromZodError(error).message;
+  }
+  
+  // In production, return a sanitized generic message
+  return 'Invalid request parameters. Please check your input and try again.';
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -634,7 +699,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/agent/settings", async (req, res) => {
     try {
-      agentService.updateSettings(req.body);
+      // Validate request body
+      const parseResult = AgentSettingsSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          success: false, 
+          error: formatValidationError(parseResult.error)
+        });
+      }
+
+      agentService.updateSettings(parseResult.data);
       res.json({ success: true, settings: agentService.getSettings() });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -643,7 +718,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/agent/execute", async (req, res) => {
     try {
-      const request = req.body;
+      // Validate request body
+      const parseResult = AgentTaskRequestSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          success: false, 
+          error: formatValidationError(parseResult.error)
+        });
+      }
+
+      const request = parseResult.data;
       const response = await agentService.executeTask(request);
       res.json(response);
     } catch (error: any) {
@@ -653,7 +738,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/agent/file-operation", async (req, res) => {
     try {
-      const request = req.body;
+      // Validate request body
+      const parseResult = FileOperationRequestSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          success: false, 
+          error: formatValidationError(parseResult.error)
+        });
+      }
+
+      const request = parseResult.data;
       const response = await agentService.fileOperation(request);
       res.json(response);
     } catch (error: any) {
