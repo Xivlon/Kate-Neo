@@ -750,11 +750,9 @@ Provide a numbered list of steps that a coding assistant could execute.`;
   private async loadContextFiles(files: string[], context: AgentContext): Promise<void> {
     for (const file of files) {
       try {
-        const filePath = path.resolve(this.workspaceRoot, file);
-        if (filePath.startsWith(this.workspaceRoot)) {
-          const content = await fs.readFile(filePath, 'utf-8');
-          context.files.set(file, content);
-        }
+        const filePath = await this.validateAndResolvePath(file);
+        const content = await fs.readFile(filePath, 'utf-8');
+        context.files.set(file, content);
       } catch (error) {
         console.warn(`Failed to load context file ${file}:`, error);
       }
