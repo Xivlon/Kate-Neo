@@ -11,6 +11,7 @@ import { getI18nService } from "./services/i18n-service";
 import { aiService } from "./services/ai-service";
 import { KateBridge } from "./services/kate-bridge";
 import { requireAuthOrDev } from "./middleware/auth-middleware";
+import { authLimiter, fileOperationLimiter } from "./middleware/rate-limit";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
@@ -71,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Authentication API endpoints
-  app.post("/api/auth/login", async (req, res, next) => {
+  app.post("/api/auth/login", authLimiter, async (req, res, next) => {
     const passport = await import('passport');
     passport.default.authenticate('local', (err: any, user: any, info: any) => {
       if (err) {
@@ -95,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })(req, res, next);
   });
 
-  app.post("/api/auth/logout", (req, res) => {
+  app.post("/api/auth/logout", authLimiter, (req, res) => {
     req.logout((err) => {
       if (err) {
         return res.status(500).json({ success: false, error: err.message });
@@ -678,7 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/settings", requireAuthOrDev, async (req, res) => {
+  app.post("/api/agent/settings", requireAuthOrDev, (req, res) => {
     try {
       agentService.updateSettings(req.body);
       res.json({ success: true, settings: agentService.getSettings() });
@@ -687,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/execute", requireAuthOrDev, async (req, res) => {
+  app.post("/api/agent/execute", requireAuthOrDev, fileOperationLimiter, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.executeTask(request);
@@ -697,7 +698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/file-operation", requireAuthOrDev, async (req, res) => {
+  app.post("/api/agent/file-operation", requireAuthOrDev, fileOperationLimiter, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.fileOperation(request);
