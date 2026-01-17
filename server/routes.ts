@@ -18,6 +18,12 @@ import * as fs from "fs/promises";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
+// Constants for validation limits
+const MAX_TEXT_LENGTH = 5000;
+const MAX_CONTENT_SIZE_BYTES = 1024 * 1024; // 1MB
+const MAX_TOKENS = 100000;
+const MIN_TOKENS = 100;
+
 // Validation schemas for agent endpoints
 const AgentOperationTypeSchema = z.enum([
   'read_file',
@@ -34,20 +40,20 @@ const AgentOperationTypeSchema = z.enum([
 
 const AgentTaskRequestSchema = z.object({
   type: AgentOperationTypeSchema,
-  description: z.string().min(1).max(5000).trim(),
+  description: z.string().min(1).max(MAX_TEXT_LENGTH).trim(),
   files: z.array(z.string().trim()).optional(),
   targetFile: z.string().trim().optional(),
-  code: z.string().max(1024 * 1024).optional(), // Max 1MB
+  code: z.string().max(MAX_CONTENT_SIZE_BYTES).optional(),
   language: z.string().trim().optional(),
-  instruction: z.string().max(5000).trim().optional(),
-  context: z.record(z.any()).optional(),
+  instruction: z.string().max(MAX_TEXT_LENGTH).trim().optional(),
+  context: z.record(z.unknown()).optional(), // Use unknown instead of any for better safety
 }).strict(); // Reject unknown properties
 
 const AgentSettingsSchema = z.object({
   mode: z.enum(['chat', 'agent', 'autonomous']).optional(),
   autoExecute: z.boolean().optional(),
   confirmFileWrites: z.boolean().optional(),
-  maxTokensPerTask: z.number().int().min(100).max(100000).optional(),
+  maxTokensPerTask: z.number().int().min(MIN_TOKENS).max(MAX_TOKENS).optional(),
   includeProjectContext: z.boolean().optional(),
   workingDirectory: z.string().trim().optional(),
 }).strict(); // Reject unknown properties
@@ -55,9 +61,25 @@ const AgentSettingsSchema = z.object({
 const FileOperationRequestSchema = z.object({
   operation: z.enum(['read', 'write', 'list', 'delete']),
   path: z.string().min(1).trim(),
-  content: z.string().max(1024 * 1024).optional(), // Max 1MB
+  content: z.string().max(MAX_CONTENT_SIZE_BYTES).optional(),
   recursive: z.boolean().optional(),
 }).strict(); // Reject unknown properties
+
+/**
+ * Sanitize validation error messages for production
+ * In development, return detailed errors. In production, return generic messages.
+ */
+function formatValidationError(error: z.ZodError): string {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  if (isDevelopment) {
+    // In development, return detailed error messages
+    return fromZodError(error).message;
+  }
+  
+  // In production, return a sanitized generic message
+  return 'Invalid request parameters. Please check your input and try again.';
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -681,10 +703,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parseResult = AgentSettingsSchema.safeParse(req.body);
       
       if (!parseResult.success) {
-        const validationError = fromZodError(parseResult.error);
         return res.status(400).json({ 
           success: false, 
-          error: `Invalid request: ${validationError.message}` 
+          error: formatValidationError(parseResult.error)
         });
       }
 
@@ -701,10 +722,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parseResult = AgentTaskRequestSchema.safeParse(req.body);
       
       if (!parseResult.success) {
-        const validationError = fromZodError(parseResult.error);
         return res.status(400).json({ 
           success: false, 
-          error: `Invalid request: ${validationError.message}` 
+          error: formatValidationError(parseResult.error)
         });
       }
 
@@ -722,10 +742,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parseResult = FileOperationRequestSchema.safeParse(req.body);
       
       if (!parseResult.success) {
-        const validationError = fromZodError(parseResult.error);
         return res.status(400).json({ 
           success: false, 
-          error: `Invalid request: ${validationError.message}` 
+          error: formatValidationError(parseResult.error)
         });
       }
 
