@@ -10,6 +10,7 @@ import { getSettingsManager } from "./services/settings-manager";
 import { getI18nService } from "./services/i18n-service";
 import { aiService } from "./services/ai-service";
 import { KateBridge } from "./services/kate-bridge";
+import { requireAuthOrDev } from "./middleware/auth-middleware";
 import type { SettingsScope, SettingsUpdateRequest, SettingsGetRequest } from "../shared/settings-types";
 import type { TranslationRequest } from "../shared/i18n-types";
 import type { ChatCompletionRequest, CodeAssistanceRequest, AIProvider } from "../shared/ai-types";
@@ -67,6 +68,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await kateBridge.initialize(httpServer).catch((error) => {
     console.warn('[KateBridge] Failed to initialize:', error.message);
     console.warn('[KateBridge] Kate features will be unavailable');
+  });
+
+  // Authentication API endpoints
+  app.post("/api/auth/login", async (req, res, next) => {
+    const passport = await import('passport');
+    passport.default.authenticate('local', (err: any, user: any, info: any) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          error: info?.message || 'Invalid credentials' 
+        });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          return res.status(500).json({ success: false, error: err.message });
+        }
+        return res.json({ 
+          success: true, 
+          user: { id: user.id, username: user.username } 
+        });
+      });
+    })(req, res, next);
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.get("/api/auth/session", (req, res) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      res.json({ 
+        authenticated: true, 
+        user: req.user 
+      });
+    } else {
+      res.json({ authenticated: false });
+    }
   });
 
   // Debug API endpoints
@@ -632,7 +678,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/settings", async (req, res) => {
+  app.post("/api/agent/settings", requireAuthOrDev, async (req, res) => {
     try {
       agentService.updateSettings(req.body);
       res.json({ success: true, settings: agentService.getSettings() });
@@ -641,7 +687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/execute", async (req, res) => {
+  app.post("/api/agent/execute", requireAuthOrDev, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.executeTask(request);
@@ -651,7 +697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/agent/file-operation", async (req, res) => {
+  app.post("/api/agent/file-operation", requireAuthOrDev, async (req, res) => {
     try {
       const request = req.body;
       const response = await agentService.fileOperation(request);
