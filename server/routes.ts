@@ -20,7 +20,7 @@ import { fromZodError } from "zod-validation-error";
 
 // Constants for validation limits
 const MAX_TEXT_LENGTH = 5000;
-const MAX_CONTENT_SIZE_BYTES = 1024 * 1024; // 1MB
+const MAX_CONTENT_LENGTH = 500000; // ~500KB worth of characters (conservative for 1MB UTF-8)
 const MAX_TOKENS = 100000;
 const MIN_TOKENS = 100;
 
@@ -43,7 +43,7 @@ const AgentTaskRequestSchema = z.object({
   description: z.string().min(1).max(MAX_TEXT_LENGTH).trim(),
   files: z.array(z.string().trim()).optional(),
   targetFile: z.string().trim().optional(),
-  code: z.string().max(MAX_CONTENT_SIZE_BYTES).optional(),
+  code: z.string().max(MAX_CONTENT_LENGTH).optional(),
   language: z.string().trim().optional(),
   instruction: z.string().max(MAX_TEXT_LENGTH).trim().optional(),
   context: z.record(z.unknown()).optional(), // Use unknown instead of any for better safety
@@ -61,7 +61,7 @@ const AgentSettingsSchema = z.object({
 const FileOperationRequestSchema = z.object({
   operation: z.enum(['read', 'write', 'list', 'delete']),
   path: z.string().min(1).trim(),
-  content: z.string().max(MAX_CONTENT_SIZE_BYTES).optional(),
+  content: z.string().max(MAX_CONTENT_LENGTH).optional(),
   recursive: z.boolean().optional(),
 }).strict(); // Reject unknown properties
 
