@@ -261,8 +261,18 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
     }
 
     if (response.generatedCode) {
-      content += 'Generated Code:\n```\n' + response.generatedCode.slice(0, 500);
-      if (response.generatedCode.length > 500) {
+      const maxPreviewLength = 500;
+      let previewCode = response.generatedCode;
+
+      if (response.generatedCode.length > maxPreviewLength) {
+        const slice = response.generatedCode.slice(0, maxPreviewLength);
+        const lastNewline = slice.lastIndexOf('\n');
+        // Prefer truncating at the last full line before the limit, if available.
+        previewCode = lastNewline > 0 ? slice.slice(0, lastNewline) : slice;
+      }
+
+      content += 'Generated Code:\n```\n' + previewCode;
+      if (response.generatedCode.length > maxPreviewLength) {
         content += '\n... (truncated, see Code Preview)';
       }
       content += '\n```\n';
