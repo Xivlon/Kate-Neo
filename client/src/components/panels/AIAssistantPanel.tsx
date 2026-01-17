@@ -83,31 +83,38 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input.trim();
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          model: selectedModel || undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.message) {
-        setMessages(prev => [...prev, data.message]);
+      // In Agent Mode, use agent execution
+      if (agentMode === 'agent') {
+        await executeAgentFromInput(currentInput);
       } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to get AI response',
-          variant: 'destructive',
+        // In Chat Mode, use regular chat API
+        const response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [...messages, userMessage],
+            model: selectedModel || undefined,
+          }),
         });
+
+        const data = await response.json();
+
+        if (data.success && data.message) {
+          setMessages(prev => [...prev, data.message]);
+        } else {
+          toast({
+            title: 'Error',
+            description: data.error || 'Failed to get AI response',
+            variant: 'destructive',
+          });
+        }
       }
     } catch (error) {
       toast({
@@ -118,6 +125,36 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Parse user input and execute appropriate agent task
+  const executeAgentFromInput = async (userInput: string) => {
+    const lowerInput = userInput.toLowerCase();
+
+    // Determine task type from user input
+    let taskType: AgentTaskRequest['type'] = 'multi_step_task';
+
+    if (lowerInput.includes('generate') || lowerInput.includes('create')) {
+      taskType = 'generate_code';
+    } else if (lowerInput.includes('refactor') || lowerInput.includes('improve')) {
+      taskType = 'refactor';
+    } else if (lowerInput.includes('fix') || lowerInput.includes('bug')) {
+      taskType = 'modify_code';
+    } else if (lowerInput.includes('list') || lowerInput.includes('show files')) {
+      taskType = 'list_files';
+    } else if (lowerInput.includes('read') && lowerInput.includes('file')) {
+      taskType = 'read_file';
+    } else if (lowerInput.includes('analyze') || lowerInput.includes('structure')) {
+      taskType = 'analyze_project';
+    }
+
+    const request: AgentTaskRequest = {
+      type: taskType,
+      description: userInput,
+      files: contextFiles.length > 0 ? contextFiles : undefined,
+    };
+
+    await executeAgentTask(request);
   };
 
   const clearChat = () => {
@@ -259,23 +296,52 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
       return;
     }
 
+    // Set contextual prompts based on action type
     switch (action) {
       case 'generate':
-        setInput('Generate a React component that...');
+        setInput('Generate a ');
         break;
       case 'refactor':
-        setInput('Refactor the code in the current file to improve...');
+        setInput('Refactor ');
         break;
       case 'explain':
-        setInput('Explain how this code works...');
+        // Execute analysis task directly
+        if (contextFiles.length === 0) {
+          setInput('Explain ');
+        } else {
+          await executeQuickTask('analyze_project', 'Analyze and explain the project structure and architecture');
+        }
         break;
       case 'fix':
-        setInput('Fix the bugs in this code...');
+        setInput('Fix ');
         break;
       case 'test':
-        setInput('Generate unit tests for...');
+        setInput('Generate tests for ');
+        break;
+      case 'list':
+        // Execute list files directly
+        await executeQuickTask('list_files', 'List project files');
         break;
     }
+  };
+
+  // Execute a quick task directly
+  const executeQuickTask = async (taskType: AgentTaskRequest['type'], description: string) => {
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: description,
+      timestamp: Date.now(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    const request: AgentTaskRequest = {
+      type: taskType,
+      description,
+      files: contextFiles.length > 0 ? contextFiles : undefined,
+    };
+
+    await executeAgentTask(request);
   };
 
   // Toggle agent mode
@@ -343,7 +409,7 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
 
       {/* Quick Actions (Agent Mode) */}
       {agentMode === 'agent' && aiEnabled && (
-        <div className="p-2 border-b bg-muted/30">
+        <div className="p-2 border-b bg-muted/30 space-y-2">
           <div className="flex flex-wrap gap-1">
             <Button
               variant="outline"
@@ -390,7 +456,34 @@ export function AIAssistantPanel({ visible = true }: AIAssistantPanelProps) {
               <Plus className="h-3 w-3 mr-1" />
               Test
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => handleQuickAction('list')}
+            >
+              <FolderOpen className="h-3 w-3 mr-1" />
+              List Files
+            </Button>
           </div>
+          {contextFiles.length > 0 && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>Context:</span>
+              {contextFiles.map((file, i) => (
+                <Badge key={i} variant="secondary" className="text-xs h-5">
+                  {file.split('/').pop()}
+                </Badge>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 text-xs"
+                onClick={() => setContextFiles([])}
+              >
+                Clear
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

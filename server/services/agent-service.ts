@@ -146,11 +146,20 @@ export class AgentService extends EventEmitter {
         throw new Error('No target file specified');
       }
 
-      const filePath = path.resolve(this.workspaceRoot, request.targetFile);
+      // Validate and resolve file path
+      const filePath = this.validateAndResolvePath(request.targetFile);
 
-      // Security check: ensure file is within workspace
-      if (!filePath.startsWith(this.workspaceRoot)) {
-        throw new Error('Access denied: File outside workspace');
+      // Check file exists and get stats
+      const stats = await fs.stat(filePath);
+
+      if (!stats.isFile()) {
+        throw new Error('Path is not a file');
+      }
+
+      // Check file size limit (1MB)
+      const maxSize = this.getCapabilities().maxFileSize;
+      if (stats.size > maxSize) {
+        throw new Error(`File too large: ${stats.size} bytes (max: ${maxSize} bytes)`);
       }
 
       const content = await fs.readFile(filePath, 'utf-8');
@@ -158,6 +167,8 @@ export class AgentService extends EventEmitter {
 
       step.status = 'completed';
       step.result = { path: request.targetFile, size: content.length };
+
+      console.log(`[AgentService] Read file: ${request.targetFile} (${content.length} bytes)`);
 
       return {
         success: true,
@@ -168,6 +179,7 @@ export class AgentService extends EventEmitter {
     } catch (error) {
       step.status = 'failed';
       step.error = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[AgentService] Failed to read file:`, error);
       throw error;
     }
   }
@@ -188,11 +200,13 @@ export class AgentService extends EventEmitter {
         throw new Error('No target file or content specified');
       }
 
-      const filePath = path.resolve(this.workspaceRoot, request.targetFile);
+      // Validate and resolve file path
+      const filePath = this.validateAndResolvePath(request.targetFile);
 
-      // Security check
-      if (!filePath.startsWith(this.workspaceRoot)) {
-        throw new Error('Access denied: File outside workspace');
+      // Validate content size
+      const maxSize = this.getCapabilities().maxFileSize;
+      if (request.code.length > maxSize) {
+        throw new Error(`Content too large: ${request.code.length} bytes (max: ${maxSize} bytes)`);
       }
 
       // Ensure directory exists
@@ -204,6 +218,8 @@ export class AgentService extends EventEmitter {
       step.status = 'completed';
       step.result = { path: request.targetFile, size: request.code.length };
 
+      console.log(`[AgentService] Wrote file: ${request.targetFile} (${request.code.length} bytes)`);
+
       return {
         success: true,
         taskId: context.taskId,
@@ -213,8 +229,35 @@ export class AgentService extends EventEmitter {
     } catch (error) {
       step.status = 'failed';
       step.error = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`[AgentService] Failed to write file:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Validate and resolve a file path
+   * @throws Error if path is invalid or outside workspace
+   */
+  private validateAndResolvePath(filePath: string): string {
+    // Check for path traversal
+    if (filePath.includes('..') || filePath.includes('~')) {
+      throw new Error('Invalid file path: Path traversal not allowed');
+    }
+
+    // Check for absolute paths outside workspace
+    if (path.isAbsolute(filePath) && !filePath.startsWith(this.workspaceRoot)) {
+      throw new Error('Access denied: Absolute path outside workspace');
+    }
+
+    // Resolve to absolute path
+    const resolvedPath = path.resolve(this.workspaceRoot, filePath);
+
+    // Final security check
+    if (!resolvedPath.startsWith(this.workspaceRoot)) {
+      throw new Error('Access denied: Resolved path outside workspace');
+    }
+
+    return resolvedPath;
   }
 
   /**
@@ -629,16 +672,18 @@ Provide a numbered list of steps that a coding assistant could execute.`;
    */
   async fileOperation(request: FileOperationRequest): Promise<FileOperationResponse> {
     try {
-      const filePath = path.resolve(this.workspaceRoot, request.path);
-
-      // Security check
-      if (!filePath.startsWith(this.workspaceRoot)) {
-        throw new Error('Access denied: Path outside workspace');
-      }
+      // Validate and resolve path
+      const filePath = this.validateAndResolvePath(request.path);
 
       switch (request.operation) {
         case 'read': {
+          // Check file size
+          const stats = await fs.stat(filePath);
+          if (stats.size > this.getCapabilities().maxFileSize) {
+            throw new Error(`File too large: ${stats.size} bytes`);
+          }
           const content = await fs.readFile(filePath, 'utf-8');
+          console.log(`[AgentService] File read: ${request.path}`);
           return { success: true, data: { content, path: request.path } };
         }
 
@@ -646,8 +691,13 @@ Provide a numbered list of steps that a coding assistant could execute.`;
           if (!request.content) {
             throw new Error('No content provided for write operation');
           }
+          // Validate content size
+          if (request.content.length > this.getCapabilities().maxFileSize) {
+            throw new Error(`Content too large: ${request.content.length} bytes`);
+          }
           await fs.mkdir(path.dirname(filePath), { recursive: true });
           await fs.writeFile(filePath, request.content, 'utf-8');
+          console.log(`[AgentService] File written: ${request.path}`);
           return { success: true, data: { path: request.path } };
         }
 
@@ -659,11 +709,13 @@ Provide a numbered list of steps that a coding assistant could execute.`;
           const directories = entries
             .filter(e => e.isDirectory())
             .map(e => e.name);
+          console.log(`[AgentService] Listed directory: ${request.path} (${files.length} files, ${directories.length} dirs)`);
           return { success: true, data: { files, directories, path: request.path } };
         }
 
         case 'delete': {
           await fs.unlink(filePath);
+          console.log(`[AgentService] File deleted: ${request.path}`);
           return { success: true, data: { path: request.path } };
         }
 
@@ -671,6 +723,7 @@ Provide a numbered list of steps that a coding assistant could execute.`;
           throw new Error(`Unknown operation: ${request.operation}`);
       }
     } catch (error) {
+      console.error(`[AgentService] File operation failed:`, error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
